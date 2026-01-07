@@ -10,25 +10,29 @@ import java.util.Map;
 public class TaskDecomposer {
 
     public List<Task> decompose(Order order) {
-        // Validación
+        // Validaciones
+        if (order == null) {
+            throw new IllegalArgumentException("Order cannot be null");
+        }
+        
         if (order.getProducts().isEmpty()) {
             throw new IllegalArgumentException("Order must contain at least one product");
         }
-        
+
         Map<Station, List<Product>> productsByStation = new HashMap<>();
-        
+
         for (Product product : order.getProducts()) {
             Station station = mapProductTypeToStation(product.getType());
             productsByStation
-                .computeIfAbsent(station, k -> new ArrayList<>())
-                .add(product);
+                    .computeIfAbsent(station, k -> new ArrayList<>())
+                    .add(product);
         }
-        
+
         List<Task> tasks = new ArrayList<>();
         for (Map.Entry<Station, List<Product>> entry : productsByStation.entrySet()) {
             tasks.add(new Task(entry.getKey(), entry.getValue()));
         }
-        
+
         return tasks;
     }
 
@@ -39,7 +43,5 @@ public class TaskDecomposer {
             case COLD_DISH -> Station.COLD_KITCHEN;
         };
     }
-
-    
 
 }
