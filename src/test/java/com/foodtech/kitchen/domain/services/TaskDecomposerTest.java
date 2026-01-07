@@ -103,4 +103,18 @@ class TaskDecomposerTest {
         assertEquals(2, tasks.get(0).getProducts().size(), "Task should contain BOTH products");
         assertEquals(Station.BAR, tasks.get(0).getStation());
     }
+
+    @Test
+    @DisplayName("Should reject order with no products")
+    void shouldRejectEmptyOrder() {
+        // Given
+        Order emptyOrder = new Order("F6", List.of());
+
+        // When & Then
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> decomposer.decompose(emptyOrder),
+                "Should throw exception for empty order");
+    }
+
 }
