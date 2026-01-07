@@ -1,5 +1,6 @@
 package com.foodtech.kitchen.domain.services;
 
+import com.foodtech.kitchen.domain.commands.Command;
 import com.foodtech.kitchen.domain.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -2,12 +2,21 @@ package com.foodtech.kitchen.domain.services;
 
 import com.foodtech.kitchen.domain.model.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class TaskDecomposer {
+    
+    private final CommandFactory commandFactory;
+
+    // Constructor sin parámetros para compatibilidad con tests anteriores
+    public TaskDecomposer() {
+        this.commandFactory = null;
+    }
+
+    // Constructor con CommandFactory
+    public TaskDecomposer(CommandFactory commandFactory) {
+        this.commandFactory = commandFactory;
+    }
 
     public List<Task> decompose(Order order) {
         validateOrder(order);
