@@ -8,6 +8,11 @@ public class Order {
     private final List<Product> products;
 
     public Order(String tableNumber, List<Product> products) {
+        // Validaciones
+        if (tableNumber == null || tableNumber.trim().isEmpty()) {
+            throw new IllegalArgumentException("Table number cannot be null or empty");
+        }
+        
         this.tableNumber = tableNumber;
         this.products = new ArrayList<>(products);
     }
