@@ -64,6 +64,27 @@ class TaskDecomposerTest {
         assertEquals(Station.COLD_KITCHEN, tasks.get(0).getStation());
     }
 
-    
+    @Test
+    @DisplayName("Should create separate tasks for different product types")
+    void shouldCreateSeparateTasksForMixedOrder() {
+        // Given
+        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
+        Product pizza = new Product("Pizza", ProductType.HOT_DISH);
+        Order order = new Order("D4", List.of(cocaCola, pizza));
+
+        // When
+        List<Task> tasks = decomposer.decompose(order);
+
+        // Then
+        assertEquals(2, tasks.size(), "Should create two separate tasks");
+
+        boolean hasDrinkTask = tasks.stream()
+                .anyMatch(task -> task.getStation() == Station.BAR);
+        boolean hasHotDishTask = tasks.stream()
+                .anyMatch(task -> task.getStation() == Station.HOT_KITCHEN);
+
+        assertTrue(hasDrinkTask, "Should have task for BARRA");
+        assertTrue(hasHotDishTask, "Should have task for COCINA_CALIENTE");
+    }
 
 }
