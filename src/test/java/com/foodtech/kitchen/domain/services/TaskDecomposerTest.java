@@ -87,4 +87,20 @@ class TaskDecomposerTest {
         assertTrue(hasHotDishTask, "Should have task for COCINA_CALIENTE");
     }
 
+    @Test
+    @DisplayName("Should group products of same type in single task")
+    void shouldGroupProductsOfSameTypeInSingleTask() {
+        // Given
+        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
+        Product sprite = new Product("Sprite", ProductType.DRINK);
+        Order order = new Order("E5", List.of(cocaCola, sprite));
+
+        // When
+        List<Task> tasks = decomposer.decompose(order);
+
+        // Then
+        assertEquals(1, tasks.size(), "Should create only ONE task for same station");
+        assertEquals(2, tasks.get(0).getProducts().size(), "Task should contain BOTH products");
+        assertEquals(Station.BAR, tasks.get(0).getStation());
+    }
 }
