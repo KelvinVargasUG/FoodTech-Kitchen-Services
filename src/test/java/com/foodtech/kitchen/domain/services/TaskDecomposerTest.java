@@ -117,4 +117,14 @@ class TaskDecomposerTest {
                 "Should throw exception for empty order");
     }
 
+    @Test
+    @DisplayName("Should reject null order")
+    void shouldRejectNullOrder() {
+        // When & Then
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> decomposer.decompose(null),
+                "Should throw exception for null order");
+    }
+
 }
