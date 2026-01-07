@@ -30,7 +30,26 @@ class TaskDecomposerTest {
 
         // Then
         assertEquals(1, tasks.size(), "Debe crear exactamente una tarea");
-        assertEquals(Station.BARRA, tasks.get(0).getStation(), "La bebida debe ir a BARRA");
+        assertEquals(Station.BAR, tasks.get(0).getStation(), "La bebida debe ir a BARRA");
         assertEquals(1, tasks.get(0).getProducts().size(), "La tarea debe contener un producto");
     }
+
+    @Test
+    @DisplayName("Should create one task for order with single hot dish")
+    void shouldCreateOneTaskForSingleHotDish() {
+        // Given
+        Product pizza = new Product("Pizza Margarita", ProductType.HOT_DISH);
+        Order order = new Order("B2", List.of(pizza));
+
+        // When
+        List<Task> tasks = decomposer.decompose(order);
+
+        // Then
+        assertEquals(1, tasks.size());
+        assertEquals(Station.HOT_KITCHEN, tasks.get(0).getStation());
+    }
+
+    
+
+
 }

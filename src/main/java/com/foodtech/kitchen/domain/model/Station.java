@@ -1,7 +1,7 @@
 package com.foodtech.kitchen.domain.model;
 
 public enum Station {
-    BARRA,
-    COCINA_CALIENTE,
-    COCINA_FRIA
+    BAR,
+    HOT_KITCHEN,
+    COLD_KITCHEN
 }

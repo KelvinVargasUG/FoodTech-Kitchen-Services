@@ -29,9 +29,9 @@ public class TaskDecomposer {
 
     private Station mapProductTypeToStation(ProductType type) {
         return switch (type) {
-            case DRINK -> Station.BARRA;
-            case HOT_DISH -> Station.COCINA_CALIENTE;
-            case COLD_DISH -> Station.COCINA_FRIA;
+            case DRINK -> Station.BAR;
+            case HOT_DISH -> Station.HOT_KITCHEN;
+            case COLD_DISH -> Station.COLD_KITCHEN;
         };
     }
 }
