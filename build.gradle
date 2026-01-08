@@ -68,8 +68,9 @@ jacocoTestReport {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
                 '**/KitchenServiceApplication.class',
-                '**/config/**',
-                '**/dto/**'
+                '**/infrastructure/config/**',
+                '**/*Dto.class',
+                '**/*DTO.class'
             ])
         }))
     }
@@ -88,8 +89,9 @@ jacocoTestCoverageVerification {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
                 '**/KitchenServiceApplication.class',
-                '**/config/**',
-                '**/dto/**'
+                '**/infrastructure/config/**',
+                '**/*Dto.class',
+                '**/*DTO.class'
             ])
         }))
     }
