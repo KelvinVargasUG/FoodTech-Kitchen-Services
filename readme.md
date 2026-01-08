@@ -3,1090 +3,710 @@
 ## 📋 Información del Proyecto
 
 **Tipo:** Ejercicio Académico - Arquitectura de Software  
-**Enfoque:** Clean Architecture, SOLID, TDD/BDD, DevOps  
-**Patrón Principal:** Command Pattern  
-**Tecnologías:** Java 17, Spring Boot, JUnit 5, Cucumber, Gradle
+**Enfoque:** Arquitectura Hexagonal, SOLID, TDD, Command Pattern  
+**Tecnologías:** Java 17, Spring Boot 3.2.1, JUnit 5, Gradle 8.5, Docker  
+**Autor:** Carlos Cuadrado  
+**Fecha:** Enero 2026
 
 ---
 
-## 🎯 Objetivo General
+## 🎯 Objetivo del Proyecto
 
-> **Construir una solución de software robusta, testeable y automatizada**, demostrando **criterio de ingeniería** para refactorizar, corregir y elevar el estándar del código generado.
+FoodTech Kitchen Service es un sistema de gestión de comandas para restaurantes que automatiza la descomposición de pedidos en tareas específicas por estación de cocina.
 
-El objetivo **NO es "que funcione"**, sino que la solución sea un ejemplo de:
-- ✅ Clean Architecture
-- ✅ SOLID (0 violaciones)
-- ✅ Cultura DevOps
-- ✅ TDD/BDD Real (tests antes del código)
-- ✅ Command Pattern aplicado correctamente
-
----
-
-## 🧠 Contexto del Dominio
-
-FoodTech Kitchen Service es un sistema para gestionar **comandas de cocina** en un restaurante.
-
-### Problema a resolver
-
-Cuando llega un pedido con múltiples productos, cada producto debe prepararse en una estación específica:
+**Problema que resuelve:**  
+Cuando un pedido contiene múltiples productos (bebidas, platos calientes, ensaladas), el sistema los agrupa automáticamente y crea tareas para cada estación de trabajo:
 
 | Estación | Productos |
 |----------|-----------|
-| **BARRA** | Bebidas, jugos, cócteles |
-| **COCINA_CALIENTE** | Platos principales, sopas |
-| **COCINA_FRIA** | Ensaladas, postres |
-
-**El sistema debe:**
-1. Recibir pedidos (vía API REST)
-2. Descomponerlos automáticamente en tareas
-3. Asignar cada tarea a su estación correspondiente
-4. Ejecutar las tareas usando el patrón Command
+| **BAR** 🍹 | Bebidas, cócteles |
+| **COCINA_CALIENTE** 🔥 | Platos principales, sopas |
+| **COCINA_FRIA** 🥗 | Ensaladas, postres |
 
 ---
 
-## 🧱 Arquitectura del Sistema
+## 🏗️ Arquitectura del Sistema
 
-### Enfoque Arquitectural
+### Arquitectura Hexagonal (Ports & Adapters)
 
-**Servicio único** con **Arquitectura Hexagonal** y separación clara de responsabilidades.
-
-```
-┌─────────────────────────────────────────────────┐
-│         KITCHEN SERVICE (Spring Boot)           │
-│                                                 │
-│  ┌──────────────────────────────────────────┐  │
-│  │   Infrastructure Layer (Adapters)        │  │
-│  │   - REST Controllers                     │  │
-│  │   - JPA Repositories                     │  │
-│  │   - Command Executor                     │  │
-│  └────────────────┬─────────────────────────┘  │
-│                   │                             │
-│  ┌────────────────▼─────────────────────────┐  │
-│  │   Application Layer (Use Cases)          │  │
-│  │   - ProcessOrderUseCase                  │  │
-│  │   - GetTasksByStationUseCase             │  │
-│  └────────────────┬─────────────────────────┘  │
-│                   │                             │
-│  ┌────────────────▼─────────────────────────┐  │
-│  │   Domain Layer (Business Logic)          │  │
-│  │   - Order (Entity)                       │  │
-│  │   - Product (Entity)                     │  │
-│  │   - Task (Entity)                        │  │
-│  │   - TaskDecomposer (Service)             │  │
-│  │   - Commands (Pattern) ⭐                │  │
-│  │     • PrepareDrinkCommand                │  │
-│  │     • PrepareHotDishCommand              │  │
-│  │     • PrepareColdDishCommand             │  │
-│  └──────────────────────────────────────────┘  │
-│                                                 │
-└─────────────────────────────────────────────────┘
-```
-
----
-
-## 📁 Estructura del Proyecto
+El proyecto sigue los principios de **Clean Architecture** con separación clara de responsabilidades en capas:
 
 ```
-kitchen-service/
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── com/foodtech/kitchen/
-│   │   │       │
-│   │   │       ├── domain/                    # ⭐ Dominio puro (POJO)
-│   │   │       │   ├── model/
-│   │   │       │   │   ├── Order.java
-│   │   │       │   │   ├── Product.java
-│   │   │       │   │   ├── Task.java
-│   │   │       │   │   ├── OrderId.java
-│   │   │       │   │   ├── TaskId.java
-│   │   │       │   │   └── Station.java       # Enum
-│   │   │       │   │
-│   │   │       │   ├── commands/              # ⭐ Command Pattern
-│   │   │       │   │   ├── Command.java       # Interface
-│   │   │       │   │   ├── PrepareDrinkCommand.java
-│   │   │       │   │   ├── PrepareHotDishCommand.java
-│   │   │       │   │   └── PrepareColdDishCommand.java
-│   │   │       │   │
-│   │   │       │   └── services/
-│   │   │       │       ├── TaskDecomposer.java
-│   │   │       │       └── CommandFactory.java
-│   │   │       │
-│   │   │       ├── application/               # Casos de uso
-│   │   │       │   ├── usecases/
-│   │   │       │   │   ├── ProcessOrderUseCase.java
-│   │   │       │   │   └── GetTasksByStationUseCase.java
-│   │   │       │   │
-│   │   │       │   └── ports/                 # Interfaces (Puertos)
-│   │   │       │       ├── in/
-│   │   │       │       │   └── ProcessOrderPort.java
-│   │   │       │       └── out/
-│   │   │       │           ├── OrderRepository.java
-│   │   │       │           ├── TaskRepository.java
-│   │   │       │           └── CommandExecutor.java
-│   │   │       │
-│   │   │       └── infrastructure/            # Adaptadores
-│   │   │           ├── rest/
-│   │   │           │   ├── OrderController.java
-│   │   │           │   ├── dto/
-│   │   │           │   │   ├── CreateOrderRequest.java
-│   │   │           │   │   ├── CreateOrderResponse.java
-│   │   │           │   │   └── TaskResponse.java
-│   │   │           │   └── mapper/
-│   │   │           │       └── OrderMapper.java
-│   │   │           │
-│   │   │           ├── persistence/
-│   │   │           │   ├── jpa/
-│   │   │           │   │   ├── OrderJpaRepository.java
-│   │   │           │   │   ├── TaskJpaRepository.java
-│   │   │           │   │   └── entities/
-│   │   │           │   │       ├── OrderEntity.java
-│   │   │           │   │       └── TaskEntity.java
-│   │   │           │   │
-│   │   │           │   └── adapters/
-│   │   │           │       ├── OrderRepositoryAdapter.java
-│   │   │           │       └── TaskRepositoryAdapter.java
-│   │   │           │
-│   │   │           └── execution/
-│   │   │               └── SyncCommandExecutor.java
-│   │   │
-│   │   └── resources/
-│   │       ├── application.yml
-│   │       └── application-test.yml
-│   │
-│   └── test/
-│       ├── java/
-│       │   └── com/foodtech/kitchen/
-│       │       │
-│       │       ├── domain/                    # ⭐ TDD - Tests unitarios
-│       │       │   ├── services/
-│       │       │   │   ├── TaskDecomposerTest.java
-│       │       │   │   └── CommandFactoryTest.java
-│       │       │   └── commands/
-│       │       │       ├── PrepareDrinkCommandTest.java
-│       │       │       ├── PrepareHotDishCommandTest.java
-│       │       │       └── PrepareColdDishCommandTest.java
-│       │       │
-│       │       ├── application/
-│       │       │   └── usecases/
-│       │       │       └── ProcessOrderUseCaseTest.java
-│       │       │
-│       │       ├── infrastructure/            # Tests de integración
-│       │       │   └── rest/
-│       │       │       ├── OrderControllerTest.java
-│       │       │       └── OrderControllerIntegrationTest.java
-│       │       │
-│       │       └── bdd/                       # ⭐ BDD - Cucumber
-│       │           ├── CucumberRunnerTest.java
-│       │           ├── steps/
-│       │           │   └── OrderProcessingSteps.java
-│       │           └── config/
-│       │               └── CucumberSpringConfiguration.java
-│       │
-│       └── resources/
-│           ├── features/                      # Gherkin Features
-│           │   └── order-processing.feature
-│           └── cucumber.properties
-│
-├── .github/
-│   └── workflows/
-│       └── ci.yml                             # GitHub Actions
-│
-├── build.gradle                               # Gradle
-├── settings.gradle
-├── gradlew
-├── gradlew.bat
-├── .gitignore
-└── README.md
+┌─────────────────────────────────────────────────────────────┐
+│                    INFRASTRUCTURE LAYER                     │
+│  ┌──────────────────┐  ┌────────────────┐  ┌─────────────┐ │
+│  │  REST Controllers │  │ JPA Adapters   │  │  Config     │ │
+│  │  - OrderController│  │ - OrderRepo    │  │  - Beans    │ │
+│  │  - DTOs          │  │  - TaskRepo     │  │  - Mappers  │ │
+│  │  - Mappers       │  │ - Entities     │  │             │ │
+│  └────────┬─────────┘  └────────┬───────┘  └─────────────┘ │
+└───────────┼────────────────────┼─────────────────────────────┘
+            │                    │
+┌───────────▼────────────────────▼─────────────────────────────┐
+│                    APPLICATION LAYER                         │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │  Use Cases (Application Services)                    │   │
+│  │  - ProcessOrderUseCase: Orquesta el procesamiento    │   │
+│  │                                                       │   │
+│  │  Ports (Interfaces):                                 │   │
+│  │  - IN:  ProcessOrderPort                             │   │
+│  │  - OUT: OrderRepository, TaskRepository              │   │
+│  └──────────────────────┬───────────────────────────────┘   │
+└─────────────────────────┼───────────────────────────────────┘
+                          │
+┌─────────────────────────▼───────────────────────────────────┐
+│                      DOMAIN LAYER (Core)                    │
+│                                                             │
+│  📦 Model (Entities & Value Objects):                      │
+│     - Order: Pedido con mesa y productos                   │
+│     - Product: Producto con nombre y tipo                  │
+│     - Task: Tarea para una estación específica             │
+│     - ProductType: DRINK, HOT_DISH, COLD_DISH              │
+│     - Station: BAR, HOT_KITCHEN, COLD_KITCHEN              │
+│                                                             │
+│  🎯 Commands (Command Pattern):                            │
+│     - Command: Interface base                              │
+│     - PrepareDrinkCommand: Ejecuta preparación de bebidas │
+│     - PrepareHotDishCommand: Ejecuta platos calientes     │
+│     - PrepareColdDishCommand: Ejecuta platos fríos        │
+│                                                             │
+│  ⚙️ Domain Services:                                       │
+│     - TaskDecomposer: Descompone Order → List<Task>       │
+│     - TaskFactory: Crea Task por estación                 │
+│     - OrderValidator: Valida reglas de negocio            │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
----
-
-## 🧩 Patrón Command - Implementación en Java
-
-### ¿Por qué Command Pattern?
-
-El patrón Command **encapsula una solicitud como un objeto**, permitiendo:
-- Parametrizar operaciones
-- Encolar tareas
-- Desacoplar invocador de ejecutor
-- Facilitar undo/redo y logging
-
-### Implementación en Java
-
-```java
-// 1. Command Interface
-package com.foodtech.kitchen.domain.commands;
-
-public interface Command {
-    void execute();
-    Station getStation();
-    TaskId getTaskId();
-}
-
-// 2. Concrete Command - Drink
-package com.foodtech.kitchen.domain.commands;
-
-public class PrepareDrinkCommand implements Command {
-    private final TaskId taskId;
-    private final String drinkName;
-    private final int quantity;
-
-    public PrepareDrinkCommand(TaskId taskId, String drinkName, int quantity) {
-        this.taskId = taskId;
-        this.drinkName = drinkName;
-        this.quantity = quantity;
-    }
-
-    @Override
-    public void execute() {
-        // Lógica de preparación de bebida
-        System.out.println("Preparing " + quantity + "x " + drinkName);
-    }
-
-    @Override
-    public Station getStation() {
-        return Station.BARRA;
-    }
-
-    @Override
-    public TaskId getTaskId() {
-        return taskId;
-    }
-}
-
-// 3. Command Executor (Invoker)
-package com.foodtech.kitchen.infrastructure.execution;
-
-public class SyncCommandExecutor implements CommandExecutor {
-    
-    @Override
-    public void execute(Command command) {
-        command.execute();
-    }
-
-    @Override
-    public void executeAll(List<Command> commands) {
-        commands.forEach(this::execute);
-    }
-}
-```
-
-**Flujo completo:**
-```
-Order → TaskDecomposer → CommandFactory → [Commands] → CommandExecutor → Stations
-```
-
----
-
-## 🧪 Testing Strategy
-
-### Niveles de Testing
-
-#### 1️⃣ **Tests Unitarios (TDD)** - 70%+ cobertura
-
-**Framework:** JUnit 5 + Mockito
-
-**Ubicación:** `src/test/java/.../domain/`
-
-**Objetivo:** Probar reglas de dominio sin infraestructura
-
-**Ejemplo:**
-```java
-package com.foodtech.kitchen.domain.services;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-import static org.junit.jupiter.api.Assertions.*;
-
-class TaskDecomposerTest {
-
-    @Test
-    @DisplayName("Should create one command per station involved")
-    void shouldCreateOneCommandPerStationInvolved() {
-        // Given
-        TaskDecomposer decomposer = new TaskDecomposer(new CommandFactory());
-        Order order = new Order(
-            OrderId.generate(),
-            "A1",
-            List.of(
-                new Product("Coca Cola", ProductType.DRINK),
-                new Product("Pizza", ProductType.HOT_DISH)
-            )
-        );
-
-        // When
-        List<Command> commands = decomposer.decompose(order);
-
-        // Then
-        assertEquals(2, commands.size());
-        assertTrue(commands.get(0) instanceof PrepareDrinkCommand);
-        assertTrue(commands.get(1) instanceof PrepareHotDishCommand);
-    }
-
-    @Test
-    @DisplayName("Should group products by station")
-    void shouldGroupProductsByStation() {
-        // Given
-        TaskDecomposer decomposer = new TaskDecomposer(new CommandFactory());
-        Order order = new Order(
-            OrderId.generate(),
-            "A1",
-            List.of(
-                new Product("Coca Cola", ProductType.DRINK),
-                new Product("Sprite", ProductType.DRINK),
-                new Product("Pizza", ProductType.HOT_DISH)
-            )
-        );
-
-        // When
-        List<Command> commands = decomposer.decompose(order);
-
-        // Then
-        assertEquals(2, commands.size());
-        PrepareDrinkCommand drinkCommand = (PrepareDrinkCommand) commands.get(0);
-        assertEquals(2, drinkCommand.getProducts().size());
-    }
-}
-```
-
----
-
-#### 2️⃣ **Tests de Integración/API** - Mínimo 3
-
-**Framework:** Spring Boot Test + MockMvc
-
-**Ubicación:** `src/test/java/.../infrastructure/rest/`
-
-**Objetivo:** Probar endpoints reales
-
-**Ejemplo:**
-```java
-package com.foodtech.kitchen.infrastructure.rest;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-@SpringBootTest
-@AutoConfigureMockMvc
-class OrderControllerIntegrationTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Test
-    void shouldCreateOrderAndReturn201() throws Exception {
-        String orderJson = """
-            {
-                "tableNumber": "A1",
-                "items": [
-                    { "name": "Coca Cola", "type": "DRINK" },
-                    { "name": "Pizza Margarita", "type": "HOT_DISH" }
-                ]
-            }
-            """;
-
-        mockMvc.perform(post("/api/orders")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(orderJson))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.orderId").exists())
-                .andExpect(jsonPath("$.tasksCreated").value(2));
-    }
-
-    @Test
-    void shouldRejectOrderWithoutProducts() throws Exception {
-        String orderJson = """
-            {
-                "tableNumber": "A1",
-                "items": []
-            }
-            """;
-
-        mockMvc.perform(post("/api/orders")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(orderJson))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("Order must have at least one product"));
-    }
-
-    @Test
-    void shouldGetTasksByStation() throws Exception {
-        // Primero crear una orden
-        createSampleOrder();
-
-        // Luego obtener tareas
-        mockMvc.perform(get("/api/tasks/BARRA"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].station").value("BARRA"));
-    }
-}
-```
-
----
-
-#### 3️⃣ **Tests BDD** - Documentación viva
-
-**Framework:** Cucumber para Java
-
-**Ubicación:** `src/test/resources/features/`
-
-**Objetivo:** Especificar comportamiento en lenguaje de negocio
-
-**Feature File:**
-```gherkin
-# src/test/resources/features/order-processing.feature
-
-Feature: Procesamiento de pedidos de cocina
-
-  Scenario: Pedido con bebida y plato caliente
-    Given un pedido para la mesa "A1"
-    And el pedido contiene los siguientes productos:
-      | Producto         | Tipo           |
-      | Coca Cola        | DRINK          |
-      | Pizza Margarita  | HOT_DISH       |
-    When el pedido es procesado
-    Then se crean 2 tareas
-    And existe una tarea para la estación "BARRA"
-    And existe una tarea para la estación "COCINA_CALIENTE"
-
-  Scenario: Pedido solo con bebidas
-    Given un pedido para la mesa "B2"
-    And el pedido contiene los siguientes productos:
-      | Producto    | Tipo  |
-      | Coca Cola   | DRINK |
-      | Sprite      | DRINK |
-    When el pedido es procesado
-    Then se crea 1 tarea
-    And la tarea es para la estación "BARRA"
-
-  Scenario: Pedido mixto (bebida, plato caliente, postre)
-    Given un pedido para la mesa "C3"
-    And el pedido contiene los siguientes productos:
-      | Producto         | Tipo           |
-      | Coca Cola        | DRINK          |
-      | Pizza Margarita  | HOT_DISH       |
-      | Tiramisu         | COLD_DISH      |
-    When el pedido es procesado
-    Then se crean 3 tareas
-    And existe una tarea para cada estación
-```
-
-**Steps Implementation:**
-```java
-package com.foodtech.kitchen.bdd.steps;
-
-import io.cucumber.java.en.*;
-import io.cucumber.datatable.DataTable;
-import static org.junit.jupiter.api.Assertions.*;
-
-public class OrderProcessingSteps {
-
-    private Order order;
-    private List<Task> createdTasks;
-    private ProcessOrderUseCase processOrderUseCase;
-
-    @Given("un pedido para la mesa {string}")
-    public void unPedidoParaLaMesa(String tableNumber) {
-        order = new Order(OrderId.generate(), tableNumber, new ArrayList<>());
-    }
-
-    @And("el pedido contiene los siguientes productos:")
-    public void elPedidoContieneLosSiguientesProductos(DataTable dataTable) {
-        dataTable.asMaps().forEach(row -> {
-            String name = row.get("Producto");
-            ProductType type = ProductType.valueOf(row.get("Tipo"));
-            order.addProduct(new Product(name, type));
-        });
-    }
-
-    @When("el pedido es procesado")
-    public void elPedidoEsProcesado() {
-        createdTasks = processOrderUseCase.execute(order);
-    }
-
-    @Then("se crean {int} tareas")
-    public void seCreanTareas(int expectedTasks) {
-        assertEquals(expectedTasks, createdTasks.size());
-    }
-
-    @And("existe una tarea para la estación {string}")
-    public void existeUnaTareaParaLaEstacion(String stationName) {
-        Station station = Station.valueOf(stationName);
-        assertTrue(createdTasks.stream()
-            .anyMatch(task -> task.getStation().equals(station)));
-    }
-}
-```
-
----
-
-## 📊 Historias de Usuario
-
-### HU-01: Procesar pedido y generar tareas
-```
-Como sistema de cocina
-Quiero recibir un pedido y descomponerlo automáticamente en tareas
-Para que cada estación pueda trabajar de forma independiente
-
-Criterios de aceptación:
-- POST /api/orders recibe pedido válido
-- El pedido tiene número de mesa y al menos un producto
-- Se descompone en tareas por estación
-- Se crean Commands por cada tarea
-- Se retorna orderId y cantidad de tareas creadas
-- Status HTTP 201 Created
-```
-
----
-
-### HU-02: Obtener tareas por estación
-```
-Como estación de cocina
-Quiero consultar solo mis tareas pendientes
-Para prepararlas eficientemente
-
-Criterios de aceptación:
-- GET /api/tasks/{station} retorna tareas filtradas
-- Solo se muestran tareas de la estación solicitada
-- Cada tarea contiene productos y comandos asociados
-- Status HTTP 200 OK
-```
-
----
-
-### HU-03: Validar pedidos
-```
-Como sistema de cocina
-Quiero validar que los pedidos sean correctos
-Para evitar procesar información inválida
-
-Criterios de aceptación:
-- Pedido sin productos retorna error 400
-- Pedido sin número de mesa retorna error 400
-- Productos con tipo inválido retornan error 400
-- El mensaje de error es descriptivo
-```
-
----
-
-## 🔄 Flujo de Datos
+### Flujo de Procesamiento de Pedidos
 
 ```
-1. Cliente envía pedido
-         ↓
-2. POST /api/orders
-   OrderController recibe CreateOrderRequest
-         ↓
-3. OrderController → ProcessOrderUseCase
-         ↓
-4. Order Entity creada y validada
-         ↓
-5. TaskDecomposer analiza productos
-   - Agrupa por ProductType
-   - Mapea a Station
-         ↓
-6. CommandFactory crea Commands
-   - PrepareDrinkCommand (BARRA)
-   - PrepareHotDishCommand (COCINA_CALIENTE)
-   - PrepareColdDishCommand (COCINA_FRIA)
-         ↓
-7. Tasks guardadas via TaskRepository
-         ↓
-8. CommandExecutor (opcional inmediato)
-         ↓
-9. Response 201 Created
+1. Cliente → POST /api/orders
+             {
+               "tableNumber": "A1",
+               "products": [
+                 {"name": "Coca Cola", "type": "DRINK"},
+                 {"name": "Pizza", "type": "HOT_DISH"}
+               ]
+             }
+             ↓
+2. OrderController (REST)
+   - Valida request
+   - Convierte DTO → Domain (OrderMapper)
+             ↓
+3. ProcessOrderUseCase (Application)
+   - Orquesta el procesamiento
+   - Llama a TaskDecomposer
+             ↓
+4. TaskDecomposer (Domain Service)
+   - Agrupa productos por estación
+   - Crea Task por cada estación
+             ↓
+5. TaskFactory (Domain Service)
+   - Genera Command por cada Task
+   - PrepareDrinkCommand para BAR
+   - PrepareHotDishCommand para HOT_KITCHEN
+             ↓
+6. Persistencia (Infrastructure)
+   - Guarda Order en OrderEntity
+   - Guarda Tasks en TaskEntity
+             ↓
+7. Respuesta al Cliente
    {
-     "orderId": "uuid",
-     "tasksCreated": 2
+     "tableNumber": "A1",
+     "tasksCreated": 2,
+     "message": "Order processed successfully"
    }
 ```
 
 ---
 
-## 🚀 Plan de Ejecución (4 Semanas)
+## 🎨 Patrones de Diseño Implementados
 
-### 📅 Semana 1: Arquitectura y Código Limpio
+### 1. Command Pattern ⭐ (Principal)
 
-**Objetivos:**
-- ✅ Estructura del proyecto (Gradle + Spring Boot)
-- ✅ Dominio con TDD (Command Pattern)
-- ✅ Aplicar SOLID (0 violaciones)
-- ✅ Al menos 1 patrón adicional (Factory para Commands)
+**¿Por qué Command Pattern?**
 
-**Entregables:**
-- Estructura de paquetes completa
-- Domain models con tests unitarios (JUnit 5)
-- Command Pattern funcionando
-- README con decisiones arquitecturales
+El patrón Command encapsula una solicitud como un objeto, permitiendo:
+- ✅ **Desacoplamiento**: Invocador no conoce al receptor
+- ✅ **Extensibilidad**: Agregar nuevos comandos sin modificar código existente (OCP)
+- ✅ **Encol amiento**: Los comandos pueden ser encolados y ejecutados async
+- ✅ **Logging/Auditoría**: Cada comando puede registrar su ejecución
+- ✅ **Undo/Redo**: Posibilidad de revertir operaciones (futuro)
 
-**Tecnologías:**
-```groovy
-// build.gradle - Dependencias principales
-dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testImplementation 'org.mockito:mockito-core'
-}
-```
-
----
-
-### 📅 Semana 2: Aceleración con IA
-
-**Objetivos:**
-- ✅ GitHub Copilot para boilerplate
-- ✅ Generar casos de prueba de borde
-- ✅ API REST con Spring Boot
-- ✅ Repositories y Adapters
-
-**Entregables:**
-- API REST funcionando
-- Tests de casos de borde
-- Controllers + DTOs
-- Mappers
-
----
-
-### 📅 Semana 3: Cultura DevOps & Calidad
-
-**Objetivos:**
-- ✅ Gitflow simplificado (Main, Develop, Feature/*)
-- ✅ Pipeline CI (GitHub Actions)
-  - Build Gradle en cada push
-  - Tests unitarios automáticos
-  - SonarCloud (opcional)
-- ✅ Tests unitarios → 70% cobertura (JaCoCo)
-
-**Entregables:**
-```yaml
-# .github/workflows/ci.yml
-name: CI Pipeline
-
-on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-        
-    - name: Build with Gradle
-      run: ./gradlew build
-      
-    - name: Run tests
-      run: ./gradlew test
-      
-    - name: Generate coverage report
-      run: ./gradlew jacocoTestReport
-      
-    - name: Check coverage
-      run: ./gradlew jacocoTestCoverageVerification
-```
-
----
-
-### 📅 Semana 4: Automatización Full Stack
-
-**Objetivos:**
-- ✅ Tests de Integración/API (mínimo 3)
-- ✅ MockMvc + Spring Boot Test
-- ✅ Tests BDD con Cucumber
-- ✅ Documentación completa (Javadoc)
-
-**Entregables:**
-- Suite completa de tests
-- Coverage > 70% (verificado con JaCoCo)
-- BDD features con Cucumber
-- Documentación técnica
-
-**Dependencias Cucumber:**
-```groovy
-// build.gradle
-dependencies {
-    testImplementation 'io.cucumber:cucumber-java:7.14.0'
-    testImplementation 'io.cucumber:cucumber-junit-platform-engine:7.14.0'
-    testImplementation 'io.cucumber:cucumber-spring:7.14.0'
-}
-```
-
----
-
-## 🛠️ Stack Tecnológico
-
-### Core
-- **JDK:** 17 (LTS)
-- **Framework:** Spring Boot 3.2+
-- **Build Tool:** Gradle 8.5+
-- **Testing:** JUnit 5, Mockito, AssertJ
-- **API Testing:** MockMvc, RestAssured (opcional)
-- **BDD:** Cucumber para Java
-- **Coverage:** JaCoCo
-
-### Database (Opcional para el ejercicio)
-- **H2:** Base de datos en memoria para tests
-- **Spring Data JPA:** Abstracción de persistencia
-
-### DevOps
-- **CI/CD:** GitHub Actions
-- **Code Quality:** SonarCloud (opcional)
-- **Coverage:** JaCoCo Gradle Plugin
-
-### Arquitectura
-- **Patrón Principal:** Command
-- **Patrones Adicionales:** Factory, Repository, Strategy
-- **Arquitectura:** Hexagonal (Ports & Adapters)
-
----
-
-## 📏 Criterios de Evaluación
-
-### ✅ Obligatorios
-
-1. **SOLID:** 0 violaciones identificables
-2. **Patrones:** Command + Factory implementados correctamente
-3. **Estructura:** Separación clara de capas (domain, application, infrastructure)
-4. **TDD/BDD:** Tests escritos ANTES del código (evidencia en commits)
-5. **Coverage:** Mínimo 70% en tests unitarios (JaCoCo report)
-6. **API Tests:** Mínimo 3 tests de integración con MockMvc
-7. **CI/CD:** Pipeline funcionando con build + tests
-8. **Git:** Historial ordenado (no happy path único)
-
-### 🎁 Bonus
-
-- Integración con SonarCloud
-- Tests con RestAssured
-- Documentación con Swagger/OpenAPI
-- Docker containerization
-- Migracion a PostgreSQL
-
----
-
-## 🚫 Reglas de Oro: "Human in the Loop"
-
-Para garantizar aprendizaje real:
-
-1. **La Regla del Crítico:** Por cada clase generada con IA, agregar Javadoc explicando decisiones de diseño
-2. **TDD/BDD Real:** Evidencia en Git que los tests fueron creados antes o en conjunto con el código
-3. **Prohibido el Happy Path Único:** El código debe manejar excepciones de negocio (OrderValidationException, InvalidProductTypeException, etc.)
-
----
-
-## 🎯 Definition of Done
-
-Una funcionalidad está "Done" cuando:
-
-- ✅ Tiene tests unitarios (>70% coverage en esa clase)
-- ✅ Pasa todos los tests
-- ✅ No viola principios SOLID
-- ✅ Tiene Javadoc completo
-- ✅ Pasa el pipeline CI
-- ✅ Fue revisado críticamente (Human in the Loop)
-- ✅ Maneja casos de error con excepciones propias
-
----
-
-## 🧪 Ejemplo de Test TDD Real
+**Implementación en el proyecto:**
 
 ```java
-package com.foodtech.kitchen.domain.services;
+// Interface base
+public interface Command {
+    void execute();
+    Station getStation();
+    List<Product> getProducts();
+}
 
-import org.junit.jupiter.api.*;
-import static org.junit.jupiter.api.Assertions.*;
+// Comando concreto - Bebidas
+public class PrepareDrinkCommand implements Command {
+    private final List<Product> products;
 
-/**
- * Tests para TaskDecomposer siguiendo TDD
- * 
- * ORDEN DE ESCRITURA:
- * 1. Test (RED)
- * 2. Implementación mínima (GREEN)
- * 3. Refactor (REFACTOR)
- */
-class TaskDecomposerTest {
-
-    private TaskDecomposer decomposer;
-    private CommandFactory commandFactory;
-
-    @BeforeEach
-    void setUp() {
-        commandFactory = new CommandFactory();
-        decomposer = new TaskDecomposer(commandFactory);
+    public PrepareDrinkCommand(List<Product> products) {
+        this.products = List.copyOf(products);
     }
 
-    @Nested
-    @DisplayName("Cuando se descompone una orden simple")
-    class SimpleOrderDecomposition {
-
-        @Test
-        @DisplayName("Una bebida genera un solo comando para BARRA")
-        void oneDrinkGeneratesOneBarCommand() {
-            // Given
-            Order order = OrderMother.withOneDrink();
-
-            // When
-            List<Command> commands = decomposer.decompose(order);
-
-            // Then
-            assertAll(
-                () -> assertEquals(1, commands.size(), "Debe generar un solo comando"),
-                () -> assertInstanceOf(PrepareDrinkCommand.class, commands.get(0)),
-                () -> assertEquals(Station.BARRA, commands.get(0).getStation())
-            );
-        }
-
-        @Test
-        @DisplayName("Un plato caliente genera un solo comando para COCINA_CALIENTE")
-        void oneHotDishGeneratesOneKitchenCommand() {
-            // Given
-            Order order = OrderMother.withOneHotDish();
-
-            // When
-            List<Command> commands = decomposer.decompose(order);
-
-            // Then
-            assertAll(
-                () -> assertEquals(1, commands.size()),
-                () -> assertInstanceOf(PrepareHotDishCommand.class, commands.get(0)),
-                () -> assertEquals(Station.COCINA_CALIENTE, commands.get(0).getStation())
-            );
-        }
+    @Override
+    public void execute() {
+        System.out.println("Preparing drinks at BAR:");
+        products.forEach(p -> System.out.println("  - " + p.getName()));
     }
 
-    @Nested
-    @DisplayName("Cuando se descompone una orden mixta")
-    class MixedOrderDecomposition {
-
-        @Test
-        @DisplayName("Orden con 2 tipos de productos genera 2 comandos")
-        void mixedOrderGeneratesMultipleCommands() {
-            // Given
-            Order order = OrderMother.withDrinkAndHotDish();
-
-            // When
-            List<Command> commands = decomposer.decompose(order);
-
-            // Then
-            assertEquals(2, commands.size(), "Debe generar un comando por estación");
-        }
-
-        @Test
-        @DisplayName("Múltiples productos del mismo tipo se agrupan en un comando")
-        void multipleProductsSameTypeGenerateOneCommand() {
-            // Given
-            Order order = OrderMother.withMultipleDrinks(3);
-
-            // When
-            List<Command> commands = decomposer.decompose(order);
-
-            // Then
-            assertAll(
-                () -> assertEquals(1, commands.size()),
-                () -> {
-                    PrepareDrinkCommand cmd = (PrepareDrinkCommand) commands.get(0);
-                    assertEquals(3, cmd.getProducts().size());
-                }
-            );
-        }
+    @Override
+    public Station getStation() {
+        return Station.BAR;
     }
 
-    @Nested
-    @DisplayName("Validaciones de negocio")
-    class BusinessValidations {
+    @Override
+    public List<Product> getProducts() {
+        return products;
+    }
+}
 
-        @Test
-        @DisplayName("Orden vacía lanza excepción")
-        void emptyOrderThrowsException() {
-            // Given
-            Order emptyOrder = OrderMother.empty();
+// Comando concreto - Platos Calientes
+public class PrepareHotDishCommand implements Command {
+    private final List<Product> products;
 
-            // When & Then
-            assertThrows(
-                EmptyOrderException.class,
-                () -> decomposer.decompose(emptyOrder),
-                "No se puede descomponer una orden vacía"
-            );
-        }
+    public PrepareHotDishCommand(List<Product> products) {
+        this.products = List.copyOf(products);
+    }
 
-        @Test
-        @DisplayName("Orden nula lanza excepción")
-        void nullOrderThrowsException() {
-            // When & Then
-            assertThrows(
-                IllegalArgumentException.class,
-                () -> decomposer.decompose(null),
-                "No se puede descomponer una orden nula"
-            );
-        }
+    @Override
+    public void execute() {
+        System.out.println("Preparing hot dishes at HOT_KITCHEN:");
+        products.forEach(p -> System.out.println("  - " + p.getName()));
+    }
+
+    @Override
+    public Station getStation() {
+        return Station.HOT_KITCHEN;
+    }
+
+    @Override
+    public List<Product> getProducts() {
+        return products;
+    }
+}
+
+// Comando concreto - Platos Fríos
+public class PrepareColdDishCommand implements Command {
+    private final List<Product> products;
+
+    public PrepareColdDishCommand(List<Product> products) {
+        this.products = List.copyOf(products);
+    }
+
+    @Override
+    public void execute() {
+        System.out.println("Preparing cold dishes at COLD_KITCHEN:");
+        products.forEach(p -> System.out.println("  - " + p.getName()));
+    }
+
+    @Override
+    public Station getStation() {
+        return Station.COLD_KITCHEN;
+    }
+
+    @Override
+    public List<Product> getProducts() {
+        return products;
     }
 }
 ```
 
----
+**¿Por qué elegimos Command Pattern para este proyecto?**
 
-## 🧠 Principios Rectores
+1. **Desacoplamiento**: Las estaciones de cocina no conocen quién genera las tareas
+2. **Extensibilidad (OCP)**: Agregar nueva estación = nuevo comando, sin modificar código existente
+3. **Encapsulación**: Cada comando encapsula toda la lógica de preparación de su tipo
+4. **Testabilidad**: Los comandos se pueden probar de forma aislada
+5. **Future-proof**: Base para implementar colas, retry, async execution
 
-> **"La arquitectura no se demuestra usando tecnologías, sino soportándolas sin cambiar el dominio."**
+### 2. Repository Pattern
 
-> **"El código debe explicar el qué, los tests el por qué."**
+Abstrae la persistencia del dominio mediante interfaces:
 
-> **"Menos infraestructura, más pensamiento."**
-
-> **"El dominio no conoce Spring."**
-
----
-
-## 📚 Recursos de Aprendizaje
-
-### Clean Architecture
-- "Clean Architecture" - Robert C. Martin
-- "Domain-Driven Design" - Eric Evans
-- "Implementing Domain-Driven Design" - Vaughn Vernon
-
-### Testing en Java
-- "Test Driven Development: By Example" - Kent Beck
-- "Growing Object-Oriented Software, Guided by Tests"
-- "Effective Unit Testing" - Lasse Koskela
-
-### Patterns
-- "Design Patterns: Elements of Reusable Object-Oriented Software" - Gang of Four
-- "Patterns of Enterprise Application Architecture" - Martin Fowler
-- "Head First Design Patterns" - Freeman & Freeman
-
-### Spring Boot
-- Spring Boot Documentation (oficial)
-- "Spring Boot in Action" - Craig Walls
-
----
-
-## 🏁 Conclusión
-
-Este proyecto busca **calidad sobre cantidad**, **diseño sobre infraestructura**, y **aprendizaje sobre atajos**.
-
-**Características clave:**
-- ✅ Un solo servicio, arquitectura limpia
-- ✅ Command Pattern como núcleo del diseño
-- ✅ Testing robusto (Unit, Integration, BDD)
-- ✅ Java + Spring Boot profesional
-- ✅ CI/CD funcional
-
-**El éxito no se mide en líneas de código, sino en criterio demostrado.**
-
----
-
-## 📝 Siguiente Paso
-
-Para iniciar el desarrollo:
-
-1. **Crear proyecto con Spring Initializr:**
-```bash
-# Opción 1: Usar https://start.spring.io/
-# - Project: Gradle - Groovy
-# - Language: Java
-# - Spring Boot: 3.2.x
-# - Java: 17
-# - Dependencies: Spring Web, Spring Data JPA, H2 Database
-
-# Opción 2: Crear manualmente
-mkdir kitchen-service
-cd kitchen-service
-gradle init --type java-application
-```
-
-2. **Estructura básica de `build.gradle`:**
-```groovy
-plugins {
-    id 'java'
-    id 'org.springframework.boot' version '3.2.1'
-    id 'io.spring.dependency-management' version '1.1.4'
-    id 'jacoco'
+```java
+// Port (Interface en dominio)
+public interface OrderRepository {
+    OrderEntity save(Order order);
 }
 
-group = 'com.foodtech'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    runtimeOnly 'com.h2database:h2'
+// Adapter (Implementación en infraestructura)
+@Component
+public class OrderRepositoryAdapter implements OrderRepository {
+    private final OrderJpaRepository jpaRepository;
+    private final OrderEntityMapper mapper;
     
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'io.cucumber:cucumber-java:7.14.0'
-    testImplementation 'io.cucumber:cucumber-junit-platform-engine:7.14.0'
-    testImplementation 'io.cucumber:cucumber-spring:7.14.0'
-}
-
-test {
-    useJUnitPlatform()
-    finalizedBy jacocoTestReport
-}
-
-jacoco {
-    toolVersion = "0.8.11"
-}
-
-jacocoTestReport {
-    dependsOn test
-    reports {
-        xml.required = true
-        html.required = true
-    }
-}
-
-jacocoTestCoverageVerification {
-    violationRules {
-        rule {
-            limit {
-                minimum = 0.70
-            }
-        }
+    @Override
+    public OrderEntity save(Order order) {
+        OrderEntity entity = mapper.toEntity(order);
+        return jpaRepository.save(entity);
     }
 }
 ```
 
-3. **Crear estructura de paquetes**
+### 3. Mapper/Factory Pattern
 
-4. **Escribir primer test TDD:**
-   - `TaskDecomposerTest.java`
-   - Implementar `TaskDecomposer.java`
+Separa la lógica de transformación de datos:
 
-5. **Commit inicial:**
-```bash
-git add .
-git commit -m "chore: initial project structure with hexagonal architecture"
+```java
+// Mapper para DTOs REST → Domain
+public class OrderMapper {
+    public static Order toDomain(CreateOrderRequest request) {
+        List<Product> products = request.products().stream()
+            .map(OrderMapper::mapProduct)
+            .toList();
+        return new Order(request.tableNumber(), products);
+    }
+}
+
+// Mapper para Domain → JPA Entities
+@Component
+public class OrderEntityMapper {
+    public OrderEntity toEntity(Order order) {
+        // Serializa productos a JSON
+        String productsJson = objectMapper.writeValueAsString(...);
+        return new OrderEntity(order.getTableNumber(), productsJson);
+    }
+}
+```
+
+### 4. Dependency Injection (Spring Framework)
+
+Todo el proyecto usa inyección de dependencias para cumplir con DIP (Dependency Inversion Principle):
+
+```java
+@RestController
+public class OrderController {
+    private final ProcessOrderPort processOrderPort; // Inyectado
+    
+    public OrderController(ProcessOrderPort processOrderPort) {
+        this.processOrderPort = processOrderPort;
+    }
+}
 ```
 
 ---
 
-**Autor:** Carlos  
-**Fecha:** Enero 2026  
-**Versión:** 2.0.0 (Java Edition)
+## 📂 Estructura del Proyecto
+
+```
+FoodTech/
+├── src/
+│   ├── main/
+│   │   ├── java/com/foodtech/kitchen/
+│   │   │   │
+│   │   │   ├── 📦 domain/                          # Capa de Dominio (core)
+│   │   │   │   ├── model/
+│   │   │   │   │   ├── Order.java                  # Entidad: Pedido
+│   │   │   │   │   ├── Product.java                # Entidad: Producto
+│   │   │   │   │   ├── Task.java                   # Entidad: Tarea
+│   │   │   │   │   ├── ProductType.java            # Enum con station
+│   │   │   │   │   └── Station.java                # Enum: BAR, HOT_KITCHEN, COLD_KITCHEN
+│   │   │   │   │
+│   │   │   │   ├── commands/                       # Command Pattern
+│   │   │   │   │   ├── Command.java                # Interface
+│   │   │   │   │   ├── PrepareDrinkCommand.java
+│   │   │   │   │   ├── PrepareHotDishCommand.java
+│   │   │   │   │   └── PrepareColdDishCommand.java
+│   │   │   │   │
+│   │   │   │   └── services/
+│   │   │   │       ├── TaskDecomposer.java         # Descompone Order → Tasks
+│   │   │   │       ├── TaskFactory.java            # Crea Tasks
+│   │   │   │       └── OrderValidator.java         # Valida reglas de negocio
+│   │   │   │
+│   │   │   ├── 🎯 application/                     # Capa de Aplicación
+│   │   │   │   ├── usecases/
+│   │   │   │   │   └── ProcessOrderUseCase.java    # Caso de uso principal
+│   │   │   │   │
+│   │   │   │   └── ports/
+│   │   │   │       └── in/
+│   │   │   │           └── ProcessOrderPort.java   # Interface del caso de uso
+│   │   │   │
+│   │   │   └── 🔌 infrastructure/                  # Capa de Infraestructura
+│   │   │       │
+│   │   │       ├── rest/                           # Adaptador REST
+│   │   │       │   ├── OrderController.java        # Controller simplificado (SRP)
+│   │   │       │   ├── dto/
+│   │   │       │   │   ├── CreateOrderRequest.java # DTO entrada
+│   │   │       │   │   ├── CreateOrderResponse.java# DTO salida
+│   │   │       │   │   ├── ProductRequest.java     # DTO producto tipado
+│   │   │       │   │   └── ErrorResponse.java      # DTO error estandarizado
+│   │   │       │   ├── mapper/
+│   │   │       │   │   └── OrderMapper.java        # Mapper DTO ↔ Domain
+│   │   │       │   └── exception/
+│   │   │       │       └── GlobalExceptionHandler.java  # Manejo centralizado
+│   │   │       │
+│   │   │       ├── persistence/                    # Adaptador JPA
+│   │   │       │   ├── adapters/
+│   │   │       │   │   ├── OrderRepositoryAdapter.java
+│   │   │       │   │   └── TaskRepositoryAdapter.java
+│   │   │       │   ├── mappers/
+│   │   │       │   │   ├── OrderEntityMapper.java  # Domain ↔ Entity
+│   │   │       │   │   └── TaskEntityMapper.java
+│   │   │       │   ├── jpa/
+│   │   │       │   │   ├── OrderJpaRepository.java
+│   │   │       │   │   ├── TaskJpaRepository.java
+│   │   │       │   │   └── entities/
+│   │   │       │   │       ├── OrderEntity.java    # JPA Entity
+│   │   │       │   │       └── TaskEntity.java
+│   │   │       │
+│   │   │       ├── config/
+│   │   │       │   └── ApplicationConfig.java      # Beans Spring
+│   │   │       │
+│   │   │       └── execution/
+│   │   │           └── SyncCommandExecutor.java    # Ejecutor de comandos
+│   │   │
+│   │   └── resources/
+│   │       └── application.yaml                    # Configuración Spring Boot
+│   │
+│   └── test/
+│       └── java/com/foodtech/kitchen/
+│           ├── domain/
+│           │   ├── services/
+│           │   │   ├── TaskDecomposerTest.java     # Tests unitarios
+│           │   │   └── TaskFactoryTest.java
+│           │   └── commands/
+│           │       └── PrepareCommandsTest.java
+│           ├── application/
+│           │   └── usecases/
+│           │       └── ProcessOrderUseCaseTest.java
+│           └── infrastructure/
+│               ├── rest/
+│               │   ├── OrderControllerIntegrationTest.java  # Tests de API
+│               │   └── mapper/
+│               │       └── OrderMapperTest.java
+│               └── persistence/
+│                   └── adapters/
+│                       ├── OrderRepositoryAdapterTest.java
+│                       └── TaskRepositoryAdapterTest.java
+│
+├── build.gradle                                    # Gradle build script
+├── Dockerfile                                       # Multi-stage Docker build
+└── README.md                                       # Este archivo
+```
+
+---
+
+## 🚀 Instrucciones de Ejecución
+
+### Prerrequisitos
+
+- ☕ **Java 17** o superior
+- 🐘 **Gradle 8.5** (incluido wrapper: `./gradlew`)
+- 🐳 **Docker** (opcional, para containerización)
+
+### 1️⃣ Clonar el Repositorio
+
+```bash
+git clone <repository-url>
+cd FoodTech
+```
+
+### 2️⃣ Ejecutar Tests
+
+```bash
+# Ejecutar todos los tests
+./gradlew test
+
+# Ejecutar con reporte de cobertura
+./gradlew test jacocoTestReport
+
+# Ver reporte en:
+# build/reports/tests/test/index.html
+# build/reports/jacoco/test/html/index.html
+```
+
+**Salida esperada:**
+```
+BUILD SUCCESSFUL in 12s
+44 tests completed
+```
+
+### 3️⃣ Ejecutar Aplicación Localmente
+
+```bash
+# Opción 1: Con Gradle
+./gradlew bootRun
+
+# Opción 2: Compilar y ejecutar JAR
+./gradlew build
+java -jar build/libs/kitchen-service-0.0.1-SNAPSHOT.jar
+```
+
+**Aplicación disponible en:** `http://localhost:8080`
+
+### 4️⃣ Probar API REST
+
+```bash
+# Crear pedido
+curl -X POST http://localhost:8080/api/orders \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tableNumber": "A1",
+    "products": [
+      {"name": "Coca Cola", "type": "DRINK"},
+      {"name": "Pizza Margherita", "type": "HOT_DISH"},
+      {"name": "Caesar Salad", "type": "COLD_DISH"}
+    ]
+  }'
+```
+
+**Respuesta esperada:**
+```json
+{
+  "tableNumber": "A1",
+  "tasksCreated": 3,
+  "message": "Order processed successfully"
+}
+```
+
+### 5️⃣ Ejecutar con Docker
+
+#### Construir Imagen
+
+```bash
+docker build -t foodtech-kitchen:latest .
+```
+
+**Dockerfile explicado:**
+```dockerfile
+# Stage 1: Build con Gradle
+FROM gradle:8.5-jdk17 AS build
+WORKDIR /app
+COPY build.gradle settings.gradle gradlew ./
+COPY gradle ./gradle
+COPY src ./src
+RUN ./gradlew clean build -x test
+
+# Stage 2: Runtime con JRE Alpine (imagen ligera)
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+COPY --from=build /app/build/libs/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
+
+#### Ejecutar Contenedor
+
+```bash
+# Ejecutar en foreground
+docker run -p 8080:8080 foodtech-kitchen:latest
+
+# Ejecutar en background
+docker run -d -p 8080:8080 --name foodtech-api foodtech-kitchen:latest
+
+# Ver logs
+docker logs -f foodtech-api
+
+# Detener
+docker stop foodtech-api
+```
+
+### 6️⃣ Ejecutar Pipeline CI (GitHub Actions)
+
+El proyecto incluye pipeline automatizado en `.github/workflows/ci.yml`:
+
+**Pipeline stages:**
+1. ✅ Checkout código
+2. ✅ Setup Java 17
+3. ✅ Setup Gradle con caché
+4. ✅ Ejecutar tests
+5. ✅ Generar reporte de cobertura
+6. ✅ Build JAR
+7. ✅ Upload artifacts
+
+**Triggers:**
+- Push a `main` o `develop`
+- Pull requests a `main`
+
+**Ver resultados:**
+- GitHub → Actions tab → Último workflow run
+
+---
+
+## 🤖 IA Collaboration Log
+
+Esta sección documenta momentos clave donde **el humano corrigió decisiones de la IA**, demostrando criterio de ingeniería y comprensión de principios SOLID.
+
+### 📌 Caso 1: Rechazo de Stub Methods (Violación LSP/ISP/YAGNI)
+
+**Contexto:**  
+Durante la refactorización de repositorios para corregir violaciones SRP/DIP, la IA sugirió agregar métodos stub a la interface `OrderRepository`:
+
+**Propuesta de la IA:**
+```java
+public interface OrderRepository {
+    OrderEntity save(Order order);
+    Optional<Order> findById(Long id);  // TODO: implement
+    List<Order> findAll();              // TODO: implement
+}
+```
+
+**❌ Problema identificado por el humano:**
+
+> "Cual es el motivo de agregar metodos que no se han implementado?"
+
+**Análisis del humano:**
+- **Violación de LSP (Liskov Substitution Principle)**: Los métodos stub lanzarían `UnsupportedOperationException` o retornarían valores incorrectos
+- **Violación de ISP (Interface Segregation Principle)**: Fuerza a clientes a depender de métodos que no usan
+- **Violación de YAGNI (You Aren't Gonna Need It)**: Agregar código especulativo antes de necesitarlo
+
+**✅ Corrección aplicada:**
+
+```java
+public interface OrderRepository {
+    OrderEntity save(Order order);  // SOLO lo que realmente se usa
+}
+```
+
+**Lección aprendida:**
+> "Los tests deben adaptarse al código, no el código a los tests. Implementar solo lo necesario."
+
+**Principios aplicados:**
+- **YAGNI**: No agregar funcionalidad hasta que sea realmente necesaria
+- **ISP**: Interfaces pequeñas y cohesivas
+- **LSP**: Todas las implementaciones deben cumplir el contrato completo
+
+---
+
+### 📌 Caso 2: Eliminación de OrderResponseFactory (Sobre-ingeniería)
+
+**Contexto:**  
+La IA creó un `OrderResponseFactory` para construir respuestas del controller, intentando separar responsabilidades.
+
+**Código generado por la IA:**
+```java
+@Component
+public class OrderResponseFactory {
+    private static final String ORDER_SUCCESS_MESSAGE = "Order processed successfully";
+
+    public CreateOrderResponse createSuccessResponse(Order order, List<Task> tasks) {
+        return new CreateOrderResponse(
+            order.getTableNumber(),
+            tasks.size(),
+            ORDER_SUCCESS_MESSAGE
+        );
+    }
+}
+```
+
+**❌ Problema identificado por el humano:**
+
+> "Ese orderResponse factory para que?"
+
+**Análisis del humano:**
+- La factory agrega **capa innecesaria de indirección**
+- La construcción del response es **trivial** (solo 3 campos)
+- El único beneficio real es **centralizar un string constante**
+- Viola **YAGNI**: Se está agregando abstracción antes de que sea necesaria
+
+**✅ Corrección aplicada:**
+
+Eliminar factory completamente y simplificar controller:
+
+```java
+@RestController
+public class OrderController {
+    private static final String ORDER_SUCCESS_MESSAGE = "Order processed successfully";
+    
+    private final ProcessOrderPort processOrderPort;
+
+    @PostMapping
+    public ResponseEntity<CreateOrderResponse> createOrder(@RequestBody CreateOrderRequest request) {
+        Order order = OrderMapper.toDomain(request);
+        List<Task> tasks = processOrderPort.execute(order);
+        
+        // Construcción directa - más simple y legible
+        CreateOrderResponse response = new CreateOrderResponse(
+            order.getTableNumber(),
+            tasks.size(),
+            ORDER_SUCCESS_MESSAGE
+        );
+        
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+}
+```
+
+**Lección aprendida:**
+> "No agregar abstracciones hasta que realmente las necesitemos. Si en el futuro hubiera lógica compleja de construcción de respuestas, ahí sí valdría la pena un factory."
+
+**Principios aplicados:**
+- **YAGNI**: Implementar solo lo necesario ahora
+- **KISS (Keep It Simple, Stupid)**: Solución más simple es mejor
+- **SRP**: Una constante en el controller no viola SRP
+
+**Impacto:**
+- ✅ Código más simple y directo
+- ✅ Menos clases innecesarias
+- ✅ Más fácil de mantener
+- ✅ No se pierde funcionalidad
+
+---
+
+## 📊 Resumen de Mejoras Aplicadas
+
+### Violaciones SOLID Corregidas
+
+| Principio | Violación Original | Corrección Aplicada |
+|-----------|-------------------|---------------------|
+| **SRP** | `OrderRepositoryAdapter` mezclaba persistencia + serialización | Extraído `OrderEntityMapper` y `TaskEntityMapper` |
+| **SRP** | `OrderController` manejaba errores + construía respuestas | Creado `GlobalExceptionHandler`, eliminado factory innecesario |
+| **OCP** | `ProductType` mapping hardcodeado en switch | `ProductType` enum contiene `Station`, eliminado switch |
+| **DIP** | Adapters creaban `ObjectMapper` internamente | `ObjectMapper` inyectado como bean Spring |
+| **ISP** | Interfaces con métodos stub no implementados | Interfaces minimalistas con solo métodos reales |
+
+### Patrones de Diseño Aplicados Correctamente
+
+- ✅ **Command Pattern**: Comandos con responsabilidad única
+- ✅ **Repository Pattern**: Abstracción de persistencia
+- ✅ **Hexagonal Architecture**: Separación clara de capas
+- ✅ **Dependency Injection**: Todo inyectado vía Spring
+- ✅ **Mapper Pattern**: Transformación de datos separada
+
+### Métricas de Calidad
+
+| Métrica | Valor |
+|---------|-------|
+| **Tests Unitarios** | 44 passing |
+| **Build Status** | ✅ SUCCESS |
+| **Principios SOLID** | 0 violaciones críticas |
+| **Code Smells** | Eliminados los principales |
+| **Cobertura de Tests** | 61%+ (objetivo: 85%) |
+
+---
+
+## 🎓 Conclusiones
+
+Este proyecto demuestra:
+
+1. **Arquitectura sólida**: Hexagonal con separación clara de responsabilidades
+2. **Criterio de ingeniería**: Capacidad para cuestionar y mejorar soluciones propuestas por IA
+3. **Principios SOLID**: Aplicación práctica y corrección de violaciones
+4. **Patrones de diseño**: Command Pattern implementado correctamente
+5. **Testing**: Estrategia de testing en múltiples niveles
+6. **DevOps**: Pipeline CI/CD, Docker, automatización
+
+**El código no solo funciona, sino que es mantenible, extensible y profesional.**
+
+---
+
+## 📝 Licencia
+
+Proyecto académico - Sofka Technologies - 2026
+
+---
+
+## 👨‍💻 Autor
+
+**Carlos Cuadrado**  
+Ejercicio de Arquitectura de Software  
+Enero 2026
