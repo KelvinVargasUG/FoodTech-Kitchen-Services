@@ -1,5 +1,0 @@
-package com.foodtech.kitchen.infrastructure.rest.dto;
-
-public class ProductRequest {
-    
-}
