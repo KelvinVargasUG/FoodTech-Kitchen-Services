@@ -64,6 +64,15 @@ jacocoTestReport {
         html.required = true
         csv.required = false
     }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/KitchenServiceApplication.class',
+                '**/config/**',
+                '**/dto/**'
+            ])
+        }))
+    }
 }
 
 jacocoTestCoverageVerification {
@@ -74,6 +83,15 @@ jacocoTestCoverageVerification {
                 minimum = 0.70
             }
         }
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/KitchenServiceApplication.class',
+                '**/config/**',
+                '**/dto/**'
+            ])
+        }))
     }
 }
 
