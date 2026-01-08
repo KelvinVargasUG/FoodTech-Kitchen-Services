@@ -10,15 +10,18 @@ import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
 
+//HUMAN REVIEW: Inyecto ObjectMapper por constructor en lugar de crear instancia propia.
+//Cumple DIP: dependo de abstracción inyectada, no creo dependencia concreta.
+//Beneficios: configurable, mockeable en tests, única instancia singleton compartida.
 @Component
 public class OrderRepositoryAdapter implements OrderRepository {
 
     private final OrderJpaRepository jpaRepository;
     private final ObjectMapper objectMapper;
 
-    public OrderRepositoryAdapter(OrderJpaRepository jpaRepository) {
+    public OrderRepositoryAdapter(OrderJpaRepository jpaRepository, ObjectMapper objectMapper) {
         this.jpaRepository = jpaRepository;
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = objectMapper;
     }
 
     public OrderEntity save(Order order) {

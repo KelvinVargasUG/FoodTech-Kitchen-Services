@@ -1,5 +1,6 @@
 package com.foodtech.kitchen.infrastructure.persistence.adapters;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodtech.kitchen.domain.model.*;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.TaskJpaRepository;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.TaskEntity;
@@ -20,7 +21,7 @@ class TaskRepositoryAdapterTest {
     @BeforeEach
     void setUp() {
         jpaRepository = mock(TaskJpaRepository.class);
-        adapter = new TaskRepositoryAdapter(jpaRepository);
+        adapter = new TaskRepositoryAdapter(jpaRepository, new ObjectMapper());
     }
 
     @Test

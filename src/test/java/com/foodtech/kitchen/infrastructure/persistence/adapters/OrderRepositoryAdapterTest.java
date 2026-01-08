@@ -1,5 +1,6 @@
 package com.foodtech.kitchen.infrastructure.persistence.adapters;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodtech.kitchen.domain.model.*;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.OrderJpaRepository;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.OrderEntity;
@@ -21,7 +22,7 @@ class OrderRepositoryAdapterTest {
     @BeforeEach
     void setUp() {
         jpaRepository = mock(OrderJpaRepository.class);
-        adapter = new OrderRepositoryAdapter(jpaRepository);
+        adapter = new OrderRepositoryAdapter(jpaRepository, new ObjectMapper());
     }
 
     @Test
