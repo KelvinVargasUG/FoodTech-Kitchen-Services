@@ -64,19 +64,19 @@ jacocoTestReport {
         html.required = true
         csv.required = false
     }
-    
-    doFirst {
-        classDirectories.setFrom(
-            files(classDirectories.files.collect {
-                fileTree(dir: it, exclude: [
-                    '**/KitchenServiceApplication.class',
-                    '**/KitchenServiceApplication$*.class',
-                    '**/infrastructure/config/**',
-                    '**/*Dto.class',
-                    '**/*DTO.class'
-                ])
-            })
-        )
+
+    // Mueve la configuración aquí, fuera de doFirst
+    // Usamos afterEvaluate para asegurar que los directorios por defecto ya existen antes de filtrar
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/KitchenServiceApplication.class',
+                '**/KitchenServiceApplication$*.class',
+                '**/infrastructure/config/**',
+                '**/*Dto.class',
+                '**/*DTO.class'
+            ])
+        }))
     }
 }
 
@@ -91,18 +91,17 @@ jacocoTestCoverageVerification {
         }
     }
     
-    doFirst {
-        classDirectories.setFrom(
-            files(classDirectories.files.collect {
-                fileTree(dir: it, exclude: [
-                    '**/KitchenServiceApplication.class',
-                    '**/KitchenServiceApplication$*.class',
-                    '**/infrastructure/config/**',
-                    '**/*Dto.class',
-                    '**/*DTO.class'
-                ])
-            })
-        )
+    // Mismo cambio aquí: Eliminar doFirst y usar afterEvaluate
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/KitchenServiceApplication.class',
+                '**/KitchenServiceApplication$*.class',
+                '**/infrastructure/config/**',
+                '**/*Dto.class',
+                '**/*DTO.class'
+            ])
+        }))
     }
 }
 
