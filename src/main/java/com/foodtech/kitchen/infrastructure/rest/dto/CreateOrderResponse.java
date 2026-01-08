@@ -1,5 +1,7 @@
 package com.foodtech.kitchen.infrastructure.rest.dto;
 
-public class CreateOrderResponse {
-    
-}
+public record CreateOrderResponse(
+    String tableNumber,
+    Integer tasksCreated,
+    String message
+) {}
