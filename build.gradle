@@ -64,36 +64,41 @@ jacocoTestReport {
         html.required = true
         csv.required = false
     }
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [
-                '**/KitchenServiceApplication.class',
-                '**/infrastructure/config/**',
-                '**/*Dto.class',
-                '**/*DTO.class'
-            ])
-        }))
-    }
+    
+    classDirectories.setFrom(
+        files(classDirectories.files.collect {
+            fileTree(dir: it) {
+                exclude '**/KitchenServiceApplication.class'
+                exclude '**/KitchenServiceApplication$*.class'
+                exclude '**/infrastructure/config/**'
+                exclude '**/*Dto.class'
+                exclude '**/*DTO.class'
+            }
+        })
+    )
 }
 
 jacocoTestCoverageVerification {
     dependsOn jacocoTestReport
+    
+    classDirectories.setFrom(
+        files(classDirectories.files.collect {
+            fileTree(dir: it) {
+                exclude '**/KitchenServiceApplication.class'
+                exclude '**/KitchenServiceApplication$*.class'
+                exclude '**/infrastructure/config/**'
+                exclude '**/*Dto.class'
+                exclude '**/*DTO.class'
+            }
+        })
+    )
+    
     violationRules {
         rule {
             limit {
                 minimum = 0.70
             }
         }
-    }
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [
-                '**/KitchenServiceApplication.class',
-                '**/infrastructure/config/**',
-                '**/*Dto.class',
-                '**/*DTO.class'
-            ])
-        }))
     }
 }
 

@@ -42,18 +42,41 @@ jobs:
     - name: Display coverage summary
       if: always()
       run: |
-        if [ -f build/reports/jacoco/test/html/index.html ]; then
+        if [ -f build/reports/jacoco/test/jacocoTestReport.xml ]; then
           echo "## 📊 Test Coverage Report" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          # Extract coverage percentages from the HTML report
-          INSTRUCTION=$(grep -oP 'Total.*?(\d+)%' build/reports/jacoco/test/html/index.html | grep -oP '\d+%' | head -1 || echo "N/A")
-          BRANCH=$(grep -oP 'Total.*?(\d+)%' build/reports/jacoco/test/html/index.html | grep -oP '\d+%' | tail -1 || echo "N/A")
+          # Extract coverage from XML report
+          INSTRUCTION_COVERED=$(grep -oP 'type="INSTRUCTION".*?covered="\K\d+' build/reports/jacoco/test/jacocoTestReport.xml | awk '{s+=$1} END {print s}')
+          INSTRUCTION_MISSED=$(grep -oP 'type="INSTRUCTION".*?missed="\K\d+' build/reports/jacoco/test/jacocoTestReport.xml | awk '{s+=$1} END {print s}')
+          BRANCH_COVERED=$(grep -oP 'type="BRANCH".*?covered="\K\d+' build/reports/jacoco/test/jacocoTestReport.xml | awk '{s+=$1} END {print s}')
+          BRANCH_MISSED=$(grep -oP 'type="BRANCH".*?missed="\K\d+' build/reports/jacoco/test/jacocoTestReport.xml | awk '{s+=$1} END {print s}')
+          LINE_COVERED=$(grep -oP 'type="LINE".*?covered="\K\d+' build/reports/jacoco/test/jacocoTestReport.xml | awk '{s+=$1} END {print s}')
+          LINE_MISSED=$(grep -oP 'type="LINE".*?missed="\K\d+' build/reports/jacoco/test/jacocoTestReport.xml | awk '{s+=$1} END {print s}')
           
-          echo "| Metric | Coverage |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|----------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Instructions | $INSTRUCTION |" >> $GITHUB_STEP_SUMMARY
-          echo "| Branches | $BRANCH |" >> $GITHUB_STEP_SUMMARY
+          # Calculate percentages
+          if [ ! -z "$INSTRUCTION_COVERED" ] && [ ! -z "$INSTRUCTION_MISSED" ]; then
+            TOTAL_INST=$((INSTRUCTION_COVERED + INSTRUCTION_MISSED))
+            INST_PCT=$((INSTRUCTION_COVERED * 100 / TOTAL_INST))
+            echo "| Metric | Coverage | Covered/Total |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|----------|---------------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Instructions | ${INST_PCT}% | ${INSTRUCTION_COVERED}/${TOTAL_INST} |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ ! -z "$BRANCH_COVERED" ] && [ ! -z "$BRANCH_MISSED" ]; then
+            TOTAL_BRANCH=$((BRANCH_COVERED + BRANCH_MISSED))
+            if [ $TOTAL_BRANCH -gt 0 ]; then
+              BRANCH_PCT=$((BRANCH_COVERED * 100 / TOTAL_BRANCH))
+              echo "| Branches | ${BRANCH_PCT}% | ${BRANCH_COVERED}/${TOTAL_BRANCH} |" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+          
+          if [ ! -z "$LINE_COVERED" ] && [ ! -z "$LINE_MISSED" ]; then
+            TOTAL_LINE=$((LINE_COVERED + LINE_MISSED))
+            LINE_PCT=$((LINE_COVERED * 100 / TOTAL_LINE))
+            echo "| Lines | ${LINE_PCT}% | ${LINE_COVERED}/${TOTAL_LINE} |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "📁 Full report available in artifacts" >> $GITHUB_STEP_SUMMARY
         else
