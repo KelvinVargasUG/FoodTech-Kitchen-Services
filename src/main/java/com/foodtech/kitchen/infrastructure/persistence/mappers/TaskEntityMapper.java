@@ -29,6 +29,7 @@ public class TaskEntityMapper {
                 .station(task.getStation())
                 .tableNumber(task.getTableNumber())
                 .products(productEntities)
+                .createdAt(task.getCreatedAt())
                 .build();
     }
 
@@ -40,7 +41,8 @@ public class TaskEntityMapper {
         return new Task(
                 entity.getStation(),
                 entity.getTableNumber(),
-                products
+                products,
+                entity.getCreatedAt()
         );
     }
 }

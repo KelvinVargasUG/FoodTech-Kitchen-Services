@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,9 +31,10 @@ class GetTasksByStationUseCaseTest {
         Product sprite = new Product("Sprite", ProductType.DRINK);
         Product pizza = new Product("Pizza", ProductType.HOT_DISH);
         
-        Task barTask1 = new Task(Station.BAR, "A1", List.of(cocaCola));
-        Task barTask2 = new Task(Station.BAR, "A2", List.of(sprite));
-        Task hotKitchenTask = new Task(Station.HOT_KITCHEN, "B1", List.of(pizza));
+        LocalDateTime now = LocalDateTime.now();
+        Task barTask1 = new Task(Station.BAR, "A1", List.of(cocaCola), now);
+        Task barTask2 = new Task(Station.BAR, "A2", List.of(sprite), now);
+        Task hotKitchenTask = new Task(Station.HOT_KITCHEN, "B1", List.of(pizza), now);
         
         when(taskRepository.findByStation(Station.BAR))
             .thenReturn(List.of(barTask1, barTask2));

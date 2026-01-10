@@ -23,7 +23,8 @@ public class TaskMapper {
         return new TaskResponse(
             task.getStation().name(),
             task.getTableNumber(),
-            products
+            products,
+            task.getCreatedAt()
         );
     }
 

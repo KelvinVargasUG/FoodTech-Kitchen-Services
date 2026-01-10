@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,7 +33,7 @@ class TaskRepositoryAdapterTest {
     void shouldSaveTasks() {
         // Given
         Product product = new Product("Coca Cola", ProductType.DRINK);
-        Task task = new Task(Station.BAR, "A1", List.of(product));
+        Task task = new Task(Station.BAR, "A1", List.of(product), LocalDateTime.now());
 
         // When
         adapter.saveAll(List.of(task));
@@ -53,6 +54,7 @@ class TaskRepositoryAdapterTest {
             .station(Station.BAR)
             .tableNumber("A1")
             .products(List.of(p))
+            .createdAt(LocalDateTime.now())
             .build();
         
         when(jpaRepository.findByStation(Station.BAR))
@@ -79,6 +81,7 @@ class TaskRepositoryAdapterTest {
             .station(Station.BAR)
             .tableNumber("A1")
             .products(List.of(p))
+            .createdAt(LocalDateTime.now())
             .build();
         
         when(jpaRepository.findAll()).thenReturn(List.of(entity));

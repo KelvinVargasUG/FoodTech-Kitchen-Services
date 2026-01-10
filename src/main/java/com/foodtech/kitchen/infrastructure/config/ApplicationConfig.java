@@ -9,6 +9,7 @@ import com.foodtech.kitchen.domain.services.OrderValidator;
 import com.foodtech.kitchen.domain.services.TaskDecomposer;
 import com.foodtech.kitchen.domain.services.TaskFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,7 +22,9 @@ public class ApplicationConfig {
 
     @Bean
     public ObjectMapper objectMapper() {
-        return new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper;
     }
 
     @Bean

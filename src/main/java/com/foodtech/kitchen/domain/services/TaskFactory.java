@@ -4,6 +4,7 @@ import com.foodtech.kitchen.domain.model.Product;
 import com.foodtech.kitchen.domain.model.Station;
 import com.foodtech.kitchen.domain.model.Task;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,11 +15,12 @@ public class TaskFactory {
 
     public List<Task> createTasks(String tableNumber, Map<Station, List<Product>> productsByStation) {
         List<Task> tasks = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
         
         for (Map.Entry<Station, List<Product>> entry : productsByStation.entrySet()) {
             Station station = entry.getKey();
             List<Product> products = entry.getValue();
-            tasks.add(new Task(station, tableNumber, products));
+            tasks.add(new Task(station, tableNumber, products, now));
         }
         
         return tasks;
