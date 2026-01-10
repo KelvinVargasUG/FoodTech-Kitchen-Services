@@ -54,6 +54,13 @@ public class TaskRepositoryAdapter implements TaskRepository {
     }
 
     @Override
+    public List<Task> findByStationAndStatus(Station station, TaskStatus status) {
+        return jpaRepository.findByStationAndStatus(station, status).stream()
+            .map(mapper::toDomain)
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Task> findAll() {
         return jpaRepository.findAll().stream()
             .map(mapper::toDomain)
