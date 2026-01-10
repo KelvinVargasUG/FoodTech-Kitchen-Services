@@ -1,6 +1,5 @@
 package com.foodtech.kitchen.infrastructure.persistence.adapters;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodtech.kitchen.domain.model.*;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.TaskJpaRepository;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.TaskEntity;
@@ -21,9 +20,8 @@ class TaskRepositoryAdapterTest {
     @BeforeEach
     void setUp() {
         jpaRepository = mock(TaskJpaRepository.class);
-        ObjectMapper objectMapper = new ObjectMapper();
         com.foodtech.kitchen.infrastructure.persistence.mappers.TaskEntityMapper mapper = 
-            new com.foodtech.kitchen.infrastructure.persistence.mappers.TaskEntityMapper(objectMapper);
+            new com.foodtech.kitchen.infrastructure.persistence.mappers.TaskEntityMapper();
         adapter = new TaskRepositoryAdapter(jpaRepository, mapper);
     }
 
@@ -32,7 +30,7 @@ class TaskRepositoryAdapterTest {
     void shouldSaveTasks() {
         // Given
         Product product = new Product("Coca Cola", ProductType.DRINK);
-        Task task = new Task(Station.BAR, List.of(product));
+        Task task = new Task(Station.BAR, "A1", List.of(product));
 
         // When
         adapter.saveAll(List.of(task));
@@ -45,10 +43,14 @@ class TaskRepositoryAdapterTest {
     @DisplayName("Should find tasks by station")
     void shouldFindTasksByStation() {
         // Given
+        com.foodtech.kitchen.infrastructure.persistence.jpa.entities.TaskProductEntity p =
+            com.foodtech.kitchen.infrastructure.persistence.jpa.entities.TaskProductEntity.builder()
+                .name("Coca Cola").type(ProductType.DRINK).build();
+
         TaskEntity entity = TaskEntity.builder()
             .station(Station.BAR)
             .tableNumber("A1")
-            .productsJson("[{\"name\":\"Coca Cola\",\"type\":\"DRINK\"}]")
+            .products(List.of(p))
             .build();
         
         when(jpaRepository.findByStation(Station.BAR))
@@ -67,10 +69,14 @@ class TaskRepositoryAdapterTest {
     @DisplayName("Should find all tasks")
     void shouldFindAllTasks() {
         // Given
+        com.foodtech.kitchen.infrastructure.persistence.jpa.entities.TaskProductEntity p =
+            com.foodtech.kitchen.infrastructure.persistence.jpa.entities.TaskProductEntity.builder()
+                .name("Coca Cola").type(ProductType.DRINK).build();
+
         TaskEntity entity = TaskEntity.builder()
             .station(Station.BAR)
             .tableNumber("A1")
-            .productsJson("[]")
+            .products(List.of(p))
             .build();
         
         when(jpaRepository.findAll()).thenReturn(List.of(entity));

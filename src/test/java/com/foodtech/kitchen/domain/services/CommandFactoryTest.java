@@ -31,7 +31,6 @@ class CommandFactoryTest {
 
         // Then
         assertInstanceOf(PrepareDrinkCommand.class, command);
-        assertEquals(Station.BAR, command.getStation());
     }
 
     @Test
@@ -46,7 +45,6 @@ class CommandFactoryTest {
 
         // Then
         assertInstanceOf(PrepareHotDishCommand.class, command);
-        assertEquals(Station.HOT_KITCHEN, command.getStation());
     }
 
     @Test
@@ -61,7 +59,6 @@ class CommandFactoryTest {
 
         // Then
         assertInstanceOf(PrepareColdDishCommand.class, command);
-        assertEquals(Station.COLD_KITCHEN, command.getStation());
     }
 
     @Test

@@ -1,6 +1,5 @@
 package com.foodtech.kitchen.infrastructure.persistence.adapters;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodtech.kitchen.domain.model.*;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.OrderJpaRepository;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.OrderEntity;
@@ -22,9 +21,8 @@ class OrderRepositoryAdapterTest {
     @BeforeEach
     void setUp() {
         jpaRepository = mock(OrderJpaRepository.class);
-        ObjectMapper objectMapper = new ObjectMapper();
         com.foodtech.kitchen.infrastructure.persistence.mappers.OrderEntityMapper mapper = 
-            new com.foodtech.kitchen.infrastructure.persistence.mappers.OrderEntityMapper(objectMapper);
+            new com.foodtech.kitchen.infrastructure.persistence.mappers.OrderEntityMapper();
         adapter = new OrderRepositoryAdapter(jpaRepository, mapper);
     }
 
@@ -36,10 +34,17 @@ class OrderRepositoryAdapterTest {
         Product pizza = new Product("Pizza", ProductType.HOT_DISH);
         Order order = new Order("A1", List.of(cocaCola, pizza));
 
+        com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity p1 =
+            com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity.builder()
+                .name("Coca Cola").type(ProductType.DRINK).build();
+        com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity p2 =
+            com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity.builder()
+                .name("Pizza").type(ProductType.HOT_DISH).build();
+
         OrderEntity savedEntity = OrderEntity.builder()
             .id(1L)
             .tableNumber("A1")
-            .productsJson("[{\"name\":\"Coca Cola\",\"type\":\"DRINK\"},{\"name\":\"Pizza\",\"type\":\"HOT_DISH\"}]")
+            .products(List.of(p1, p2))
             .build();
 
         when(jpaRepository.save(any(OrderEntity.class))).thenReturn(savedEntity);
@@ -63,9 +68,9 @@ class OrderRepositoryAdapterTest {
         when(jpaRepository.save(any(OrderEntity.class))).thenAnswer(invocation -> {
             OrderEntity entity = invocation.getArgument(0);
             assertEquals("B2", entity.getTableNumber());
-            assertNotNull(entity.getProductsJson());
-            assertTrue(entity.getProductsJson().contains("Coca Cola"));
-            assertTrue(entity.getProductsJson().contains("DRINK"));
+            assertNotNull(entity.getProducts());
+            assertTrue(entity.getProducts().stream().anyMatch(pe -> pe.getName().equals("Coca Cola")));
+            assertTrue(entity.getProducts().stream().anyMatch(pe -> pe.getType() == ProductType.DRINK));
             return entity;
         });
 
@@ -91,9 +96,9 @@ class OrderRepositoryAdapterTest {
         // Then
         verify(jpaRepository, times(1)).save(argThat(entity -> 
             entity.getTableNumber().equals("C3") &&
-            entity.getProductsJson().contains("Coca Cola") &&
-            entity.getProductsJson().contains("Sprite") &&
-            entity.getProductsJson().contains("Pizza")
+            entity.getProducts().stream().anyMatch(pe -> pe.getName().equals("Coca Cola")) &&
+            entity.getProducts().stream().anyMatch(pe -> pe.getName().equals("Sprite")) &&
+            entity.getProducts().stream().anyMatch(pe -> pe.getName().equals("Pizza"))
         ));
     }
 }

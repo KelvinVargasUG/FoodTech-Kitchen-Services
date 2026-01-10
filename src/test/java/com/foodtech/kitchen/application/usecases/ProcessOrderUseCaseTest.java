@@ -70,13 +70,10 @@ class ProcessOrderUseCaseTest {
     @Test
     @DisplayName("Should propagate validation exception from TaskDecomposer")
     void shouldPropagateValidationException() {
-        // Given
-        Order emptyOrder = new Order("C3", List.of());
-
-        // When & Then
+        // When & Then - la validación ya se lanza al crear el Order
         assertThrows(
             IllegalArgumentException.class,
-            () -> useCase.execute(emptyOrder)
+            () -> useCase.execute(new Order("C3", List.of()))
         );
         verify(taskRepository, never()).saveAll(anyList());
     }

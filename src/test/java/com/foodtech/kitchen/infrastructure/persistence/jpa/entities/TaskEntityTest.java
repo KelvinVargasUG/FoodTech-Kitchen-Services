@@ -29,10 +29,7 @@ class TaskEntityTest {
         // Given
         TaskEntity entity = new TaskEntity();
         
-        // When
-        entity.setId(1L);
-        
-        // Then
-        assertEquals(1L, entity.getId());
+        // Then - before persisting, id should be null
+        assertNull(entity.getId());
     }
 }

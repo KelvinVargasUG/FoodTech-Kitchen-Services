@@ -23,10 +23,14 @@ class TaskJpaRepositoryTest {
     @DisplayName("Should save and find task")
     void shouldSaveAndFindTask() {
         // Given
+        com.foodtech.kitchen.infrastructure.persistence.jpa.entities.TaskProductEntity p =
+            com.foodtech.kitchen.infrastructure.persistence.jpa.entities.TaskProductEntity.builder()
+                .name("Coca Cola").type(com.foodtech.kitchen.domain.model.ProductType.DRINK).build();
+
         TaskEntity task = TaskEntity.builder()
             .station(Station.BAR)
             .tableNumber("A1")
-            .productsJson("[{\"name\":\"Coca Cola\",\"type\":\"DRINK\"}]")
+            .products(List.of(p))
             .build();
 
         // When
@@ -46,13 +50,13 @@ class TaskJpaRepositoryTest {
         TaskEntity barTask = TaskEntity.builder()
             .station(Station.BAR)
             .tableNumber("A1")
-            .productsJson("[]")
+            .products(List.of())
             .build();
         
         TaskEntity kitchenTask = TaskEntity.builder()
             .station(Station.HOT_KITCHEN)
             .tableNumber("B2")
-            .productsJson("[]")
+            .products(List.of())
             .build();
 
         repository.save(barTask);

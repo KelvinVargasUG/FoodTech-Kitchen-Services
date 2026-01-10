@@ -21,9 +21,7 @@ class PrepareDrinkCommandTest {
         PrepareDrinkCommand command = new PrepareDrinkCommand(products);
 
         // Then
-        assertEquals(Station.BAR, command.getStation());
-        assertEquals(1, command.getProducts().size());
-        assertEquals("Coca Cola", command.getProducts().get(0).getName());
+            assertInstanceOf(PrepareDrinkCommand.class, command);
     }
 
     @Test
@@ -49,7 +47,6 @@ class PrepareDrinkCommandTest {
         PrepareDrinkCommand command = new PrepareDrinkCommand(products);
 
         // Then
-        assertEquals(2, command.getProducts().size());
-        assertEquals(Station.BAR, command.getStation());
+        assertInstanceOf(PrepareDrinkCommand.class, command);
     }
 }

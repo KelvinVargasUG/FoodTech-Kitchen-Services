@@ -1,7 +1,6 @@
 package com.foodtech.kitchen.infrastructure.persistence.mappers;
 
 import com.foodtech.kitchen.domain.model.Product;
-import com.foodtech.kitchen.domain.model.ProductType;
 import com.foodtech.kitchen.domain.model.Task;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.TaskEntity;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.TaskProductEntity;

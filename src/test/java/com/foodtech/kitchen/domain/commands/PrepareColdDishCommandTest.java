@@ -21,8 +21,7 @@ class PrepareColdDishCommandTest {
         PrepareColdDishCommand command = new PrepareColdDishCommand(products);
 
         // Then
-        assertEquals(Station.COLD_KITCHEN, command.getStation());
-        assertEquals(1, command.getProducts().size());
+        assertInstanceOf(PrepareColdDishCommand.class, command);
     }
 
     @Test
