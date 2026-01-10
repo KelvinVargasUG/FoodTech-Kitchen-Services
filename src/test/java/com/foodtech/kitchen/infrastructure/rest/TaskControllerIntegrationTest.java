@@ -119,4 +119,16 @@ class TaskControllerIntegrationTest {
             .andExpect(jsonPath("$[0].products[0].type").exists())
             .andExpect(jsonPath("$[0].createdAt").exists());
     }
+
+    @Test
+    @DisplayName("Scenario 4: Should return 400 when invalid station")
+    void shouldReturn400WhenInvalidStation() throws Exception {
+        // Given - el sistema solo reconoce BAR, HOT_KITCHEN, COLD_KITCHEN
+        // When - se consultan tareas para una estación no reconocida
+        // Then - el sistema informa que la estación no existe
+        mockMvc.perform(get("/api/tasks/station/INVALID_STATION"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error").exists())
+            .andExpect(jsonPath("$.message").exists());
+    }
 }
