@@ -21,10 +21,14 @@ public class TaskMapper {
             .collect(Collectors.toList());
 
         return new TaskResponse(
+            task.getId(),
+            task.getOrderId(),
             task.getStation().name(),
             task.getTableNumber(),
             products,
-            task.getCreatedAt()
+            task.getCreatedAt(),
+            task.getStatus().name(),
+            task.getStartedAt()
         );
     }
 

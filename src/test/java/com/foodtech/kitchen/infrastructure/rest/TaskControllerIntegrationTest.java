@@ -1,6 +1,8 @@
 package com.foodtech.kitchen.infrastructure.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.foodtech.kitchen.application.ports.out.TaskRepository;
+import com.foodtech.kitchen.domain.model.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +27,9 @@ class TaskControllerIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private TaskRepository taskRepository;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -117,5 +122,21 @@ class TaskControllerIntegrationTest {
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.error").exists())
             .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    @DisplayName("HU-003 Scenario 1: Should start task preparation and update status")
+    @org.springframework.transaction.annotation.Transactional
+    void shouldStartTaskPreparation() throws Exception {
+        // Given - existe una tarea pendiente con ID
+        List<Task> allTasks = taskRepository.findAll();
+        Long taskId = allTasks.get(0).getId();
+
+        // When - el cocinero inicia la preparación de la tarea
+        mockMvc.perform(patch("/api/tasks/" + taskId + "/start"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(taskId))
+            .andExpect(jsonPath("$.status").value("IN_PREPARATION"))
+            .andExpect(jsonPath("$.startedAt").exists());
     }
 }
