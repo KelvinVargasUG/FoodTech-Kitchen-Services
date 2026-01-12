@@ -1,11 +1,13 @@
 package com.foodtech.kitchen.application.usecases;
 
+import com.foodtech.kitchen.application.ports.out.CommandExecutor;
 import com.foodtech.kitchen.application.ports.out.TaskRepository;
 import com.foodtech.kitchen.domain.model.Station;
 import com.foodtech.kitchen.domain.model.Product;
 import com.foodtech.kitchen.domain.model.ProductType;
 import com.foodtech.kitchen.domain.model.Task;
 import com.foodtech.kitchen.domain.model.TaskStatus;
+import com.foodtech.kitchen.domain.services.CommandFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,11 +28,17 @@ class StartTaskPreparationUseCaseTest {
     @Mock
     private TaskRepository taskRepository;
 
+    @Mock
+    private CommandFactory commandFactory;
+
+    @Mock
+    private com.foodtech.kitchen.application.ports.out.CommandExecutor commandExecutor;
+
     private StartTaskPreparationUseCase useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new StartTaskPreparationUseCase(taskRepository);
+        useCase = new StartTaskPreparationUseCase(taskRepository, commandFactory, commandExecutor);
     }
 
     @Test

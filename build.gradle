@@ -29,7 +29,11 @@ dependencies {
     // Spring Boot Starters
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // ✅ NUEVO: Project Reactor para programación reactiva
+    implementation 'io.projectreactor:reactor-core:3.6.0'
+
     // Jackson (explícito para IDE)
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
@@ -43,7 +47,9 @@ dependencies {
     
     // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'io.projectreactor:reactor-test'
+
     // Lombok for tests
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'

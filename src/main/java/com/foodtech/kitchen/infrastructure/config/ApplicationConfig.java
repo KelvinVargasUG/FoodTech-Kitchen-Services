@@ -1,25 +1,16 @@
 package com.foodtech.kitchen.infrastructure.config;
 
-import com.foodtech.kitchen.application.ports.in.GetOrderStatusPort;
-import com.foodtech.kitchen.application.ports.in.GetTasksByStationPort;
-import com.foodtech.kitchen.application.ports.in.ProcessOrderPort;
-import com.foodtech.kitchen.application.ports.out.TaskRepository;
-import com.foodtech.kitchen.application.usecases.GetOrderStatusUseCase;
-import com.foodtech.kitchen.application.usecases.GetTasksByStationUseCase;
-import com.foodtech.kitchen.application.usecases.ProcessOrderUseCase;
-import com.foodtech.kitchen.domain.services.OrderStatusCalculator;
-import com.foodtech.kitchen.domain.services.OrderValidator;
-import com.foodtech.kitchen.domain.services.TaskDecomposer;
-import com.foodtech.kitchen.domain.services.TaskFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.foodtech.kitchen.application.ports.in.*;
+import com.foodtech.kitchen.application.ports.out.CommandExecutor;
+import com.foodtech.kitchen.application.ports.out.OrderRepository;
+import com.foodtech.kitchen.application.ports.out.TaskRepository;
+import com.foodtech.kitchen.application.usecases.*;
+import com.foodtech.kitchen.domain.services.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-//HUMAN REVIEW: Configuré beans para todas las clases de servicio separadas.
-//Cada bean tiene una responsabilidad clara y se inyectan correctamente en TaskDecomposer.
-//HUMAN REVIEW: Agregué bean ObjectMapper como singleton para inyectarlo en adapters.
-//Cumple DIP: adapters no crean dependencias, las reciben por inyección.
 @Configuration
 public class ApplicationConfig {
 
@@ -41,45 +32,53 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public com.foodtech.kitchen.domain.services.CommandFactory commandFactory() {
-        return new com.foodtech.kitchen.domain.services.CommandFactory();
+    public CommandFactory commandFactory() {
+        return new CommandFactory();
     }
 
     @Bean
-    public TaskDecomposer taskDecomposer(OrderValidator orderValidator,
-                                         TaskFactory taskFactory) {
-        return new TaskDecomposer(orderValidator, taskFactory);
-    }
-
-    @Bean
-    public ProcessOrderPort processOrderPort(
-        com.foodtech.kitchen.application.ports.out.OrderRepository orderRepository,
-        TaskDecomposer taskDecomposer, 
-        TaskRepository taskRepository,
-        com.foodtech.kitchen.domain.services.CommandFactory commandFactory,
-        com.foodtech.kitchen.application.ports.out.CommandExecutor commandExecutor
+    public TaskDecomposer taskDecomposer(
+            OrderValidator orderValidator,
+            TaskFactory taskFactory
     ) {
-        return new ProcessOrderUseCase(orderRepository, taskDecomposer, taskRepository, commandFactory, commandExecutor);
-    }
-
-    @Bean
-    public GetTasksByStationPort getTasksByStationPort(TaskRepository taskRepository) {
-        return new GetTasksByStationUseCase(taskRepository);
-    }
-
-    @Bean
-    public com.foodtech.kitchen.application.ports.in.StartTaskPreparationPort startTaskPreparationPort(TaskRepository taskRepository) {
-        return new com.foodtech.kitchen.application.usecases.StartTaskPreparationUseCase(taskRepository);
-    }
-
-    @Bean
-    public com.foodtech.kitchen.application.ports.in.CompleteTaskPreparationPort completeTaskPreparationPort(TaskRepository taskRepository) {
-        return new com.foodtech.kitchen.application.usecases.CompleteTaskPreparationUseCase(taskRepository);
+        return new TaskDecomposer(orderValidator, taskFactory);
     }
 
     @Bean
     public OrderStatusCalculator orderStatusCalculator() {
         return new OrderStatusCalculator();
+    }
+
+    @Bean
+    public ProcessOrderPort processOrderPort(
+            OrderRepository orderRepository,
+            TaskDecomposer taskDecomposer,
+            TaskRepository taskRepository
+    ) {
+        return new ProcessOrderUseCase(orderRepository, taskDecomposer, taskRepository);
+    }
+
+    @Bean
+    public StartTaskPreparationPort startTaskPreparationPort(
+            TaskRepository taskRepository,
+            CommandFactory commandFactory,
+            CommandExecutor commandExecutor
+    ) {
+        return new StartTaskPreparationUseCase(taskRepository, commandFactory, commandExecutor);
+    }
+
+    @Bean
+    public CompleteTaskPreparationPort completeTaskPreparationPort(
+            TaskRepository taskRepository
+    ) {
+        return new CompleteTaskPreparationUseCase(taskRepository);
+    }
+
+    @Bean
+    public GetTasksByStationPort getTasksByStationPort(
+            TaskRepository taskRepository
+    ) {
+        return new GetTasksByStationUseCase(taskRepository);
     }
 
     @Bean

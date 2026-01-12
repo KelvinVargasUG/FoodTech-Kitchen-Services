@@ -1,0 +1,805 @@
+{
+	"info": {
+		"_postman_id": "foodtech-kitchen-api-v2-2026",
+		"name": "FoodTech Kitchen API - Complete Test Suite",
+		"description": "Suite completa de tests para FoodTech Kitchen Service.\n\n**Arquitectura:** Hexagonal + Command Pattern + Reactive (Mono)\n**Base URL:** http://localhost:8080\n\n**Features:**\n- ✅ Procesamiento asíncrono de pedidos\n- ✅ Auto-completado de tareas con Mono/Flux\n- ✅ Gestión de tareas por estación\n- ✅ Seguimiento de estado en tiempo real\n- ✅ Tests automatizados E2E\n\n**Ejecución recomendada:**\n1. Run \"End-to-End Workflows\" folder para flujo completo\n2. Run \"Negative Tests\" para validar errores\n3. Run collection completa para cobertura total\n\n**Autor:** Carlos Cuadrado\n**Fecha:** Enero 2026\n**Versión:** 2.0",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "🎯 End-to-End Workflows",
+			"item": [
+				{
+					"name": "E2E - Complete Order Lifecycle",
+					"item": [
+						{
+							"name": "1. Create Order (Mixed Products)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// 📊 HU-001: Procesar pedido de cocina",
+											"pm.test(\"✅ Status 201 - Order created\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"const response = pm.response.json();",
+											"",
+											"pm.test(\"✅ Response structure is correct\", function () {",
+											"    pm.expect(response).to.have.property('tableNumber');",
+											"    pm.expect(response).to.have.property('tasksCreated');",
+											"    pm.expect(response).to.have.property('message');",
+											"});",
+											"",
+											"pm.test(\"✅ 3 tasks created (BAR + HOT + COLD)\", function () {",
+											"    pm.expect(response.tasksCreated).to.eql(3);",
+											"});",
+											"",
+											"pm.test(\"✅ Table number matches\", function () {",
+											"    pm.expect(response.tableNumber).to.match(/^[A-Z]\\d+$/);",
+											"});",
+											"",
+											"// 💾 Save for next requests",
+											"pm.collectionVariables.set(\"e2e_tableNumber\", response.tableNumber);",
+											"console.log(\"📝 Saved table:\", response.tableNumber);"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generate unique table number",
+											"const table = \"A\" + Math.floor(Math.random() * 50 + 1);",
+											"pm.collectionVariables.set(\"e2e_tableNumber\", table);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"tableNumber\": \"{{e2e_tableNumber}}\",\n    \"products\": [\n        {\"name\": \"Pizza Margherita\", \"type\": \"HOT_DISH\"},\n        {\"name\": \"Coca Cola\", \"type\": \"DRINK\"},\n        {\"name\": \"Sprite\", \"type\": \"DRINK\"},\n        {\"name\": \"Caesar Salad\", \"type\": \"COLD_DISH\"}\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/orders",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "orders"]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "2. Get BAR Tasks (Pending)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// 📊 HU-002: Consultar tareas por estación",
+											"pm.test(\"✅ Status 200 - Tasks retrieved\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"const tasks = pm.response.json();",
+											"",
+											"pm.test(\"✅ At least 1 BAR task exists\", function () {",
+											"    pm.expect(tasks.length).to.be.above(0);",
+											"});",
+											"",
+											"pm.test(\"✅ All tasks are BAR station\", function () {",
+											"    tasks.forEach(task => {",
+											"        pm.expect(task.station).to.eql('BAR');",
+											"    });",
+											"});",
+											"",
+											"// Find our task by table number",
+											"const tableNumber = pm.collectionVariables.get('e2e_tableNumber');",
+											"const ourTask = tasks.find(t => t.tableNumber === tableNumber);",
+											"",
+											"pm.test(\"✅ Task for our table exists\", function () {",
+											"    pm.expect(ourTask).to.not.be.undefined;",
+											"});",
+											"",
+											"if (ourTask) {",
+											"    pm.test(\"✅ Task status is PENDING\", function () {",
+											"        pm.expect(ourTask.status).to.eql('PENDING');",
+											"    });",
+											"    ",
+											"    pm.test(\"✅ Task has 2 drinks (Coca Cola + Sprite)\", function () {",
+											"        pm.expect(ourTask.products.length).to.eql(2);",
+											"        const productNames = ourTask.products.map(p => p.name);",
+											"        pm.expect(productNames).to.include('Coca Cola');",
+											"        pm.expect(productNames).to.include('Sprite');",
+											"    });",
+											"    ",
+											"    pm.test(\"✅ All products are DRINK type\", function () {",
+											"        ourTask.products.forEach(p => {",
+											"            pm.expect(p.type).to.eql('DRINK');",
+											"        });",
+											"    });",
+											"    ",
+											"    pm.test(\"✅ Timestamps: createdAt exists, others null\", function () {",
+											"        pm.expect(ourTask.createdAt).to.not.be.null;",
+											"        pm.expect(ourTask.startedAt).to.be.null;",
+											"        pm.expect(ourTask.completedAt).to.be.null;",
+											"    });",
+											"    ",
+											"    // 💾 Save task ID and orderId",
+											"    pm.collectionVariables.set('e2e_taskId', ourTask.id);",
+											"    pm.collectionVariables.set('e2e_orderId', ourTask.orderId);",
+											"    console.log(\"📝 Saved taskId:\", ourTask.id);",
+											"    console.log(\"📝 Saved orderId:\", ourTask.orderId);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/tasks/station/BAR?status=PENDING",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "tasks", "station", "BAR"],
+									"query": [
+										{"key": "status", "value": "PENDING"}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "3. Start Task Preparation",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// 📊 HU-003: Iniciar preparación (auto-completa con Mono)",
+											"pm.test(\"✅ Status 200 - Task started\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"const task = pm.response.json();",
+											"",
+											"pm.test(\"✅ Status changed to IN_PREPARATION\", function () {",
+											"    pm.expect(task.status).to.eql('IN_PREPARATION');",
+											"});",
+											"",
+											"pm.test(\"✅ startedAt timestamp is set\", function () {",
+											"    pm.expect(task.startedAt).to.not.be.null;",
+											"});",
+											"",
+											"pm.test(\"✅ completedAt is still null (async execution)\", function () {",
+											"    pm.expect(task.completedAt).to.be.null;",
+											"});",
+											"",
+											"pm.test(\"✅ Timestamps chronology: createdAt < startedAt\", function () {",
+											"    const created = new Date(task.createdAt);",
+											"    const started = new Date(task.startedAt);",
+											"    pm.expect(started.getTime()).to.be.above(created.getTime());",
+											"});",
+											"",
+											"console.log(\"⏳ Task started - waiting for auto-completion (Mono background)\");",
+											"console.log(\"⏱️  Expected completion time: ~6 seconds (2 drinks × 3 sec)\");"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/tasks/{{e2e_taskId}}/start",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "tasks", "{{e2e_taskId}}", "start"]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "4. Poll Task Status (Wait 8 sec)",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// ⏳ Wait 8 seconds for Mono to auto-complete task",
+											"console.log(\"⏳ Waiting 8 seconds for auto-completion...\");",
+											"setTimeout(() => {}, 8000);"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// 📊 HU-003: Validar auto-completado",
+											"pm.test(\"✅ Status 200 - Task retrieved\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"const tasks = pm.response.json();",
+											"const taskId = pm.collectionVariables.get('e2e_taskId');",
+											"const task = tasks.find(t => t.id === parseInt(taskId));",
+											"",
+											"pm.test(\"✅ Task found by ID\", function () {",
+											"    pm.expect(task).to.not.be.undefined;",
+											"});",
+											"",
+											"if (task) {",
+											"    pm.test(\"✅ Task auto-completed (status = COMPLETED)\", function () {",
+											"        pm.expect(task.status).to.eql('COMPLETED');",
+											"    });",
+											"    ",
+											"    pm.test(\"✅ completedAt timestamp is set\", function () {",
+											"        pm.expect(task.completedAt).to.not.be.null;",
+											"    });",
+											"    ",
+											"    pm.test(\"✅ All timestamps present\", function () {",
+											"        pm.expect(task.createdAt).to.not.be.null;",
+											"        pm.expect(task.startedAt).to.not.be.null;",
+											"        pm.expect(task.completedAt).to.not.be.null;",
+											"    });",
+											"    ",
+											"    pm.test(\"✅ Timestamps chronology: created < started < completed\", function () {",
+											"        const created = new Date(task.createdAt).getTime();",
+											"        const started = new Date(task.startedAt).getTime();",
+											"        const completed = new Date(task.completedAt).getTime();",
+											"        ",
+											"        pm.expect(started).to.be.above(created);",
+											"        pm.expect(completed).to.be.above(started);",
+											"    });",
+											"    ",
+											"    console.log(\"✅ Task auto-completed successfully by Mono!\");",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/tasks/station/BAR?status=COMPLETED",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "tasks", "station", "BAR"],
+									"query": [
+										{"key": "status", "value": "COMPLETED"}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "5. Get Order Status (Partial)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// 📊 HU-003: Estado del pedido (parcial)",
+											"pm.test(\"✅ Status 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"const response = pm.response.json();",
+											"",
+											"pm.test(\"✅ Order still IN_PREPARATION (other tasks pending)\", function () {",
+											"    // BAR completada, pero HOT_KITCHEN y COLD_KITCHEN aún pendientes",
+											"    pm.expect(response.status).to.be.oneOf(['IN_PREPARATION', 'PENDING']);",
+											"});",
+											"",
+											"console.log(\"📊 Order status:\", response.status);",
+											"console.log(\"ℹ️  BAR task completed, but HOT_KITCHEN and COLD_KITCHEN still pending\");"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/orders/{{e2e_orderId}}/status",
+									"host": ["{{baseUrl}}"],
+									"path": ["api", "orders", "{{e2e_orderId}}", "status"]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Flujo completo End-to-End que valida:\n- HU-001: Crear pedido\n- HU-002: Consultar tareas por estación\n- HU-003: Iniciar preparación y auto-completado\n\n**Tiempo de ejecución:** ~10 segundos\n**Validaciones:** 25+ tests"
+				}
+			],
+			"description": "Flujos End-to-End que validan las Historias de Usuario completas"
+		},
+		{
+			"name": "📦 Orders API",
+			"item": [
+				{
+					"name": "Create Order - Mixed Products",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ Status 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"pm.test(\"✅ Response structure\", function () {",
+									"    pm.expect(response).to.have.property('tableNumber');",
+									"    pm.expect(response).to.have.property('tasksCreated');",
+									"    pm.expect(response).to.have.property('message');",
+									"});",
+									"",
+									"pm.test(\"✅ 3 tasks created\", function () {",
+									"    pm.expect(response.tasksCreated).to.eql(3);",
+									"});",
+									"",
+									"pm.test(\"✅ Success message\", function () {",
+									"    pm.expect(response.message).to.include('successfully');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tableNumber\": \"A1\",\n    \"products\": [\n        {\"name\": \"Pizza Margherita\", \"type\": \"HOT_DISH\"},\n        {\"name\": \"Coca Cola\", \"type\": \"DRINK\"},\n        {\"name\": \"Caesar Salad\", \"type\": \"COLD_DISH\"}\n    ]\n}",
+							"options": {"raw": {"language": "json"}}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/orders",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "orders"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Order - Only Drinks",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ Status 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"✅ Only 1 task (BAR)\", function () {",
+									"    pm.expect(pm.response.json().tasksCreated).to.eql(1);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tableNumber\": \"B5\",\n    \"products\": [\n        {\"name\": \"Coca Cola\", \"type\": \"DRINK\"},\n        {\"name\": \"Orange Juice\", \"type\": \"DRINK\"}\n    ]\n}",
+							"options": {"raw": {"language": "json"}}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/orders",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "orders"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ Status 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"pm.test(\"✅ Has orderId and status\", function () {",
+									"    pm.expect(response).to.have.property('orderId');",
+									"    pm.expect(response).to.have.property('status');",
+									"});",
+									"",
+									"pm.test(\"✅ Valid status enum\", function () {",
+									"    pm.expect(response.status).to.be.oneOf(['PENDING', 'IN_PREPARATION', 'COMPLETED']);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/orders/{{orderId}}/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "orders", "{{orderId}}", "status"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🍽️ Tasks API",
+			"item": [
+				{
+					"name": "Get Tasks - BAR Station",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ Status 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const tasks = pm.response.json();",
+									"",
+									"pm.test(\"✅ Response is array\", function () {",
+									"    pm.expect(tasks).to.be.an('array');",
+									"});",
+									"",
+									"if (tasks.length > 0) {",
+									"    pm.test(\"✅ All tasks are BAR\", function () {",
+									"        tasks.forEach(t => pm.expect(t.station).to.eql('BAR'));",
+									"    });",
+									"    ",
+									"    pm.test(\"✅ Required fields present\", function () {",
+									"        const task = tasks[0];",
+									"        pm.expect(task).to.have.property('id');",
+									"        pm.expect(task).to.have.property('orderId');",
+									"        pm.expect(task).to.have.property('station');",
+									"        pm.expect(task).to.have.property('products');",
+									"        pm.expect(task).to.have.property('status');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tasks/station/BAR",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tasks", "station", "BAR"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tasks - HOT_KITCHEN",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tasks/station/HOT_KITCHEN",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tasks", "station", "HOT_KITCHEN"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tasks - COLD_KITCHEN",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tasks/station/COLD_KITCHEN",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tasks", "station", "COLD_KITCHEN"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Task Preparation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ Status 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const task = pm.response.json();",
+									"",
+									"pm.test(\"✅ Status = IN_PREPARATION\", function () {",
+									"    pm.expect(task.status).to.eql('IN_PREPARATION');",
+									"});",
+									"",
+									"pm.test(\"✅ startedAt timestamp set\", function () {",
+									"    pm.expect(task.startedAt).to.not.be.null;",
+									"});",
+									"",
+									"console.log(\"⏳ Task started - will auto-complete in background (Mono)\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tasks/{{taskId}}/start",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tasks", "{{taskId}}", "start"]
+						},
+						"description": "Inicia preparación de tarea.\n\n**⚠️ Comportamiento Asíncrono:**\n- Retorna inmediatamente con status IN_PREPARATION\n- Comando se ejecuta en background con Mono\n- Tarea se auto-completa cuando termina ejecución\n- Use polling (GET tasks) para verificar completado"
+					},
+					"response": []
+				},
+				{
+					"name": "Complete Task Manually (Exception)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ Status 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const task = pm.response.json();",
+									"",
+									"pm.test(\"✅ Status = COMPLETED\", function () {",
+									"    pm.expect(task.status).to.eql('COMPLETED');",
+									"});",
+									"",
+									"pm.test(\"✅ completedAt set\", function () {",
+									"    pm.expect(task.completedAt).to.not.be.null;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tasks/{{taskId}}/complete",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tasks", "{{taskId}}", "complete"]
+						},
+						"description": "**⚠️ Uso Excepcional - Completado Manual**\n\nEste endpoint NO se usa en flujo normal (tareas auto-completan).\n\n**Casos de uso válidos:**\n- Corrección manual si comando falló\n- Override de supervisor\n- Testing/Debug\n- Recuperación de errores del sistema\n\n**Flujo normal:** Task auto-completa cuando comando termina"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "❌ Negative Tests",
+			"item": [
+				{
+					"name": "Order - Empty Products",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ Status 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"const error = pm.response.json();",
+									"",
+									"pm.test(\"✅ Error structure\", function () {",
+									"    pm.expect(error).to.have.property('status');",
+									"    pm.expect(error).to.have.property('message');",
+									"});",
+									"",
+									"pm.test(\"✅ Error mentions products\", function () {",
+									"    pm.expect(error.message.toLowerCase()).to.include('product');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tableNumber\": \"ERROR1\",\n    \"products\": []\n}",
+							"options": {"raw": {"language": "json"}}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/orders",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "orders"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Order - Empty Table Number",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ Status 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"✅ Error mentions table\", function () {",
+									"    const error = pm.response.json();",
+									"    pm.expect(error.message.toLowerCase()).to.match(/table|mesa/);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tableNumber\": \"\",\n    \"products\": [\n        {\"name\": \"Coca Cola\", \"type\": \"DRINK\"}\n    ]\n}",
+							"options": {"raw": {"language": "json"}}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/orders",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "orders"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Task - Start Already Started",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// NOTE: Este test requiere taskId de tarea ya iniciada",
+									"// Ejecutar después de \"Start Task Preparation\""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ Status 400 or 409 (conflict)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 409]);",
+									"});",
+									"",
+									"pm.test(\"✅ Error about state\", function () {",
+									"    const error = pm.response.json();",
+									"    pm.expect(error.message.toLowerCase()).to.match(/pending|state|status/);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tasks/{{e2e_taskId}}/start",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tasks", "{{e2e_taskId}}", "start"]
+						},
+						"description": "Intenta iniciar tarea que ya está IN_PREPARATION"
+					},
+					"response": []
+				},
+				{
+					"name": "Order Status - Non-existent ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"✅ Status 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/orders/999999/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "orders", "999999", "status"]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Tests de validación negativa (error handling)"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"console.log('🚀 Request:', pm.request.method, pm.request.url.toString());",
+					"",
+					"if (!pm.collectionVariables.get('baseUrl')) {",
+					"    pm.collectionVariables.set('baseUrl', 'http://localhost:8080');",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"console.log('✅', pm.response.status, pm.response.code, '-', pm.response.responseTime, 'ms');",
+					"",
+					"pm.test(\"[GLOBAL] Response time < 3s\", function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+					"});",
+					"",
+					"if (pm.response.code !== 404 && pm.response.code !== 400) {",
+					"    pm.test(\"[GLOBAL] Content-Type is JSON\", function () {",
+					"        pm.expect(pm.response.headers.get('Content-Type')).to.include('json');",
+					"    });",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{"key": "baseUrl", "value": "http://localhost:8080", "type": "string"},
+		{"key": "orderId", "value": "1", "type": "string"},
+		{"key": "taskId", "value": "1", "type": "string"},
+		{"key": "e2e_tableNumber", "value": "", "type": "string"},
+		{"key": "e2e_taskId", "value": "", "type": "string"},
+		{"key": "e2e_orderId", "value": "", "type": "string"}
+	]
+}

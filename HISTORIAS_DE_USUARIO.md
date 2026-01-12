@@ -192,85 +192,85 @@ Scenario: Consulta de estación inexistente
 ### Descripción
 
 **Como** cocinero de una estación  
-**Quiero** marcar una tarea como en preparación y posteriormente como completada  
-**Para** mantener visibilidad del estado de los pedidos en tiempo real
+**Quiero** iniciar la preparación de una tarea asignada  
+**Para** que el sistema registre automáticamente el progreso y notifique cuando esté completada
 
 ### Contexto de Negocio
 
-Cuando un cocinero comienza a preparar una tarea, es importante que el sistema registre:
-- Qué tareas están en progreso
-- Qué tareas ya fueron completadas
-- Cuánto tiempo toma cada preparación
+Cuando un cocinero comienza a preparar una tarea, el sistema debe:
+- Registrar el inicio de la preparación
+- Monitorear el progreso de la tarea
+- Notificar automáticamente cuando la preparación finaliza
+- Mantener visibilidad del estado en tiempo real para coordinación con meseros
 
-Esto permite a los responsables de cocina y meseros saber el estado real de cada pedido.
+Esto permite a los responsables de cocina y al área de servicio conocer el estado real de cada pedido sin intervención manual adicional.
 
 ### Valor de Negocio
 
 - Visibilidad del estado de pedidos en tiempo real
-- Mejor coordinación entre estaciones
-- Métricas de tiempos de preparación
-- Comunicación efectiva con el área de servicio
+- Reducción de errores humanos en el registro de avances
+- Mejor coordinación entre estaciones de cocina y área de servicio
+- Métricas automáticas de tiempos de preparación
+- Liberación del cocinero para enfocarse en la preparación, no en actualizar sistemas
 
 ---
 
 ### Criterios de Aceptación
 
 #### Escenario 1: Iniciar preparación de una tarea
-
 ```gherkin
-Scenario: Cocinero comienza a preparar una tarea
-  Given que existe una tarea pendiente con identificador único
+Scenario: Cocinero inicia preparación de una tarea pendiente
+  Given que existe una tarea pendiente para la estación de barra
   And la tarea está en estado "PENDIENTE"
-  When el cocinero inicia la preparación de la tarea
+  When el cocinero indica que inicia la preparación de la tarea
   Then el sistema cambia el estado de la tarea a "EN_PREPARACION"
   And el sistema registra la hora de inicio de preparación
 ```
 
-#### Escenario 2: Completar preparación de una tarea
-
+#### Escenario 2: Sistema completa tarea automáticamente
 ```gherkin
-Scenario: Cocinero completa la preparación de una tarea
+Scenario: Tarea se completa automáticamente al finalizar preparación
   Given que existe una tarea en estado "EN_PREPARACION"
-  When el cocinero marca la tarea como completada
-  Then el sistema cambia el estado de la tarea a "COMPLETADA"
+  And el cocinero está ejecutando la preparación física de los productos
+  When el tiempo estimado de preparación transcurre
+  Then el sistema cambia el estado de la tarea a "COMPLETADA" automáticamente
   And el sistema registra la hora de finalización
   And el sistema calcula el tiempo total de preparación
 ```
 
-#### Escenario 3: No se puede completar una tarea que no está en preparación
-
-```gherkin
-Scenario: Validación de estado antes de completar
-  Given que existe una tarea en estado "PENDIENTE"
-  When se intenta marcar la tarea como completada
-  Then el sistema rechaza la operación
-  And el sistema informa que la tarea debe estar en preparación primero
-  And la tarea permanece en estado "PENDIENTE"
-```
-
-#### Escenario 4: Visualización de todas las tareas completadas
-
+#### Escenario 3: Visualización de tareas completadas por estación
 ```gherkin
 Scenario: Consulta de tareas completadas de una estación
   Given que la estación de barra tiene 2 tareas completadas
   And la estación de barra tiene 1 tarea en preparación
   And la estación de barra tiene 1 tarea pendiente
-  When se consulta el historial de tareas completadas de barra
+  When el responsable consulta el historial de tareas completadas de barra
   Then el sistema muestra únicamente las 2 tareas completadas
   And cada tarea muestra su tiempo total de preparación
 ```
 
-#### Escenario 5: Pedido completo cuando todas sus tareas están completadas
-
+#### Escenario 4: Estado del pedido basado en estado de sus tareas
 ```gherkin
-Scenario: Estado del pedido basado en el estado de sus tareas
+Scenario: Pedido refleja el estado agregado de todas sus tareas
   Given que un pedido generó 3 tareas para diferentes estaciones
   And 2 tareas ya están completadas
   And 1 tarea está en preparación
-  When se consulta el estado del pedido
+  When el área de servicio consulta el estado del pedido
   Then el sistema indica que el pedido está "EN_PREPARACION"
-  And cuando la última tarea se completa
+  
+  When la última tarea se completa automáticamente
+  And el área de servicio consulta nuevamente el estado del pedido
   Then el sistema indica que el pedido está "COMPLETADO"
+```
+
+#### Escenario 5: No se puede iniciar una tarea ya iniciada
+```gherkin
+Scenario: Validación de estado antes de iniciar preparación
+  Given que existe una tarea en estado "EN_PREPARACION"
+  When el cocinero intenta iniciar nuevamente la preparación de la misma tarea
+  Then el sistema rechaza la operación
+  And el sistema informa que la tarea ya está en preparación
+  And la tarea permanece en estado "EN_PREPARACION"
 ```
 
 ---

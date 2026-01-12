@@ -43,8 +43,8 @@ public class TaskRepositoryAdapter implements TaskRepository {
 
     @Override
     public Optional<Task> findById(Long id) {
-        return jpaRepository.findById(id)
-            .map(mapper::toDomain);
+        return jpaRepository.findByIdWithProducts(id) // ✅ Usar eager fetch
+                .map(mapper::toDomain);
     }
 
     @Override
