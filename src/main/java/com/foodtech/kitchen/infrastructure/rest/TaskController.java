@@ -2,7 +2,6 @@ package com.foodtech.kitchen.infrastructure.rest;
 
 import com.foodtech.kitchen.application.ports.in.GetTasksByStationPort;
 import com.foodtech.kitchen.application.ports.in.StartTaskPreparationPort;
-import com.foodtech.kitchen.application.ports.in.CompleteTaskPreparationPort;
 import com.foodtech.kitchen.application.ports.out.TaskRepository;
 import com.foodtech.kitchen.domain.model.Station;
 import com.foodtech.kitchen.domain.model.Task;
@@ -20,16 +19,13 @@ public class TaskController {
 
     private final GetTasksByStationPort getTasksByStationPort;
     private final StartTaskPreparationPort startTaskPreparationPort;
-    private final CompleteTaskPreparationPort completeTaskPreparationPort;
     private final TaskRepository taskRepository;
 
     public TaskController(GetTasksByStationPort getTasksByStationPort, 
                          StartTaskPreparationPort startTaskPreparationPort,
-                         CompleteTaskPreparationPort completeTaskPreparationPort,
                          TaskRepository taskRepository) {
         this.getTasksByStationPort = getTasksByStationPort;
         this.startTaskPreparationPort = startTaskPreparationPort;
-        this.completeTaskPreparationPort = completeTaskPreparationPort;
         this.taskRepository = taskRepository;
     }
 
@@ -50,13 +46,6 @@ public class TaskController {
     @PatchMapping("/{id}/start")
     public ResponseEntity<TaskResponse> startTaskPreparation(@PathVariable Long id) {
         Task task = startTaskPreparationPort.execute(id);
-        TaskResponse response = TaskMapper.toResponse(task);
-        return ResponseEntity.ok(response);
-    }
-
-    @PatchMapping("/{id}/complete")
-    public ResponseEntity<TaskResponse> completeTaskPreparation(@PathVariable Long id) {
-        Task task = completeTaskPreparationPort.execute(id);
         TaskResponse response = TaskMapper.toResponse(task);
         return ResponseEntity.ok(response);
     }

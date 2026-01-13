@@ -1,6 +1,7 @@
 package com.foodtech.kitchen.infrastructure.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.foodtech.kitchen.application.ports.in.*;
 import com.foodtech.kitchen.application.ports.out.CommandExecutor;
@@ -18,6 +19,7 @@ public class ApplicationConfig {
     public ObjectMapper objectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return mapper;
     }
 
@@ -65,13 +67,6 @@ public class ApplicationConfig {
             CommandExecutor commandExecutor
     ) {
         return new StartTaskPreparationUseCase(taskRepository, commandFactory, commandExecutor);
-    }
-
-    @Bean
-    public CompleteTaskPreparationPort completeTaskPreparationPort(
-            TaskRepository taskRepository
-    ) {
-        return new CompleteTaskPreparationUseCase(taskRepository);
     }
 
     @Bean

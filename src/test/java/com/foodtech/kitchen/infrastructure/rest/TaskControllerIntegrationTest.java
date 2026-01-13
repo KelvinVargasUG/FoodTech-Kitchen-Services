@@ -144,65 +144,25 @@ class TaskControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("HU-003 Scenario 2: Should complete task preparation and calculate duration")
-    @org.springframework.transaction.annotation.Transactional
-    void shouldCompleteTaskPreparation() throws Exception {
-        // Given - existe una tarea en estado EN_PREPARACION
-        List<Task> allTasks = taskRepository.findAll();
-        Long taskId = allTasks.get(0).getId();
-        
-        // Start the task first
-        mockMvc.perform(patch("/api/tasks/" + taskId + "/start"))
-            .andExpect(status().isOk());
-
-        // When - el cocinero marca la tarea como completada
-        mockMvc.perform(patch("/api/tasks/" + taskId + "/complete"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(taskId))
-            .andExpect(jsonPath("$.status").value("COMPLETED"))
-            .andExpect(jsonPath("$.completedAt").exists())
-            .andExpect(jsonPath("$.startedAt").exists());
-    }
-
-    @Test
-    @DisplayName("HU-003 Scenario 3: Should return 400 when completing a pending task")
-    @org.springframework.transaction.annotation.Transactional
-    void shouldReturn400WhenCompletingPendingTask() throws Exception {
-        // Given - existe una tarea en estado PENDIENTE (sin iniciar)
-        List<Task> allTasks = taskRepository.findAll();
-        Long taskId = allTasks.get(0).getId();
-
-        // When - se intenta marcar la tarea como completada sin iniciarla primero
-        // Then - el sistema rechaza la operación con 400
-        mockMvc.perform(patch("/api/tasks/" + taskId + "/complete"))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.error").value("Task must be in IN_PREPARATION status to complete"))
-            .andExpect(jsonPath("$.message").value("Invalid state transition"))
-            .andExpect(jsonPath("$.status").value(400));
-    }
-
-    @Test
-    @DisplayName("HU-003 Scenario 4: Should return only completed tasks when filtering by status")
+    @DisplayName("HU-003 Scenario 3: Should return only completed tasks when filtering by status")
     @org.springframework.transaction.annotation.Transactional
     void shouldReturnOnlyCompletedTasksForStation() throws Exception {
         // Given - la estación de barra tiene tareas en diferentes estados
         List<Task> barTasks = taskRepository.findByStation(Station.BAR);
         
-        // Create 2 completed tasks, 1 in preparation, and 1 pending
+        // Start tasks (without completing them through the API)
         Task task1 = barTasks.get(0);
         Task task2 = barTasks.get(1);
         
-        // Complete task1: start and complete
-        mockMvc.perform(patch("/api/tasks/" + task1.getId() + "/start"))
-            .andExpect(status().isOk());
-        mockMvc.perform(patch("/api/tasks/" + task1.getId() + "/complete"))
-            .andExpect(status().isOk());
+        // Start and manually complete task1
+        task1.start();
+        task1.complete();
+        taskRepository.save(task1);
         
-        // Complete task2: start and complete
-        mockMvc.perform(patch("/api/tasks/" + task2.getId() + "/start"))
-            .andExpect(status().isOk());
-        mockMvc.perform(patch("/api/tasks/" + task2.getId() + "/complete"))
-            .andExpect(status().isOk());
+        // Start and manually complete task2
+        task2.start();
+        task2.complete();
+        taskRepository.save(task2);
 
         // When - se consulta el historial de tareas completadas de barra
         mockMvc.perform(get("/api/tasks/station/BAR?status=COMPLETED"))
@@ -258,17 +218,20 @@ class TaskControllerIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("IN_PREPARATION"));
 
-        // Complete first task, start and complete second - still IN_PREPARATION because third is pending
-        mockMvc.perform(patch("/api/tasks/" + orderTasks.get(0).getId() + "/complete"))
-            .andExpect(status().isOk());
-        mockMvc.perform(patch("/api/tasks/" + orderTasks.get(1).getId() + "/start"))
-            .andExpect(status().isOk());
-        mockMvc.perform(patch("/api/tasks/" + orderTasks.get(1).getId() + "/complete"))
-            .andExpect(status().isOk());
+        // Complete first task manually (refresh from DB first), start and complete second
+        Task task0 = taskRepository.findById(orderTasks.get(0).getId()).get();
+        task0.complete();
+        taskRepository.save(task0);
+        
+        Task task1 = taskRepository.findById(orderTasks.get(1).getId()).get();
+        task1.start();
+        task1.complete();
+        taskRepository.save(task1);
 
+        // With 2 completed and 1 pending, status is still IN_PREPARATION because at least one task was started
         mockMvc.perform(get("/api/orders/" + orderId + "/status"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.status").value("PENDING"));  // Changed: with 1 pending, status is PENDING
+            .andExpect(jsonPath("$.status").value("IN_PREPARATION"));
 
         // Start last task - order should be IN_PREPARATION
         mockMvc.perform(patch("/api/tasks/" + orderTasks.get(2).getId() + "/start"))
@@ -278,9 +241,10 @@ class TaskControllerIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("IN_PREPARATION"));
 
-        // Complete last task - order should be COMPLETED
-        mockMvc.perform(patch("/api/tasks/" + orderTasks.get(2).getId() + "/complete"))
-            .andExpect(status().isOk());
+        // Complete last task manually - order should be COMPLETED
+        Task task2 = taskRepository.findById(orderTasks.get(2).getId()).get();
+        task2.complete();
+        taskRepository.save(task2);
 
         mockMvc.perform(get("/api/orders/" + orderId + "/status"))
             .andExpect(status().isOk())

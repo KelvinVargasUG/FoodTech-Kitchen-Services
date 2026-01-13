@@ -1001,16 +1001,14 @@ FoodTech/
 │   │   │   │   │   ├── ProcessOrderUseCase.java            # Procesa pedido completo
 │   │   │   │   │   ├── GetOrderStatusUseCase.java          # Consulta estado de orden
 │   │   │   │   │   ├── GetTasksByStationUseCase.java       # Filtra tareas por estación
-│   │   │   │   │   ├── StartTaskPreparationUseCase.java    # Inicia preparación de tarea
-│   │   │   │   │   └── CompleteTaskPreparationUseCase.java # Completa preparación
+│   │   │   │   │   └── StartTaskPreparationUseCase.java    # Inicia preparación de tarea
 │   │   │   │   │
 │   │   │   │   ├── ports/
 │   │   │   │   │   └── in/
 │   │   │   │   │       ├── ProcessOrderPort.java
 │   │   │   │   │       ├── GetOrderStatusPort.java
 │   │   │   │   │       ├── GetTasksByStationPort.java
-│   │   │   │   │       ├── StartTaskPreparationPort.java
-│   │   │   │   │       └── CompleteTaskPreparationPort.java
+│   │   │   │   │       └── StartTaskPreparationPort.java
 │   │   │   │   │
 │   │   │   │   └── exepcions/                      # Excepciones de aplicación
 │   │   │   │       ├── OrderNotFoundException.java

@@ -1,18 +1,5 @@
 # 📋 Historias de Usuario - FoodTech Kitchen Service
 
-## 🎯 Principios INVEST
-
-Todas las historias de usuario de este proyecto cumplen con los principios INVEST:
-
-- **I**ndependent (Independiente): Cada historia puede desarrollarse y entregarse por separado
-- **N**egotiable (Negociable): Los detalles pueden refinarse con el equipo
-- **V**aluable (Valiosa): Aporta valor observable al negocio
-- **E**stimable (Estimable): Se puede estimar el esfuerzo necesario
-- **S**mall (Pequeña): Se puede completar en una iteración
-- **T**estable (Testeable): Se puede verificar su cumplimiento
-
----
-
 ## HU-001: Procesar pedido de cocina
 
 ### Descripción
@@ -20,25 +7,6 @@ Todas las historias de usuario de este proyecto cumplen con los principios INVES
 **Como** responsable de cocina  
 **Quiero** que el sistema reciba un pedido y lo descomponga automáticamente en tareas por estación  
 **Para** que cada área de preparación pueda trabajar de forma independiente y eficiente
-
-### Contexto de Negocio
-
-Actualmente, cuando llega un pedido al restaurante, el responsable de cocina debe leer manualmente todos los productos y asignarlos a las diferentes estaciones (barra, cocina caliente, cocina fría). Este proceso manual genera:
-- Demoras en la preparación
-- Errores de asignación
-- Productos olvidados
-- Falta de visibilidad por estación
-
-La solución automatiza esta descomposición, permitiendo que cada estación reciba únicamente sus tareas correspondientes de manera inmediata.
-
-### Valor de Negocio
-
-- Reducción del tiempo de procesamiento de pedidos
-- Eliminación de errores de asignación manual
-- Mayor eficiencia operativa en cocina
-- Mejor experiencia del cliente por tiempos de preparación optimizados
-
----
 
 ### Criterios de Aceptación
 
@@ -117,25 +85,6 @@ Scenario: Pedido sin identificación de mesa no puede ser procesado
 **Quiero** visualizar únicamente las tareas pendientes de mi estación  
 **Para** prepararlas sin confusión con tareas de otras áreas
 
-### Contexto de Negocio
-
-Cada estación de cocina (barra, cocina caliente, cocina fría) necesita ver solamente sus propias tareas pendientes. Si todas las estaciones ven todas las tareas, se genera:
-- Confusión sobre qué preparar
-- Duplicación de esfuerzos
-- Tareas olvidadas o no realizadas
-- Pérdida de tiempo identificando responsabilidades
-
-La solución permite que cada estación consulte únicamente sus tareas asignadas.
-
-### Valor de Negocio
-
-- Claridad operativa por estación
-- Reducción de errores de preparación
-- Mejor organización del trabajo
-- Mayor velocidad de ejecución
-
----
-
 ### Criterios de Aceptación
 
 #### Escenario 1: Consulta de tareas de una estación específica
@@ -195,26 +144,6 @@ Scenario: Consulta de estación inexistente
 **Quiero** iniciar la preparación de una tarea asignada  
 **Para** que el sistema registre automáticamente el progreso y notifique cuando esté completada
 
-### Contexto de Negocio
-
-Cuando un cocinero comienza a preparar una tarea, el sistema debe:
-- Registrar el inicio de la preparación
-- Monitorear el progreso de la tarea
-- Notificar automáticamente cuando la preparación finaliza
-- Mantener visibilidad del estado en tiempo real para coordinación con meseros
-
-Esto permite a los responsables de cocina y al área de servicio conocer el estado real de cada pedido sin intervención manual adicional.
-
-### Valor de Negocio
-
-- Visibilidad del estado de pedidos en tiempo real
-- Reducción de errores humanos en el registro de avances
-- Mejor coordinación entre estaciones de cocina y área de servicio
-- Métricas automáticas de tiempos de preparación
-- Liberación del cocinero para enfocarse en la preparación, no en actualizar sistemas
-
----
-
 ### Criterios de Aceptación
 
 #### Escenario 1: Iniciar preparación de una tarea
@@ -272,50 +201,3 @@ Scenario: Validación de estado antes de iniciar preparación
   And el sistema informa que la tarea ya está en preparación
   And la tarea permanece en estado "EN_PREPARACION"
 ```
-
----
-
-## 📊 Matriz de Trazabilidad
-
-| Historia | Estación Involucrada | Prioridad | Complejidad | Dependencies |
-|----------|---------------------|-----------|-------------|--------------|
-| HU-001   | Todas               | Alta      | Media       | Ninguna      |
-| HU-002   | Todas               | Alta      | Baja        | HU-001       |
-| HU-003   | Todas               | Media     | Media       | HU-001, HU-002 |
-
----
-
-## 🎯 Orden de Implementación Sugerido
-
-1. **Sprint 1:** HU-001 (Core del negocio - Procesamiento de pedidos)
-2. **Sprint 2:** HU-002 (Consulta de tareas)
-3. **Sprint 3:** HU-003 (Ejecución y seguimiento)
-
----
-
-## 📝 Notas Importantes
-
-### Lenguaje de Negocio
-
-Todos los criterios de aceptación están escritos en **lenguaje de negocio**, no técnico:
-- ✅ "el sistema genera una tarea" (no "se crea un registro en BD")
-- ✅ "el pedido es registrado" (no "se hace POST al endpoint")
-- ✅ "se muestra el número de mesa" (no "se retorna en el JSON response")
-
-### Validez Tecnológica
-
-Los criterios son **independientes de la implementación**:
-- ✅ Válidos si usas REST API o GraphQL
-- ✅ Válidos si usas PostgreSQL o MongoDB
-- ✅ Válidos si usas Java o Python
-- ✅ Válidos si cambias el frontend
-
-### Orientación a QA
-
-Los escenarios están escritos para que **QA pueda entenderlos y probarlos** sin conocimiento técnico del código.
-
----
-
-**Versión:** 1.0  
-**Fecha:** Enero 2026  
-**Autor:** Carlos
