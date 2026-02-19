@@ -1,6 +1,7 @@
 package com.foodtech.kitchen.infrastructure.persistence.mappers;
 
 import com.foodtech.kitchen.domain.model.Order;
+import com.foodtech.kitchen.domain.model.OrderStatus;
 import com.foodtech.kitchen.domain.model.Product;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.OrderEntity;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity;
@@ -23,10 +24,13 @@ public class OrderEntityMapper {
                 .map(productEntityMapper::toProductEntity)
                 .collect(Collectors.toList());
 
+        OrderStatus status = order.getStatus() != null ? order.getStatus() : OrderStatus.CREATED;
+
         return OrderEntity.builder()
                 .id(order.getId())
                 .tableNumber(order.getTableNumber())
                 .products(products)
+            .status(status)
                 .build();
     }
 
@@ -35,7 +39,8 @@ public class OrderEntityMapper {
                 .map(productEntityMapper::toDomain)
                 .collect(Collectors.toList());
 
+        OrderStatus status = entity.getStatus() != null ? entity.getStatus() : OrderStatus.CREATED;
 
-        return Order.reconstruct(entity.getId(), entity.getTableNumber(), products);
+        return Order.reconstruct(entity.getId(), entity.getTableNumber(), products, status);
     }
 }

@@ -1,6 +1,7 @@
 // OrderEntity.java
 package com.foodtech.kitchen.infrastructure.persistence.jpa.entities;
 
+import com.foodtech.kitchen.domain.model.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,6 +23,11 @@ public class OrderEntity {
 
     @Column(name = "table_number", nullable = false)
     private String tableNumber;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private OrderStatus status = OrderStatus.CREATED;
 
     // ✅ Relación OneToMany - JPA maneja esto nativamente
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)

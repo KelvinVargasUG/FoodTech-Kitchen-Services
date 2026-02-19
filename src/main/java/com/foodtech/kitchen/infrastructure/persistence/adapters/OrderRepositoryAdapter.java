@@ -7,6 +7,8 @@ import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.OrderEntity;
 import com.foodtech.kitchen.infrastructure.persistence.mappers.OrderEntityMapper;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 //HUMAN REVIEW: Simplifiqué adapter inyectando OrderEntityMapper dedicado.
 //Cumple SRP: este adapter solo adapta entre JPA y dominio, no serializa.
 //Mapper maneja serialización JSON, cumpliendo separación de responsabilidades.
@@ -26,5 +28,11 @@ public class OrderRepositoryAdapter implements OrderRepository {
         OrderEntity entity = mapper.toEntity(order);
         OrderEntity savedEntity = jpaRepository.save(entity);
         return mapper.toDomain(savedEntity);
+    }
+
+    @Override
+    public Optional<Order> findById(Long id) {
+        return jpaRepository.findById(id)
+                .map(mapper::toDomain);
     }
 }

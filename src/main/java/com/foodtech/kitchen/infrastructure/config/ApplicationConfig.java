@@ -63,10 +63,18 @@ public class ApplicationConfig {
     @Bean
     public StartTaskPreparationPort startTaskPreparationPort(
             TaskRepository taskRepository,
+            OrderRepository orderRepository,
             CommandFactory commandFactory,
-            CommandExecutor commandExecutor
+            CommandExecutor commandExecutor,
+            OrderStatusCalculator orderStatusCalculator
     ) {
-        return new StartTaskPreparationUseCase(taskRepository, commandFactory, commandExecutor);
+        return new StartTaskPreparationUseCase(
+                taskRepository,
+                orderRepository,
+                commandFactory,
+                commandExecutor,
+                orderStatusCalculator
+        );
     }
 
     @Bean
@@ -79,8 +87,9 @@ public class ApplicationConfig {
     @Bean
     public GetOrderStatusPort getOrderStatusPort(
             TaskRepository taskRepository,
+            OrderRepository orderRepository,
             OrderStatusCalculator orderStatusCalculator
     ) {
-        return new GetOrderStatusUseCase(taskRepository, orderStatusCalculator);
+        return new GetOrderStatusUseCase(taskRepository, orderRepository, orderStatusCalculator);
     }
 }

@@ -7,6 +7,7 @@ import com.foodtech.kitchen.domain.model.Order;
 import com.foodtech.kitchen.domain.model.Task;
 import com.foodtech.kitchen.domain.services.TaskDecomposer;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class ProcessOrderUseCase implements ProcessOrderPort {
     }
 
     @Override
+    @Transactional
     public List<Task> execute(Order order) {
         Order savedOrder = orderRepository.save(order);
         List<Task> tasks = taskDecomposer.decompose(savedOrder);
