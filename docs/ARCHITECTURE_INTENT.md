@@ -1,32 +1,33 @@
-# ARCHITECTURE INTENT
+# INTENCION ARQUITECTONICA
 
-## Clean Architecture Structure
+## Estructura de Clean Architecture
 
 - domain/
-  - Core business rules, entities, value objects, domain services.
+  - Reglas de negocio centrales, entidades, objetos de valor, servicios de dominio.
 - application/
-  - Use cases, input ports, output ports.
+  - Casos de uso, puertos de entrada, puertos de salida.
 - infrastructure/
-  - Adapters (web, persistence, messaging), framework wiring.
+  - Adaptadores (web, persistencia, mensajeria), cableado de framework.
 
-## Import Rules
+## Reglas de Importacion
 
-- domain must not import Spring, Jackson, Reactor, JPA.
-- application must not depend on infrastructure.
-- infrastructure may depend on all layers.
+- domain no debe importar Spring, Jackson, Reactor, JPA.
+- application no debe depender de infrastructure.
+- infrastructure puede depender de todas las capas.
 
-## Mandatory Patterns
+## Patrones Obligatorios
 
-- Repository Pattern via domain ports (application/ports/out).
-- Strategy Pattern for variable behavior (no large switch-case in domain/services).
+- Repository Pattern mediante puertos de dominio (application/ports/out).
+- Strategy Pattern para comportamiento variable (sin switch-case extensos en domain/services).
 
-## Architecture Decision
+## Decision Arquitectonica
 
 // ARCHITECTURE_DECISION:
 This interface exists to decouple persistence and enable mocking in unit tests.
 
-## Why We Are Refactoring
+## Por Que Refactorizamos
 
-This refactor aligns the codebase with the workshop Definition of Done (DoD)
-by enforcing layer boundaries, reducing framework coupling in core logic, and
-improving unit testability without changing production behavior.
+Este refactor alinea el codigo base con la Definicion de Terminado (DoD) del
+taller, reforzando los limites entre capas, reduciendo el acoplamiento con
+frameworks en la logica central, y mejorando la testabilidad unitaria sin
+cambiar el comportamiento en produccion.
