@@ -16,7 +16,11 @@ class CommandFactoryTest {
 
     @BeforeEach
     void setUp() {
-        factory = new CommandFactory();
+        factory = new CommandFactory(List.of(
+                new PrepareDrinkStrategy(),
+                new PrepareHotDishStrategy(),
+                new PrepareColdDishStrategy()
+        ));
     }
 
     @Test
