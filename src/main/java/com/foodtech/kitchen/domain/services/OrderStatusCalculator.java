@@ -39,6 +39,7 @@ public class OrderStatusCalculator {
             case CREATED -> TaskStatus.PENDING;
             case IN_PROGRESS -> TaskStatus.IN_PREPARATION;
             case COMPLETED -> TaskStatus.COMPLETED;
+            case INVOICED -> TaskStatus.COMPLETED;
         };
     }
 

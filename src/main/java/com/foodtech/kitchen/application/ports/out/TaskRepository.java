@@ -14,5 +14,7 @@ public interface TaskRepository {
     List<Task> findByStation(Station station);
     List<Task> findByStationAndStatus(Station station, TaskStatus status);
     List<Task> findByOrderId(Long orderId);
+    long countByOrderId(Long orderId);
+    long countByOrderIdAndStatus(Long orderId, TaskStatus status);
     List<Task> findAll();
 }

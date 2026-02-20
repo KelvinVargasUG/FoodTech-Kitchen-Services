@@ -11,7 +11,6 @@ import com.foodtech.kitchen.domain.model.OrderStatus;
 import com.foodtech.kitchen.domain.model.Task;
 import com.foodtech.kitchen.domain.model.TaskStatus;
 import com.foodtech.kitchen.domain.services.CommandFactory;
-import com.foodtech.kitchen.domain.services.OrderStatusCalculator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +41,8 @@ class StartTaskPreparationUseCaseTest {
     private com.foodtech.kitchen.application.ports.out.CommandExecutor commandExecutor;
 
     @Mock
-    private OrderStatusCalculator orderStatusCalculator;
+    private OrderCompletionService orderCompletionService;
+
 
     private StartTaskPreparationUseCase useCase;
 
@@ -53,7 +53,7 @@ class StartTaskPreparationUseCaseTest {
                 orderRepository,
                 commandFactory,
                 commandExecutor,
-                orderStatusCalculator
+                orderCompletionService
         );
     }
 

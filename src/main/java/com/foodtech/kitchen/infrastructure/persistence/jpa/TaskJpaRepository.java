@@ -16,6 +16,8 @@ public interface TaskJpaRepository extends JpaRepository<TaskEntity, Long> {
     List<TaskEntity> findByStation(Station station);
     List<TaskEntity> findByStationAndStatus(Station station, TaskStatus status);
     List<TaskEntity> findByOrderId(Long orderId);
+    long countByOrderId(Long orderId);
+    long countByOrderIdAndStatus(Long orderId, TaskStatus status);
 
     @Query("SELECT t FROM TaskEntity t LEFT JOIN FETCH t.products WHERE t.id = :id")
     Optional<TaskEntity> findByIdWithProducts(@Param("id") Long id);

@@ -1,12 +1,17 @@
 package com.foodtech.kitchen.infrastructure.rest;
 
+import com.foodtech.kitchen.application.ports.in.GetCompletedOrdersPort;
 import com.foodtech.kitchen.application.ports.in.GetOrderStatusPort;
 import com.foodtech.kitchen.application.ports.in.ProcessOrderPort;
+import com.foodtech.kitchen.application.ports.in.RequestOrderInvoicePort;
+import com.foodtech.kitchen.application.usecases.dto.CompletedOrderView;
 import com.foodtech.kitchen.domain.model.Order;
 import com.foodtech.kitchen.domain.model.Task;
 import com.foodtech.kitchen.domain.model.TaskStatus;
+import com.foodtech.kitchen.infrastructure.rest.dto.CompletedOrderResponse;
 import com.foodtech.kitchen.infrastructure.rest.dto.CreateOrderRequest;
 import com.foodtech.kitchen.infrastructure.rest.dto.CreateOrderResponse;
+import com.foodtech.kitchen.infrastructure.rest.mapper.CompletedOrderMapper;
 import com.foodtech.kitchen.infrastructure.rest.mapper.OrderMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +28,17 @@ public class OrderController {
 
     private final ProcessOrderPort processOrderPort;
     private final GetOrderStatusPort getOrderStatusPort;
+    private final GetCompletedOrdersPort getCompletedOrdersPort;
+    private final RequestOrderInvoicePort requestOrderInvoicePort;
 
     public OrderController(ProcessOrderPort processOrderPort,
-                           GetOrderStatusPort getOrderStatusPort) {
+                           GetOrderStatusPort getOrderStatusPort,
+                           GetCompletedOrdersPort getCompletedOrdersPort,
+                           RequestOrderInvoicePort requestOrderInvoicePort) {
         this.processOrderPort = processOrderPort;
         this.getOrderStatusPort = getOrderStatusPort;
+        this.getCompletedOrdersPort = getCompletedOrdersPort;
+        this.requestOrderInvoicePort = requestOrderInvoicePort;
     }
 
     @PostMapping
@@ -50,5 +61,17 @@ public class OrderController {
                 "orderId", orderId.toString(),
                 "status", status.name()
         ));
+    }
+
+    @GetMapping("/completed")
+    public ResponseEntity<List<CompletedOrderResponse>> getCompletedOrders() {
+        List<CompletedOrderView> views = getCompletedOrdersPort.execute();
+        return ResponseEntity.ok(CompletedOrderMapper.toResponseList(views));
+    }
+
+    @PostMapping("/{orderId}/invoice")
+    public ResponseEntity<Void> requestInvoice(@PathVariable Long orderId) {
+        requestOrderInvoicePort.execute(orderId);
+        return ResponseEntity.accepted().build();
     }
 }

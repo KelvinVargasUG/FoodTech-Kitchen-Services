@@ -91,4 +91,10 @@ public class Order {
             this.status = OrderStatus.COMPLETED;
         }
     }
+
+    public void markInvoiced() {
+        if (this.status == OrderStatus.COMPLETED) {
+            this.status = OrderStatus.INVOICED;
+        }
+    }
 }

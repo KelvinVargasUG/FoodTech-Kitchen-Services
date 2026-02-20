@@ -66,14 +66,14 @@ public class ApplicationConfig {
             OrderRepository orderRepository,
             CommandFactory commandFactory,
             CommandExecutor commandExecutor,
-            OrderStatusCalculator orderStatusCalculator
+            OrderCompletionService orderCompletionService
     ) {
         return new StartTaskPreparationUseCase(
                 taskRepository,
                 orderRepository,
                 commandFactory,
                 commandExecutor,
-                orderStatusCalculator
+            orderCompletionService
         );
     }
 
@@ -91,5 +91,22 @@ public class ApplicationConfig {
             OrderStatusCalculator orderStatusCalculator
     ) {
         return new GetOrderStatusUseCase(taskRepository, orderRepository, orderStatusCalculator);
+    }
+
+    @Bean
+    public GetCompletedOrdersPort getCompletedOrdersPort(
+            OrderRepository orderRepository,
+            TaskRepository taskRepository
+    ) {
+        return new GetCompletedOrdersUseCase(orderRepository, taskRepository);
+    }
+
+    @Bean
+    public RequestOrderInvoicePort requestOrderInvoicePort(
+            OrderRepository orderRepository,
+            com.foodtech.kitchen.application.ports.out.OutboxEventRepository outboxEventRepository,
+            InvoicePayloadBuilder payloadBuilder
+    ) {
+        return new RequestOrderInvoiceUseCase(orderRepository, outboxEventRepository, payloadBuilder);
     }
 }
