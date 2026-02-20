@@ -7,8 +7,6 @@ import com.foodtech.kitchen.application.usecases.dto.CompletedOrderView;
 import com.foodtech.kitchen.domain.model.Order;
 import com.foodtech.kitchen.domain.model.OrderStatus;
 import com.foodtech.kitchen.domain.model.Task;
-import org.springframework.stereotype.Service;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -16,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Service
 public class GetCompletedOrdersUseCase implements GetCompletedOrdersPort {
 
     private final OrderRepository orderRepository;

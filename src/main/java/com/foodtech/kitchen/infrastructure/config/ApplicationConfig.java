@@ -6,11 +6,17 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.foodtech.kitchen.application.ports.in.*;
 import com.foodtech.kitchen.application.ports.out.CommandExecutor;
 import com.foodtech.kitchen.application.ports.out.OrderRepository;
+import com.foodtech.kitchen.application.ports.out.PayloadSerializer;
 import com.foodtech.kitchen.application.ports.out.TaskRepository;
 import com.foodtech.kitchen.application.usecases.*;
 import com.foodtech.kitchen.domain.ports.out.AsyncCommandDispatcher;
 import com.foodtech.kitchen.domain.services.*;
 import com.foodtech.kitchen.infrastructure.execution.ReactorAsyncCommandDispatcher;
+import com.foodtech.kitchen.infrastructure.serialization.JacksonPayloadSerializer;
+import com.foodtech.kitchen.infrastructure.transactional.TransactionalOrderCompletionService;
+import com.foodtech.kitchen.infrastructure.transactional.TransactionalProcessOrderPort;
+import com.foodtech.kitchen.infrastructure.transactional.TransactionalRequestOrderInvoicePort;
+import com.foodtech.kitchen.infrastructure.transactional.TransactionalStartTaskPreparationPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -25,6 +31,16 @@ public class ApplicationConfig {
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return mapper;
+    }
+
+    @Bean
+    public PayloadSerializer payloadSerializer(ObjectMapper objectMapper) {
+        return new JacksonPayloadSerializer(objectMapper);
+    }
+
+    @Bean
+    public InvoicePayloadBuilder invoicePayloadBuilder(PayloadSerializer payloadSerializer) {
+        return new InvoicePayloadBuilder(payloadSerializer);
     }
 
     @Bean
@@ -71,7 +87,7 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public ProcessOrderPort processOrderPort(
+    public ProcessOrderUseCase processOrderUseCase(
             OrderRepository orderRepository,
             TaskDecomposer taskDecomposer,
             TaskRepository taskRepository
@@ -80,7 +96,20 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public StartTaskPreparationPort startTaskPreparationPort(
+    public ProcessOrderPort processOrderPort(ProcessOrderUseCase processOrderUseCase) {
+        return new TransactionalProcessOrderPort(processOrderUseCase);
+    }
+
+    @Bean
+    public OrderCompletionService orderCompletionService(
+            TaskRepository taskRepository,
+            OrderRepository orderRepository
+    ) {
+        return new TransactionalOrderCompletionService(taskRepository, orderRepository);
+    }
+
+    @Bean
+    public StartTaskPreparationUseCase startTaskPreparationUseCase(
             TaskRepository taskRepository,
             OrderRepository orderRepository,
             CommandFactory commandFactory,
@@ -92,6 +121,11 @@ public class ApplicationConfig {
                 commandFactory,
                 asyncCommandDispatcher
         );
+    }
+
+    @Bean
+    public StartTaskPreparationPort startTaskPreparationPort(StartTaskPreparationUseCase startTaskPreparationUseCase) {
+        return new TransactionalStartTaskPreparationPort(startTaskPreparationUseCase);
     }
 
     @Bean
@@ -108,14 +142,19 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public GetTasksByStationPort getTasksByStationPort(
+    public GetTasksByStationUseCase getTasksByStationUseCase(
             TaskRepository taskRepository
     ) {
         return new GetTasksByStationUseCase(taskRepository);
     }
 
     @Bean
-    public GetOrderStatusPort getOrderStatusPort(
+    public GetTasksByStationPort getTasksByStationPort(GetTasksByStationUseCase getTasksByStationUseCase) {
+        return getTasksByStationUseCase;
+    }
+
+    @Bean
+    public GetOrderStatusUseCase getOrderStatusUseCase(
             TaskRepository taskRepository,
             OrderRepository orderRepository,
             OrderStatusCalculator orderStatusCalculator
@@ -124,7 +163,12 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public GetCompletedOrdersPort getCompletedOrdersPort(
+    public GetOrderStatusPort getOrderStatusPort(GetOrderStatusUseCase getOrderStatusUseCase) {
+        return getOrderStatusUseCase;
+    }
+
+    @Bean
+    public GetCompletedOrdersUseCase getCompletedOrdersUseCase(
             OrderRepository orderRepository,
             TaskRepository taskRepository
     ) {
@@ -132,11 +176,21 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public RequestOrderInvoicePort requestOrderInvoicePort(
+    public GetCompletedOrdersPort getCompletedOrdersPort(GetCompletedOrdersUseCase getCompletedOrdersUseCase) {
+        return getCompletedOrdersUseCase;
+    }
+
+    @Bean
+    public RequestOrderInvoiceUseCase requestOrderInvoiceUseCase(
             OrderRepository orderRepository,
             com.foodtech.kitchen.application.ports.out.OutboxEventRepository outboxEventRepository,
             InvoicePayloadBuilder payloadBuilder
     ) {
         return new RequestOrderInvoiceUseCase(orderRepository, outboxEventRepository, payloadBuilder);
+    }
+
+    @Bean
+    public RequestOrderInvoicePort requestOrderInvoicePort(RequestOrderInvoiceUseCase requestOrderInvoiceUseCase) {
+        return new TransactionalRequestOrderInvoicePort(requestOrderInvoiceUseCase);
     }
 }

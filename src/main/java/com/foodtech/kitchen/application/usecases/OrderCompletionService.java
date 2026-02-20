@@ -6,10 +6,6 @@ import com.foodtech.kitchen.application.ports.out.TaskRepository;
 import com.foodtech.kitchen.domain.model.Order;
 import com.foodtech.kitchen.domain.model.OrderStatus;
 import com.foodtech.kitchen.domain.model.TaskStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-@Service
 public class OrderCompletionService {
 
     private final TaskRepository taskRepository;
@@ -20,7 +16,6 @@ public class OrderCompletionService {
         this.orderRepository = orderRepository;
     }
 
-    @Transactional
     public void completeOrderIfReady(Long orderId) {
         long totalTasks = taskRepository.countByOrderId(orderId);
         if (totalTasks == 0) {

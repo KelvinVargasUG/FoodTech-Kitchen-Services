@@ -22,3 +22,10 @@
 - Moved async callbacks to infrastructure
 - SRP and DIP restored
 - Build verified
+
+## PR4 - Remove Framework Annotations from Application Layer
+- Eliminated Spring annotations from application
+- Moved bean wiring to infrastructure config
+- Application layer now framework-free
+- Clean Architecture boundary enforced
+- Build verified

@@ -10,11 +10,6 @@ import com.foodtech.kitchen.domain.model.Order;
 import com.foodtech.kitchen.domain.model.Task;
 import com.foodtech.kitchen.domain.ports.out.AsyncCommandDispatcher;
 import com.foodtech.kitchen.domain.services.CommandFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-
-@Service
 public class StartTaskPreparationUseCase implements StartTaskPreparationPort {
 
     private final TaskRepository taskRepository;
@@ -35,7 +30,6 @@ public class StartTaskPreparationUseCase implements StartTaskPreparationPort {
     }
 
     @Override
-    @Transactional
     public Task execute(Long taskId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new TaskNotFoundException(taskId));

@@ -1,22 +1,19 @@
 package com.foodtech.kitchen.application.usecases;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.foodtech.kitchen.application.ports.out.PayloadSerializer;
 import com.foodtech.kitchen.domain.model.Order;
 import com.foodtech.kitchen.domain.model.Product;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Component
 public class InvoicePayloadBuilder {
 
-    private final ObjectMapper objectMapper;
+    private final PayloadSerializer payloadSerializer;
 
-    public InvoicePayloadBuilder(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    public InvoicePayloadBuilder(PayloadSerializer payloadSerializer) {
+        this.payloadSerializer = payloadSerializer;
     }
 
     public String build(Order order, int totalItems, int totalAmount) {
@@ -32,11 +29,7 @@ public class InvoicePayloadBuilder {
                 "products", products
         );
 
-        try {
-            return objectMapper.writeValueAsString(payload);
-        } catch (JsonProcessingException ex) {
-            throw new IllegalStateException("Failed to build invoice payload", ex);
-        }
+        return payloadSerializer.serialize(payload);
     }
 
     private Map<String, String> toProductPayload(Product product) {

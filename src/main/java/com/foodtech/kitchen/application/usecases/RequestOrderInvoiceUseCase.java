@@ -7,7 +7,6 @@ import com.foodtech.kitchen.application.ports.out.OrderRepository;
 import com.foodtech.kitchen.application.ports.out.OutboxEventRepository;
 import com.foodtech.kitchen.domain.model.Order;
 import com.foodtech.kitchen.domain.model.OrderStatus;
-import org.springframework.transaction.annotation.Transactional;
 
 public class RequestOrderInvoiceUseCase implements RequestOrderInvoicePort {
 
@@ -24,7 +23,6 @@ public class RequestOrderInvoiceUseCase implements RequestOrderInvoicePort {
     }
 
     @Override
-    @Transactional
     public void execute(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
