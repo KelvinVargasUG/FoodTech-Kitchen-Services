@@ -16,6 +16,7 @@ public class RegisterUserUseCase {
 
     public User execute(String username, String email, String rawPassword) {
         validateEmail(email);
+        validatePassword(rawPassword);
         String passwordHash = passwordHasher.hash(rawPassword);
         User user = new User(username, email, passwordHash, UserStatus.ACTIVE);
         return userRepository.save(user);
@@ -34,6 +35,32 @@ public class RegisterUserUseCase {
         int dotAfterAt = email.indexOf('.', atIndex + 1);
         if (dotAfterAt == -1) {
             throw new IllegalArgumentException("Email must contain a '.' after '@'");
+        }
+    }
+
+    private void validatePassword(String password) {
+        if (password == null) {
+            throw new IllegalArgumentException("Password must not be null");
+        }
+
+        if (password.length() < 6) {
+            throw new IllegalArgumentException("Password must be at least 6 characters long");
+        }
+
+        boolean hasLetter = false;
+        boolean hasDigit = false;
+
+        for (int i = 0; i < password.length(); i++) {
+            char current = password.charAt(i);
+            if (Character.isLetter(current)) {
+                hasLetter = true;
+            } else if (Character.isDigit(current)) {
+                hasDigit = true;
+            }
+        }
+
+        if (!hasLetter || !hasDigit) {
+            throw new IllegalArgumentException("Password must contain at least one letter and one number");
         }
     }
 }

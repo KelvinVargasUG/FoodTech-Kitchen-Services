@@ -59,4 +59,17 @@ class RegisterUserUseCaseTest {
         verify(passwordHasher, never()).hash(password);
         verify(userRepository, never()).save(any(User.class));
     }
+
+    @Test
+    void registerUser_withWeakPassword_throwsExceptionAndDoesNotPersist() {
+        String username = "jdoe";
+        String email = "jdoe@example.com";
+        String password = "abcdef";
+
+        assertThrows(IllegalArgumentException.class,
+                () -> registerUserUseCase.execute(username, email, password));
+
+        verify(passwordHasher, never()).hash(password);
+        verify(userRepository, never()).save(any(User.class));
+    }
 }
