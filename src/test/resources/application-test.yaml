@@ -1,0 +1,3 @@
+jwt:
+  secret: "test-secret-should-be-long-enough-for-hs256-123456"
+  expirationSeconds: 3600

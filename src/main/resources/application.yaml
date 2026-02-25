@@ -10,3 +10,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+jwt:
+  secret: "change-me-dev-secret-should-be-32-chars-min"
+  expirationSeconds: 3600

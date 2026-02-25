@@ -9,13 +9,14 @@ import com.foodtech.kitchen.application.ports.out.OrderRepository;
 import com.foodtech.kitchen.application.ports.out.PasswordHasher;
 import com.foodtech.kitchen.application.ports.out.PayloadSerializer;
 import com.foodtech.kitchen.application.ports.out.TaskRepository;
+import com.foodtech.kitchen.application.ports.out.TokenGenerator;
 import com.foodtech.kitchen.application.ports.out.UserRepository;
 import com.foodtech.kitchen.application.usecases.*;
 import com.foodtech.kitchen.domain.ports.out.AsyncCommandDispatcher;
 import com.foodtech.kitchen.domain.services.*;
 import com.foodtech.kitchen.infrastructure.execution.ReactorAsyncCommandDispatcher;
 import com.foodtech.kitchen.infrastructure.security.BCryptPasswordHasher;
-import com.foodtech.kitchen.infrastructure.security.StubTokenGenerator;
+import com.foodtech.kitchen.infrastructure.security.JwtTokenGenerator;
 import com.foodtech.kitchen.infrastructure.serialization.JacksonPayloadSerializer;
 import com.foodtech.kitchen.infrastructure.transactional.TransactionalOrderCompletionService;
 import com.foodtech.kitchen.infrastructure.transactional.TransactionalProcessOrderPort;
@@ -23,7 +24,9 @@ import com.foodtech.kitchen.infrastructure.transactional.TransactionalRequestOrd
 import com.foodtech.kitchen.infrastructure.transactional.TransactionalStartTaskPreparationPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 
+import java.time.Clock;
 import java.util.List;
 
 @Configuration
@@ -212,7 +215,16 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public com.foodtech.kitchen.application.ports.out.TokenGenerator tokenGenerator() {
-        return new StubTokenGenerator();
+    public Clock clock() {
+        return Clock.systemUTC();
+    }
+
+    @Bean
+    public TokenGenerator tokenGenerator(
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.expirationSeconds}") long expirationSeconds,
+            Clock clock
+    ) {
+        return new JwtTokenGenerator(secret, expirationSeconds, clock);
     }
 }
