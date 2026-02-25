@@ -17,6 +17,9 @@ public class RegisterUserUseCase {
     public User execute(String username, String email, String rawPassword) {
         validateEmail(email);
         validatePassword(rawPassword);
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("Email already registered");
+        }
         String passwordHash = passwordHasher.hash(rawPassword);
         User user = new User(username, email, passwordHash, UserStatus.ACTIVE);
         return userRepository.save(user);
