@@ -12,7 +12,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -43,5 +45,18 @@ class RegisterUserUseCaseTest {
         verify(userRepository).save(any(User.class));
         assertNotNull(result);
         assertEquals(UserStatus.ACTIVE, result.getStatus());
+    }
+
+    @Test
+    void registerUser_withInvalidEmail_throwsExceptionAndDoesNotPersist() {
+        String username = "jdoe";
+        String email = "correo-invalido";
+        String password = "abc123";
+
+        assertThrows(IllegalArgumentException.class,
+                () -> registerUserUseCase.execute(username, email, password));
+
+        verify(passwordHasher, never()).hash(password);
+        verify(userRepository, never()).save(any(User.class));
     }
 }

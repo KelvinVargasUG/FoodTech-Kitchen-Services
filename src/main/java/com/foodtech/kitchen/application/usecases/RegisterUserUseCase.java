@@ -15,8 +15,25 @@ public class RegisterUserUseCase {
     }
 
     public User execute(String username, String email, String rawPassword) {
+        validateEmail(email);
         String passwordHash = passwordHasher.hash(rawPassword);
         User user = new User(username, email, passwordHash, UserStatus.ACTIVE);
         return userRepository.save(user);
+    }
+
+    private void validateEmail(String email) {
+        if (email == null) {
+            throw new IllegalArgumentException("Email must not be null");
+        }
+
+        int atIndex = email.indexOf('@');
+        if (atIndex == -1 || email.indexOf('@', atIndex + 1) != -1) {
+            throw new IllegalArgumentException("Email must contain exactly one '@'");
+        }
+
+        int dotAfterAt = email.indexOf('.', atIndex + 1);
+        if (dotAfterAt == -1) {
+            throw new IllegalArgumentException("Email must contain a '.' after '@'");
+        }
     }
 }
