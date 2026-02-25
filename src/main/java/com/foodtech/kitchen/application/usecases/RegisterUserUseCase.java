@@ -20,6 +20,9 @@ public class RegisterUserUseCase {
         if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Email already registered");
         }
+        if (userRepository.existsByUsername(username)) {
+            throw new IllegalArgumentException("Username already registered");
+        }
         String passwordHash = passwordHasher.hash(rawPassword);
         User user = new User(username, email, passwordHash, UserStatus.ACTIVE);
         return userRepository.save(user);

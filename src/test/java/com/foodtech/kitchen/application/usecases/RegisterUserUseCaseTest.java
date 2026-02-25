@@ -87,4 +87,19 @@ class RegisterUserUseCaseTest {
         verify(passwordHasher, never()).hash(any());
         verify(userRepository, never()).save(any());
     }
+
+    @Test
+    void registerUser_withDuplicateUsername_throwsExceptionAndDoesNotPersist() {
+        String username = "existingUser";
+        String email = "unique@mail.com";
+        String password = "abc123";
+
+        when(userRepository.existsByUsername(username)).thenReturn(true);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> registerUserUseCase.execute(username, email, password));
+
+        verify(passwordHasher, never()).hash(any());
+        verify(userRepository, never()).save(any());
+    }
 }
