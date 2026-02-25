@@ -1,7 +1,7 @@
 package com.foodtech.kitchen.application.usecases;
 
 import com.foodtech.kitchen.application.ports.out.PasswordHasher;
-import com.foodtech.kitchen.application.ports.out.TokenProvider;
+import com.foodtech.kitchen.application.ports.out.TokenGenerator;
 import com.foodtech.kitchen.application.ports.out.UserRepository;
 import com.foodtech.kitchen.domain.model.User;
 import com.foodtech.kitchen.domain.model.UserStatus;
@@ -28,7 +28,7 @@ class AuthenticateUserUseCaseTest {
     private UserRepository userRepository;
 
     @Mock
-    private TokenProvider tokenProvider;
+    private TokenGenerator tokenGenerator;
 
     @Mock
     private PasswordHasher passwordHasher;
@@ -47,7 +47,7 @@ class AuthenticateUserUseCaseTest {
         assertThrows(IllegalArgumentException.class,
                 () -> authenticateUserUseCase.execute(identifier, password));
 
-        verify(tokenProvider, never()).generateToken(any());
+        verify(tokenGenerator, never()).generateToken(any());
     }
 
     @Test
@@ -75,7 +75,7 @@ class AuthenticateUserUseCaseTest {
         assertThrows(IllegalArgumentException.class,
             () -> authenticateUserUseCase.execute(identifier, rawPassword));
 
-        verify(tokenProvider, never()).generateToken(any());
+        verify(tokenGenerator, never()).generateToken(any());
     }
 
         @Test
@@ -103,7 +103,7 @@ class AuthenticateUserUseCaseTest {
         assertThrows(IllegalArgumentException.class,
             () -> authenticateUserUseCase.execute(identifier, rawPassword));
 
-        verify(tokenProvider, never()).generateToken(any());
+        verify(tokenGenerator, never()).generateToken(any());
         }
 
         @Test
@@ -129,13 +129,13 @@ class AuthenticateUserUseCaseTest {
         when(passwordHasher.matches(rawPassword, storedHash))
             .thenReturn(true);
 
-        when(tokenProvider.generateToken(user))
+        when(tokenGenerator.generateToken(user.getUsername()))
             .thenReturn(expectedToken);
 
         String result = authenticateUserUseCase.execute(identifier, rawPassword);
 
         assertEquals(expectedToken, result);
 
-        verify(tokenProvider).generateToken(user);
+        verify(tokenGenerator).generateToken(user.getUsername());
         }
 }

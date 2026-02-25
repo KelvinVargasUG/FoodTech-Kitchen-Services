@@ -1,21 +1,21 @@
 package com.foodtech.kitchen.application.usecases;
 
 import com.foodtech.kitchen.application.ports.out.PasswordHasher;
-import com.foodtech.kitchen.application.ports.out.TokenProvider;
+import com.foodtech.kitchen.application.ports.out.TokenGenerator;
 import com.foodtech.kitchen.application.ports.out.UserRepository;
 import com.foodtech.kitchen.domain.model.User;
 import com.foodtech.kitchen.domain.model.UserStatus;
 
 public class AuthenticateUserUseCase {
     private final UserRepository userRepository;
-    private final TokenProvider tokenProvider;
+    private final TokenGenerator tokenGenerator;
     private final PasswordHasher passwordHasher;
 
     public AuthenticateUserUseCase(UserRepository userRepository,
-                                   TokenProvider tokenProvider,
+                                   TokenGenerator tokenGenerator,
                                    PasswordHasher passwordHasher) {
         this.userRepository = userRepository;
-        this.tokenProvider = tokenProvider;
+        this.tokenGenerator = tokenGenerator;
         this.passwordHasher = passwordHasher;
     }
 
@@ -28,7 +28,6 @@ public class AuthenticateUserUseCase {
         if (user.getStatus() != UserStatus.ACTIVE) {
             throw new IllegalArgumentException("User is not active");
         }
-        String token = tokenProvider.generateToken(user);
-        return token;
+        return tokenGenerator.generateToken(user.getUsername());
     }
 }
