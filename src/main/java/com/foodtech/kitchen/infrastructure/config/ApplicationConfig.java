@@ -210,6 +210,15 @@ public class ApplicationConfig {
     }
 
     @Bean
+    public AuthenticateUserUseCase authenticateUserUseCase(
+            UserRepository userRepository,
+            TokenGenerator tokenGenerator,
+            PasswordHasher passwordHasher
+    ) {
+        return new AuthenticateUserUseCase(userRepository, tokenGenerator, passwordHasher);
+    }
+
+    @Bean
     public PasswordHasher passwordHasher() {
         return new BCryptPasswordHasher();
     }
