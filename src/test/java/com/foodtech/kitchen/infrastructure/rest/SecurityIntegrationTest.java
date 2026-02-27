@@ -11,6 +11,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.foodtech.kitchen.infrastructure.security.JwtTokenGenerator;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import org.springframework.beans.factory.annotation.Value;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -26,6 +31,9 @@ class SecurityIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
     @Test
     @DisplayName("RED: Protected endpoint without token returns 401")
@@ -57,4 +65,17 @@ class SecurityIntegrationTest {
             .header("Authorization", "Bearer " + token))
             .andExpect(status().isOk());
         }
+
+    @Test
+    @DisplayName("RED: Protected endpoint with expired token returns 401")
+    void protectedEndpoint_withExpiredToken_returns401() throws Exception {
+        Instant fixedInstant = Instant.parse("2020-01-01T00:00:00Z");
+        Clock fixedClock = Clock.fixed(fixedInstant, ZoneOffset.UTC);
+        JwtTokenGenerator generator = new JwtTokenGenerator(jwtSecret, 1L, fixedClock);
+        String expiredToken = generator.generateToken("auth-user");
+
+        mockMvc.perform(get("/api/tasks/station/BAR")
+                .header("Authorization", "Bearer " + expiredToken))
+                .andExpect(status().isUnauthorized());
+    }
 }
