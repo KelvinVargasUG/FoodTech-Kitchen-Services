@@ -5,6 +5,7 @@ import com.foodtech.kitchen.application.usecases.RegisterUserUseCase;
 import com.foodtech.kitchen.infrastructure.rest.dto.LoginRequest;
 import com.foodtech.kitchen.infrastructure.rest.dto.LoginResponse;
 import com.foodtech.kitchen.infrastructure.rest.dto.RegisterRequest;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,7 +27,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Void> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<Void> register(@Valid @RequestBody RegisterRequest request) {
         // ⚕️ HUMAN CHECK: Exception mapping is delegated to GlobalExceptionHandler.
         // Controller must not swallow domain/application exceptions.
         registerUserUseCase.execute(request.username(), request.email(), request.password());

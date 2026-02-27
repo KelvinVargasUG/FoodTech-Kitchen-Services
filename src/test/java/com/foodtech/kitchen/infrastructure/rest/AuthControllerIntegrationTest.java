@@ -101,4 +101,55 @@ class AuthControllerIntegrationTest {
                 .content(secondBody))
                 .andExpect(status().isConflict());
     }
+
+        @Test
+        @DisplayName("RED: register with null username returns 400")
+        void register_nullUsername_returns400() throws Exception {
+                String requestBody = "{\"username\":null,\"email\":\"valid-null-user@example.com\",\"password\":\"abc123\"}";
+
+                mockMvc.perform(post("/api/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestBody))
+                                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("RED: register with null email returns 400")
+        void register_nullEmail_returns400() throws Exception {
+                String requestBody = "{\"username\":\"valid-null-email\",\"email\":null,\"password\":\"abc123\"}";
+
+                mockMvc.perform(post("/api/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestBody))
+                                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("RED: register with null password returns 400")
+        void register_nullPassword_returns400() throws Exception {
+                String requestBody = "{\"username\":\"valid-null-pass\",\"email\":\"valid-null-pass@example.com\",\"password\":null}";
+
+                mockMvc.perform(post("/api/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestBody))
+                                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("RED: register with empty body returns 400")
+        void register_emptyBody_returns400() throws Exception {
+                mockMvc.perform(post("/api/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(""))
+                                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("RED: register with malformed JSON returns 400")
+        void register_malformedJson_returns400() throws Exception {
+                mockMvc.perform(post("/api/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{ invalid json }"))
+                                .andExpect(status().isBadRequest());
+        }
 }
