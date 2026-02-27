@@ -16,6 +16,7 @@ import com.foodtech.kitchen.domain.ports.out.AsyncCommandDispatcher;
 import com.foodtech.kitchen.domain.services.*;
 import com.foodtech.kitchen.infrastructure.execution.ReactorAsyncCommandDispatcher;
 import com.foodtech.kitchen.infrastructure.security.BCryptPasswordHasher;
+import com.foodtech.kitchen.infrastructure.security.JwtTokenValidator;
 import com.foodtech.kitchen.infrastructure.security.JwtTokenGenerator;
 import com.foodtech.kitchen.infrastructure.serialization.JacksonPayloadSerializer;
 import com.foodtech.kitchen.infrastructure.transactional.TransactionalOrderCompletionService;
@@ -235,5 +236,13 @@ public class ApplicationConfig {
             Clock clock
     ) {
         return new JwtTokenGenerator(secret, expirationSeconds, clock);
+    }
+
+    @Bean
+    public JwtTokenValidator jwtTokenValidator(
+            @Value("${jwt.secret}") String secret,
+            Clock clock
+    ) {
+        return new JwtTokenValidator(secret, clock);
     }
 }

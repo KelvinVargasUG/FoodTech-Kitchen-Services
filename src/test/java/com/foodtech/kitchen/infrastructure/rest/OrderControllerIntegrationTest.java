@@ -1,6 +1,8 @@
 package com.foodtech.kitchen.infrastructure.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.foodtech.kitchen.application.ports.out.TokenGenerator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.util.List;
 import java.util.Map;
@@ -27,6 +30,23 @@ class OrderControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private TokenGenerator tokenGenerator;
+
+    private String authHeaderValue;
+
+    @BeforeEach
+    void setUp() {
+        authHeaderValue = "Bearer " + tokenGenerator.generateToken("test-user");
+    }
+
+    private RequestPostProcessor auth() {
+        return request -> {
+            request.addHeader("Authorization", authHeaderValue);
+            return request;
+        };
+    }
+
     @Test
     @DisplayName("Should create order and return 201 with task count")
     void shouldCreateOrderAndReturn201() throws Exception {
@@ -40,6 +60,7 @@ class OrderControllerIntegrationTest {
 
         // When & Then
         mockMvc.perform(post("/api/orders")
+            .with(auth())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -62,6 +83,7 @@ class OrderControllerIntegrationTest {
 
         // When & Then
         mockMvc.perform(post("/api/orders")
+            .with(auth())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -80,6 +102,7 @@ class OrderControllerIntegrationTest {
 
         // When & Then
         mockMvc.perform(post("/api/orders")
+            .with(auth())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -99,6 +122,7 @@ class OrderControllerIntegrationTest {
 
         // When & Then
         mockMvc.perform(post("/api/orders")
+            .with(auth())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())

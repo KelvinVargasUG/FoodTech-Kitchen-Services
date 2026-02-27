@@ -5,8 +5,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.http.HttpStatus;
+import com.foodtech.kitchen.infrastructure.security.JwtAuthenticationFilter;
+import com.foodtech.kitchen.infrastructure.security.JwtTokenValidator;
 
 /**
  * Configuración de seguridad para desarrollo.
@@ -18,7 +23,8 @@ import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWrite
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
             // Deshabilitar CSRF para desarrollo (necesario para POST/PUT/DELETE sin token)
             // En producción con frontend SPA, configura CSRF con tokens
@@ -26,10 +32,8 @@ public class SecurityConfig {
             
             // Configurar autorización
             .authorizeHttpRequests(auth -> auth
-                // Permitir todos los endpoints de la API (para desarrollo)
-                // En producción, especifica roles: .requestMatchers("/api/**").hasRole("USER")
-                .requestMatchers("/api/**").permitAll()
-                // Cualquier otra petición requiere autenticación (cuando la implementes)
+                .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+                .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             )
             
@@ -57,8 +61,19 @@ public class SecurityConfig {
                 // Content Security Policy (CSP) - deshabilitado para desarrollo
                 // En producción, configura una política estricta
                 // .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'"))
-            );
+            )
+
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+            )
+
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();
+    }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtTokenValidator jwtTokenValidator) {
+        return new JwtAuthenticationFilter(jwtTokenValidator);
     }
 }
