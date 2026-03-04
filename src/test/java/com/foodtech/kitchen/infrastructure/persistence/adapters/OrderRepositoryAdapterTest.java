@@ -1,120 +1,94 @@
 package com.foodtech.kitchen.infrastructure.persistence.adapters;
 
-import com.foodtech.kitchen.domain.model.*;
+import com.foodtech.kitchen.domain.model.Order;
+import com.foodtech.kitchen.domain.model.OrderStatus;
+import com.foodtech.kitchen.domain.model.Product;
+import com.foodtech.kitchen.domain.model.ProductType;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.OrderJpaRepository;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.OrderEntity;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-
+import com.foodtech.kitchen.infrastructure.persistence.mappers.OrderEntityMapper;
 import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class OrderRepositoryAdapterTest {
 
-    private OrderRepositoryAdapter adapter;
+    @Mock
     private OrderJpaRepository jpaRepository;
 
-    @BeforeEach
-    void setUp() {
-        jpaRepository = mock(OrderJpaRepository.class);
-        com.foodtech.kitchen.infrastructure.persistence.mappers.ProductEntityMapper productMapper =
-            new com.foodtech.kitchen.infrastructure.persistence.mappers.ProductEntityMapper();
-        com.foodtech.kitchen.infrastructure.persistence.mappers.OrderEntityMapper mapper = 
-            new com.foodtech.kitchen.infrastructure.persistence.mappers.OrderEntityMapper(productMapper);
-        adapter = new OrderRepositoryAdapter(jpaRepository, mapper);
-    }
+    @Mock
+    private OrderEntityMapper mapper;
+
+    @InjectMocks
+    private OrderRepositoryAdapter adapter;
 
     @Test
-    @DisplayName("Should save order using JPA repository")
-    void shouldSaveOrder() {
-        // Given
-        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
-        Product pizza = new Product("Pizza", ProductType.HOT_DISH);
-        Order order = new Order("A1", List.of(cocaCola, pizza));
+    void save_mapsToEntityAndBack() {
+        // Arrange
+        Order order = Order.reconstruct(1L, "A1", sampleProducts(), OrderStatus.CREATED);
+        OrderEntity entity = OrderEntity.builder().id(1L).tableNumber("A1").build();
+        OrderEntity savedEntity = OrderEntity.builder().id(1L).tableNumber("A1").build();
+        Order savedOrder = Order.reconstruct(1L, "A1", sampleProducts(), OrderStatus.CREATED);
 
-        com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity p1 =
-            com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity.builder()
-                .name("Coca Cola").type(ProductType.DRINK).build();
-        com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity p2 =
-            com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity.builder()
-                .name("Pizza").type(ProductType.HOT_DISH).build();
+        when(mapper.toEntity(order)).thenReturn(entity);
+        when(jpaRepository.save(entity)).thenReturn(savedEntity);
+        when(mapper.toDomain(savedEntity)).thenReturn(savedOrder);
 
-        OrderEntity savedEntity = OrderEntity.builder()
-            .id(1L)
-            .tableNumber("A1")
-            .products(List.of(p1, p2))
-            .build();
-
-        when(jpaRepository.save(any(OrderEntity.class))).thenReturn(savedEntity);
-
-        // When
-        adapter.save(order);
-
-        // Then
-        verify(jpaRepository, times(1)).save(any(OrderEntity.class));
-    }
-
-    @Test
-    @DisplayName("Should convert Order to OrderEntity correctly")
-    void shouldConvertOrderToEntity() {
-        // Given
-        Product product = new Product("Coca Cola", ProductType.DRINK);
-        Order order = new Order("B2", List.of(product));
-        
-        OrderEntity savedEntity = OrderEntity.builder()
-            .id(2L)
-            .tableNumber("B2")
-            .products(List.of(com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity.builder()
-                .name("Coca Cola").type(ProductType.DRINK).build()))
-            .build();
-        
-        when(jpaRepository.save(any(OrderEntity.class))).thenReturn(savedEntity);
-
-        // When
+        // Act
         Order result = adapter.save(order);
 
-        // Then
+        // Assert
         assertNotNull(result);
-        assertEquals(2L, result.getId());
-        assertEquals("B2", result.getTableNumber());
-        verify(jpaRepository, times(1)).save(any(OrderEntity.class));
+        assertEquals(1L, result.getId());
+        verify(mapper).toEntity(order);
+        verify(mapper).toDomain(savedEntity);
     }
 
     @Test
-    @DisplayName("Should handle order with multiple products")
-    void shouldHandleMultipleProducts() {
-        // Given
-        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
-        Product sprite = new Product("Sprite", ProductType.DRINK);
-        Product pizza = new Product("Pizza", ProductType.HOT_DISH);
-        Order order = new Order("C3", List.of(cocaCola, sprite, pizza));
+    void findById_mapsEntityToDomain() {
+        // Arrange
+        OrderEntity entity = OrderEntity.builder().id(2L).tableNumber("B2").build();
+        Order order = Order.reconstruct(2L, "B2", sampleProducts(), OrderStatus.CREATED);
+        when(jpaRepository.findById(2L)).thenReturn(Optional.of(entity));
+        when(mapper.toDomain(entity)).thenReturn(order);
 
-        OrderEntity savedEntity = OrderEntity.builder()
-            .id(3L)
-            .tableNumber("C3")
-            .products(List.of(
-                com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity.builder()
-                    .name("Coca Cola").type(ProductType.DRINK).build(),
-                com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity.builder()
-                    .name("Sprite").type(ProductType.DRINK).build(),
-                com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity.builder()
-                    .name("Pizza").type(ProductType.HOT_DISH).build()))
-            .build();
-        
-        when(jpaRepository.save(any(OrderEntity.class))).thenReturn(savedEntity);
+        // Act
+        Optional<Order> result = adapter.findById(2L);
 
-        // When
-        Order result = adapter.save(order);
+        // Assert
+        assertEquals(true, result.isPresent());
+        assertEquals(2L, result.get().getId());
+        verify(mapper).toDomain(entity);
+    }
 
-        // Then
-        assertNotNull(result);
-        assertEquals(3L, result.getId());
-        assertEquals("C3", result.getTableNumber());
-        assertEquals(3, result.getProducts().size());
-        verify(jpaRepository, times(1)).save(any(OrderEntity.class));
+    @Test
+    void findByStatus_mapsEntityListToDomainList() {
+        // Arrange
+        OrderEntity entity = OrderEntity.builder().id(3L).tableNumber("C3").build();
+        Order order = Order.reconstruct(3L, "C3", sampleProducts(), OrderStatus.COMPLETED);
+        when(jpaRepository.findByStatus(OrderStatus.COMPLETED)).thenReturn(List.of(entity));
+        when(mapper.toDomain(entity)).thenReturn(order);
+
+        // Act
+        List<Order> result = adapter.findByStatus(OrderStatus.COMPLETED);
+
+        // Assert
+        assertEquals(1, result.size());
+        assertEquals(3L, result.get(0).getId());
+        verify(mapper).toDomain(entity);
+    }
+
+    private List<Product> sampleProducts() {
+        return List.of(new Product("Tea", ProductType.DRINK));
     }
 }
