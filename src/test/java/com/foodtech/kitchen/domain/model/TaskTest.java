@@ -1,12 +1,14 @@
 package com.foodtech.kitchen.domain.model;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("unit")
 class TaskTest {
 
     @Test

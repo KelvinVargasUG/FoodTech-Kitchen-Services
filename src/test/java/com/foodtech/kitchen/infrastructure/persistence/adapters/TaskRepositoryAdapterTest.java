@@ -6,6 +6,7 @@ import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.TaskEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@Tag("component")
 class TaskRepositoryAdapterTest {
 
     private TaskRepositoryAdapter adapter;

@@ -7,6 +7,7 @@ import com.foodtech.kitchen.domain.model.ProductType;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.OrderEntity;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity;
 import java.util.List;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@Tag("component")
 @ExtendWith(MockitoExtension.class)
 class OrderEntityMapperTest {
 

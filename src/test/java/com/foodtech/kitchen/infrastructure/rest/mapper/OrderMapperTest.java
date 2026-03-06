@@ -4,6 +4,7 @@ import com.foodtech.kitchen.domain.model.Order;
 import com.foodtech.kitchen.domain.model.ProductType;
 import com.foodtech.kitchen.infrastructure.rest.dto.CreateOrderRequest;
 import com.foodtech.kitchen.infrastructure.rest.dto.ProductRequest;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
@@ -11,6 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("component")
 class OrderMapperTest {
 
     @Test

@@ -1,6 +1,7 @@
 package com.foodtech.kitchen.infrastructure.transactional;
 
 import com.foodtech.kitchen.application.usecases.RequestOrderInvoiceUseCase;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.verify;
 
+@Tag("component")
 @ExtendWith(MockitoExtension.class)
 class TransactionalRequestOrderInvoicePortTest {
 

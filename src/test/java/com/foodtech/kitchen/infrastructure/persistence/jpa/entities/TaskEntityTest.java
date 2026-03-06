@@ -1,11 +1,13 @@
 package com.foodtech.kitchen.infrastructure.persistence.jpa.entities;
 
 import com.foodtech.kitchen.domain.model.Station;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("component")
 class TaskEntityTest {
 
     @Test
