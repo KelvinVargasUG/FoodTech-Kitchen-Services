@@ -1,33 +1,24 @@
-# INTENCION ARQUITECTONICA
+# ARCHITECTURE_INTENT
 
-## Estructura de Clean Architecture
+This document captures architectural intent, rationale, and future direction. Current-state facts live in [docs/core/ARCHITECTURE_CONTEXT.md](ARCHITECTURE_CONTEXT.md) and [docs/core/SYSTEM_MAP.md](SYSTEM_MAP.md).
 
-- domain/
-  - Reglas de negocio centrales, entidades, objetos de valor, servicios de dominio.
-- application/
-  - Casos de uso, puertos de entrada, puertos de salida.
-- infrastructure/
-  - Adaptadores (web, persistencia, mensajeria), cableado de framework.
+## Clean Architecture Intent
+- domain: core business rules, entities, value objects, and domain services.
+- application: use cases and ports (in/out).
+- infrastructure: adapters (web, persistence, messaging) and framework wiring.
 
-## Reglas de Importacion
+## Import Rules (Intent)
+- domain must not import Spring, Jackson, Reactor, or JPA.
+- application must not depend on infrastructure.
+- infrastructure may depend on all layers.
 
-- domain no debe importar Spring, Jackson, Reactor, JPA.
-- application no debe depender de infrastructure.
-- infrastructure puede depender de todas las capas.
+## Required Patterns (Intent)
+- Repository pattern via output ports in application/ports/out.
+- Strategy pattern for variable behavior instead of large switch-case blocks.
 
-## Patrones Obligatorios
-
-- Repository Pattern mediante puertos de dominio (application/ports/out).
-- Strategy Pattern para comportamiento variable (sin switch-case extensos en domain/services).
-
-## Decision Arquitectonica
-
+## Architectural Decision Placeholder
 // ARCHITECTURE_DECISION:
 This interface exists to decouple persistence and enable mocking in unit tests.
 
-## Por Que Refactorizamos
-
-Este refactor alinea el codigo base con la Definicion de Terminado (DoD) del
-taller, reforzando los limites entre capas, reduciendo el acoplamiento con
-frameworks en la logica central, y mejorando la testabilidad unitaria sin
-cambiar el comportamiento en produccion.
+## Why We Refactor (Intent)
+Refactors must reinforce layer boundaries, reduce framework coupling in core logic, and improve unit testability without changing production behavior.
