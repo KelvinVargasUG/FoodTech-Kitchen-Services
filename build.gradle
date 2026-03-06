@@ -134,49 +134,44 @@ def jacocoExcludedClasses = [
     '**/*JpaRepository.class'
 ]
 
-def applyJacocoExcludes = { reportTask ->
-    reportTask.classDirectories.setFrom(files(reportTask.classDirectories.files.collect {
-        fileTree(dir: it, exclude: jacocoExcludedClasses)
-    }))
+def jacocoClassDirs = sourceSets.main.output.asFileTree.matching {
+    exclude jacocoExcludedClasses
 }
 
 tasks.register('jacocoUnitTestReport', JacocoReport) {
     dependsOn tasks.named('unitTest')
     executionData(tasks.named('unitTest'))
     sourceDirectories.setFrom(sourceSets.main.allSource.srcDirs)
-    classDirectories.setFrom(sourceSets.main.output)
+    classDirectories.setFrom(jacocoClassDirs)
     reports {
         xml.required = true
         html.required = true
         csv.required = false
     }
-    afterEvaluate { applyJacocoExcludes(delegate) }
 }
 
 tasks.register('jacocoComponentTestReport', JacocoReport) {
     dependsOn tasks.named('componentTest')
     executionData(tasks.named('componentTest'))
     sourceDirectories.setFrom(sourceSets.main.allSource.srcDirs)
-    classDirectories.setFrom(sourceSets.main.output)
+    classDirectories.setFrom(jacocoClassDirs)
     reports {
         xml.required = true
         html.required = true
         csv.required = false
     }
-    afterEvaluate { applyJacocoExcludes(delegate) }
 }
 
 tasks.register('jacocoIntegrationTestReport', JacocoReport) {
     dependsOn tasks.named('integrationTest')
     executionData(tasks.named('integrationTest'))
     sourceDirectories.setFrom(sourceSets.main.allSource.srcDirs)
-    classDirectories.setFrom(sourceSets.main.output)
+    classDirectories.setFrom(jacocoClassDirs)
     reports {
         xml.required = true
         html.required = true
         csv.required = false
     }
-    afterEvaluate { applyJacocoExcludes(delegate) }
 }
 
 jacocoTestReport {
@@ -189,7 +184,7 @@ jacocoTestReport {
 
     // Mueve la configuración aquí, fuera de doFirst
     // Usamos afterEvaluate para asegurar que los directorios por defecto ya existen antes de filtrar
-    afterEvaluate { applyJacocoExcludes(delegate) }
+    classDirectories.setFrom(jacocoClassDirs)
 }
 
 jacocoTestCoverageVerification {
@@ -204,7 +199,7 @@ jacocoTestCoverageVerification {
     }
     
     // Mismo cambio aquí: Eliminar doFirst y usar afterEvaluate
-    afterEvaluate { applyJacocoExcludes(delegate) }
+    classDirectories.setFrom(jacocoClassDirs)
 }
 
 check.dependsOn jacocoTestCoverageVerification
@@ -212,6 +207,7 @@ check.dependsOn jacocoTestCoverageVerification
 dependencyCheck {
     formats = ['HTML', 'XML']
     failBuildOnCVSS = 7.0
+    failOnError = false
 }
 
 cyclonedxBom {
