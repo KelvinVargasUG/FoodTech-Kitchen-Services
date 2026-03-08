@@ -117,20 +117,25 @@ Given a protected endpoint
 When a request is made with a valid token
 Then access is allowed.
 
-## Mapping to Test Levels
-| Requirement | Strategy Scenario(s) | Acceptance Criteria | Test Level | Technique |
+## Refined Mapping to Test Levels
+| Requirement | Acceptance Criteria | Test Level (Component / Integration) | Testing Technique (White Box / Black Box) | Covered Scenario (from Testing Strategy) |
 | --- | --- | --- | --- | --- |
-| REQ-AUTH-001 | Register success | AC-AUTH-REG-001 | Integration Test | Black Box |
-| REQ-AUTH-002 | Register duplicate email | AC-AUTH-REG-002 | Integration Test | Black Box |
-| REQ-AUTH-003 | Register duplicate username | AC-AUTH-REG-003 | Integration Test | Black Box |
-| REQ-AUTH-004 | Invalid email format | AC-AUTH-REG-004 | Component Test | White Box |
-| REQ-AUTH-005 | Weak password (menos de 6, sin numero, sin letra) | AC-AUTH-REG-005 | Component Test | White Box |
-| REQ-AUTH-006 | Login success (username) | AC-AUTH-LOGIN-001 | Integration Test | Black Box |
-| REQ-AUTH-007 | Login success (email) | AC-AUTH-LOGIN-002 | Integration Test | Black Box |
-| REQ-AUTH-008 | Login wrong password | AC-AUTH-LOGIN-003 | Component Test | White Box |
-| REQ-AUTH-009 | Login inactive user | AC-AUTH-LOGIN-004 | Component Test | White Box |
-| REQ-AUTH-010 | Token generation | AC-AUTH-TOKEN-001 | Component Test | White Box |
-| REQ-AUTH-011 | Token expiration validation | AC-AUTH-TOKEN-002 | Component Test | White Box |
-| REQ-AUTH-012 | Token malformed | AC-AUTH-TOKEN-003 | Component Test | White Box |
-| REQ-AUTH-013 | Protected endpoint without token | AC-AUTH-PROTECT-001 | Integration Test | Black Box |
-| REQ-AUTH-014 | Protected endpoint with valid token | AC-AUTH-PROTECT-002 | Integration Test | Black Box |
+| REQ-AUTH-001 | AC-AUTH-REG-001 | Component Test | White Box | Register success |
+| REQ-AUTH-001 | AC-AUTH-REG-001 | Integration Test | Black Box | Register success |
+| REQ-AUTH-002 | AC-AUTH-REG-002 | Component Test | White Box | Register duplicate email |
+| REQ-AUTH-002 | AC-AUTH-REG-002 | Integration Test | Black Box | Register duplicate email |
+| REQ-AUTH-003 | AC-AUTH-REG-003 | Component Test | White Box | Register duplicate username |
+| REQ-AUTH-003 | AC-AUTH-REG-003 | Integration Test | Black Box | Register duplicate username |
+| REQ-AUTH-004 | AC-AUTH-REG-004 | Component Test | White Box | Invalid email format |
+| REQ-AUTH-005 | AC-AUTH-REG-005 | Component Test | White Box | Weak password (menos de 6, sin numero, sin letra) |
+| REQ-AUTH-006 | AC-AUTH-LOGIN-001 | Component Test | White Box | Login success (username) |
+| REQ-AUTH-006 | AC-AUTH-LOGIN-001 | Integration Test | Black Box | Login success (username) |
+| REQ-AUTH-007 | AC-AUTH-LOGIN-002 | Component Test | White Box | Login success (email) |
+| REQ-AUTH-007 | AC-AUTH-LOGIN-002 | Integration Test | Black Box | Login success (email) |
+| REQ-AUTH-008 | AC-AUTH-LOGIN-003 | Component Test | White Box | Login wrong password |
+| REQ-AUTH-009 | AC-AUTH-LOGIN-004 | Component Test | White Box | Login inactive user |
+| REQ-AUTH-010 | AC-AUTH-TOKEN-001 | Component Test | White Box | Token generation |
+| REQ-AUTH-011 | AC-AUTH-TOKEN-002 | Component Test | White Box | Token expiration validation |
+| REQ-AUTH-012 | AC-AUTH-TOKEN-003 | Component Test | White Box | Token malformed |
+| REQ-AUTH-013 | AC-AUTH-PROTECT-001 | Integration Test | Black Box | Protected endpoint without token |
+| REQ-AUTH-014 | AC-AUTH-PROTECT-002 | Integration Test | Black Box | Protected endpoint with valid token |
