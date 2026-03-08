@@ -28,6 +28,7 @@ Este plan define cómo se verifican las capacidades del feature de autenticació
 | Integration Tests | Validar comportamiento del sistema completo | SpringBootTest | Black Box |
 
 Las pruebas de caja negra son el enfoque principal para validar el comportamiento observable del sistema. Estas pruebas verifican endpoints REST, respuestas HTTP, acceso a recursos protegidos y el flujo completo de autenticación sin depender de la implementación interna. Este enfoque es el que se expone en la defensa del proyecto.
+Las pruebas de integración validan el comportamiento observable del sistema al invocar endpoints REST y verificar respuestas HTTP, por lo que representan pruebas de caja negra.
 
 # 4. Técnicas de Prueba
 | Técnica | Aplicación |
@@ -40,13 +41,13 @@ Las pruebas de caja negra se aplican principalmente en los Integration Tests, do
 # 5. Aplicación de los 7 Principios de Testing
 | Principio | Aplicación en el proyecto |
 | --- | --- |
-| Testing shows presence of defects | pruebas negativas de validación |
-| Exhaustive testing is impossible | selección de escenarios representativos |
-| Early testing | ejecución temprana en CI |
-| Defect clustering | foco en login y validaciones |
-| Pesticide paradox | ejecución continua en CI |
-| Testing depends on context | uso de H2 en pruebas |
-| Absence-of-errors fallacy | passing tests no implica seguridad total |
+| Testing shows presence of defects | TC-AUTH-LOGIN-003 valida el rechazo por password inválido |
+| Exhaustive testing is impossible | se seleccionan escenarios representativos del flujo de autenticación |
+| Early testing | unit-tests y component-tests se ejecutan antes de integration-tests en CI |
+| Defect clustering | el módulo de autenticación concentra los escenarios de TC-AUTH-REG, TC-AUTH-LOGIN, TC-AUTH-TOKEN y TC-AUTH-PROTECT |
+| Pesticide paradox | el CI ejecuta pruebas en cada push y pull request |
+| Testing depends on context | las integration-tests usan H2 en memoria para aislamiento |
+| Absence-of-errors fallacy | el éxito de pruebas no garantiza seguridad completa del sistema |
 
 # 6. Matriz de Trazabilidad
 | Requerimiento | Criterio de aceptación | Nivel de prueba | Tipo de prueba | Método de verificación |
@@ -90,30 +91,34 @@ Las pruebas de caja negra se aplican principalmente en los Integration Tests, do
 | TC-AUTH-PROTECT-002 | [REQ-AUTH-014](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-014) | [AC-AUTH-PROTECT-002](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#ac-auth-protect-002) | Integration | Black Box | Token válido obtenido por login | Acceso permitido con token válido |
 
 # 8. Integración con CI/CD
-La canalización de CI descrita en [CI workflow](../../../.github/workflows/ci.yml) ejecuta pruebas unitarias, de componente e integración, y valida seguridad y empaquetado. Esto asegura que el feature se verifique en cada cambio.
+La canalización de CI descrita en [CI workflow](../../../.github/workflows/ci.yml) ejecuta linting, pruebas unitarias, de componente e integración, y valida seguridad y empaquetado. Esto asegura que el feature se verifique en cada cambio.
 
 | Job del Pipeline | Tipo de Validación | Objetivo |
 | --- | --- | --- |
+| lint | Static Analysis | validar calidad de código |
 | unit-tests | Unit Testing | validar lógica básica |
 | component-tests | Component Testing | validar reglas de negocio |
 | integration-tests | Integration Testing | validar comportamiento observable |
-| docker-build | Build | construir imagen del servicio |
+| docker-build | Build | construir imagen Docker |
 | trivy-scan | Security Scan | detectar vulnerabilidades |
-| sbom | Dependency Analysis | generar inventario de dependencias |
+| sbom | Dependency Analysis | generar SBOM |
 
-# 9. Evidencia de Ejecución
-## 9.1 Pipeline CI exitoso
+# 9. Validación Humana (HITL)
+La IA generó la estructura inicial del pipeline, la documentación de pruebas y la configuración de seguridad en Docker. La validación humana verificó la corrección de los links de CI, la trazabilidad entre requerimientos y casos de prueba, la cobertura de caja negra en integración y la configuración del escaneo de seguridad.
+
+# 10. Evidencia de Ejecución
+## 10.1 Pipeline CI exitoso
 Captura esperada: [docs/workshops/week3/evidence/pipeline-success.png](evidence/pipeline-success.png)
 Descripción: Captura del pipeline en estado GREEN donde todos los jobs finalizan correctamente.
 
-## 9.2 Ejecución de pruebas automatizadas
+## 10.2 Ejecución de pruebas automatizadas
 Captura esperada: [docs/workshops/week3/evidence/tests-execution.png](evidence/tests-execution.png)
 Descripción: Captura del job donde se observa la ejecución de unit tests, component tests e integration tests.
 
-## 9.3 Escaneo de seguridad de imagen Docker
+## 10.3 Escaneo de seguridad de imagen Docker
 Captura esperada: [docs/workshops/week3/evidence/trivy-report.png](evidence/trivy-report.png)
 Descripción: Resultado del escaneo de vulnerabilidades generado por Trivy.
 
-## 9.4 Generación de SBOM
+## 10.4 Generación de SBOM
 Captura esperada: [docs/workshops/week3/evidence/sbom-artifact.png](evidence/sbom-artifact.png)
 Descripción: Artifact generado con CycloneDX mostrando la lista de dependencias del proyecto.
