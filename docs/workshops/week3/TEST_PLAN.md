@@ -51,43 +51,43 @@ Las pruebas de caja negra se aplican principalmente en los Integration Tests, do
 # 6. Matriz de Trazabilidad
 | Requerimiento | Criterio de aceptacion | Nivel de prueba | Tipo de prueba | Metodo de verificacion |
 | --- | --- | --- | --- | --- |
-| REQ-AUTH-001 | AC-AUTH-REG-001 | Component | White Box | Prueba de componente del caso de uso de registro |
-| REQ-AUTH-001 | AC-AUTH-REG-001 | Integration | Black Box | Flujo del endpoint de registro con SpringBootTest |
-| REQ-AUTH-002 | AC-AUTH-REG-002 | Component | White Box | Validacion de email duplicado en caso de uso |
-| REQ-AUTH-002 | AC-AUTH-REG-002 | Integration | Black Box | Endpoint de registro con email existente |
-| REQ-AUTH-003 | AC-AUTH-REG-003 | Component | White Box | Validacion de username duplicado en caso de uso |
-| REQ-AUTH-003 | AC-AUTH-REG-003 | Integration | Black Box | Endpoint de registro con username existente |
-| REQ-AUTH-004 | AC-AUTH-REG-004 | Component | White Box | Regla de validacion de formato de email |
-| REQ-AUTH-005 | AC-AUTH-REG-005 | Component | White Box | Regla de robustez de password |
-| REQ-AUTH-006 | AC-AUTH-LOGIN-001 | Component | White Box | Caso de uso de login con username |
-| REQ-AUTH-006 | AC-AUTH-LOGIN-001 | Integration | Black Box | Endpoint de login con username |
-| REQ-AUTH-007 | AC-AUTH-LOGIN-002 | Component | White Box | Caso de uso de login con email |
-| REQ-AUTH-007 | AC-AUTH-LOGIN-002 | Integration | Black Box | Endpoint de login con email |
-| REQ-AUTH-008 | AC-AUTH-LOGIN-003 | Component | White Box | Respuesta de password invalido en caso de uso |
-| REQ-AUTH-009 | AC-AUTH-LOGIN-004 | Component | White Box | Rechazo de usuario inactivo |
-| REQ-AUTH-010 | AC-AUTH-TOKEN-001 | Component | White Box | Generacion y validacion de token |
-| REQ-AUTH-011 | AC-AUTH-TOKEN-002 | Component | White Box | Validacion de expiracion de token |
-| REQ-AUTH-012 | AC-AUTH-TOKEN-003 | Component | White Box | Validacion de token malformado |
-| REQ-AUTH-013 | AC-AUTH-PROTECT-001 | Integration | Black Box | Endpoint protegido sin token |
-| REQ-AUTH-014 | AC-AUTH-PROTECT-002 | Integration | Black Box | Endpoint protegido con token valido |
+| [REQ-AUTH-001](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-001) | AC-AUTH-REG-001 | Component | White Box | Prueba de componente del caso de uso de registro |
+| [REQ-AUTH-001](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-001) | AC-AUTH-REG-001 | Integration | Black Box | Flujo del endpoint de registro con SpringBootTest |
+| [REQ-AUTH-002](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-002) | AC-AUTH-REG-002 | Component | White Box | Validacion de email duplicado en caso de uso |
+| [REQ-AUTH-002](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-002) | AC-AUTH-REG-002 | Integration | Black Box | Endpoint de registro con email existente |
+| [REQ-AUTH-003](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-003) | AC-AUTH-REG-003 | Component | White Box | Validacion de username duplicado en caso de uso |
+| [REQ-AUTH-003](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-003) | AC-AUTH-REG-003 | Integration | Black Box | Endpoint de registro con username existente |
+| [REQ-AUTH-004](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-004) | AC-AUTH-REG-004 | Component | White Box | Regla de validacion de formato de email |
+| [REQ-AUTH-005](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-005) | AC-AUTH-REG-005 | Component | White Box | Regla de robustez de password |
+| [REQ-AUTH-006](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-006) | AC-AUTH-LOGIN-001 | Component | White Box | Caso de uso de login con username |
+| [REQ-AUTH-006](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-006) | AC-AUTH-LOGIN-001 | Integration | Black Box | Endpoint de login con username |
+| [REQ-AUTH-007](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-007) | AC-AUTH-LOGIN-002 | Component | White Box | Caso de uso de login con email |
+| [REQ-AUTH-007](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-007) | AC-AUTH-LOGIN-002 | Integration | Black Box | Endpoint de login con email |
+| [REQ-AUTH-008](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-008) | AC-AUTH-LOGIN-003 | Component | White Box | Respuesta de password invalido en caso de uso |
+| [REQ-AUTH-009](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-009) | AC-AUTH-LOGIN-004 | Component | White Box | Rechazo de usuario inactivo |
+| [REQ-AUTH-010](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-010) | AC-AUTH-TOKEN-001 | Component | White Box | Generacion y validacion de token |
+| [REQ-AUTH-011](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-011) | AC-AUTH-TOKEN-002 | Component | White Box | Validacion de expiracion de token |
+| [REQ-AUTH-012](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-012) | AC-AUTH-TOKEN-003 | Component | White Box | Validacion de token malformado |
+| [REQ-AUTH-013](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-013) | AC-AUTH-PROTECT-001 | Integration | Black Box | Endpoint protegido sin token |
+| [REQ-AUTH-014](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-014) | AC-AUTH-PROTECT-002 | Integration | Black Box | Endpoint protegido con token valido |
 
 # 7. Casos de Prueba
 | ID | Requerimiento | Criterio | Nivel | Tipo | Precondicion | Resultado esperado |
 | --- | --- | --- | --- | --- | --- | --- |
-| TC-AUTH-REG-001 | REQ-AUTH-001 | AC-AUTH-REG-001 | Integration | Black Box | Usuario no existe en H2 | Registro exitoso |
-| TC-AUTH-REG-002 | REQ-AUTH-002 | AC-AUTH-REG-002 | Integration | Black Box | Email ya registrado | Registro rechazado por email duplicado |
-| TC-AUTH-REG-003 | REQ-AUTH-003 | AC-AUTH-REG-003 | Integration | Black Box | Username ya registrado | Registro rechazado por username duplicado |
-| TC-AUTH-REG-004 | REQ-AUTH-004 | AC-AUTH-REG-004 | Component | White Box | Ninguna | Registro rechazado por email invalido |
-| TC-AUTH-REG-005 | REQ-AUTH-005 | AC-AUTH-REG-005 | Component | White Box | Ninguna | Registro rechazado por password debil |
-| TC-AUTH-LOGIN-001 | REQ-AUTH-006 | AC-AUTH-LOGIN-001 | Integration | Black Box | Usuario activo con username | Login exitoso y token JWT devuelto |
-| TC-AUTH-LOGIN-002 | REQ-AUTH-007 | AC-AUTH-LOGIN-002 | Integration | Black Box | Usuario activo con email | Login exitoso y token JWT devuelto |
-| TC-AUTH-LOGIN-003 | REQ-AUTH-008 | AC-AUTH-LOGIN-003 | Component | White Box | Usuario activo existente | Login rechazado por password invalido |
-| TC-AUTH-LOGIN-004 | REQ-AUTH-009 | AC-AUTH-LOGIN-004 | Component | White Box | Usuario inactivo existente | Login rechazado por usuario inactivo |
-| TC-AUTH-TOKEN-001 | REQ-AUTH-010 | AC-AUTH-TOKEN-001 | Component | White Box | Autenticacion exitosa | Token generado y validado |
-| TC-AUTH-TOKEN-002 | REQ-AUTH-011 | AC-AUTH-TOKEN-002 | Component | White Box | Token expirado | Validacion falla por expiracion |
-| TC-AUTH-TOKEN-003 | REQ-AUTH-012 | AC-AUTH-TOKEN-003 | Component | White Box | Token malformado | Validacion falla por formato |
-| TC-AUTH-PROTECT-001 | REQ-AUTH-013 | AC-AUTH-PROTECT-001 | Integration | Black Box | Endpoint protegido disponible | Acceso denegado sin token |
-| TC-AUTH-PROTECT-002 | REQ-AUTH-014 | AC-AUTH-PROTECT-002 | Integration | Black Box | Token valido obtenido por login | Acceso permitido con token valido |
+| TC-AUTH-REG-001 | [REQ-AUTH-001](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-001) | AC-AUTH-REG-001 | Integration | Black Box | Usuario no existe en H2 | Registro exitoso |
+| TC-AUTH-REG-002 | [REQ-AUTH-002](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-002) | AC-AUTH-REG-002 | Integration | Black Box | Email ya registrado | Registro rechazado por email duplicado |
+| TC-AUTH-REG-003 | [REQ-AUTH-003](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-003) | AC-AUTH-REG-003 | Integration | Black Box | Username ya registrado | Registro rechazado por username duplicado |
+| TC-AUTH-REG-004 | [REQ-AUTH-004](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-004) | AC-AUTH-REG-004 | Component | White Box | Ninguna | Registro rechazado por email invalido |
+| TC-AUTH-REG-005 | [REQ-AUTH-005](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-005) | AC-AUTH-REG-005 | Component | White Box | Ninguna | Registro rechazado por password debil |
+| TC-AUTH-LOGIN-001 | [REQ-AUTH-006](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-006) | AC-AUTH-LOGIN-001 | Integration | Black Box | Usuario activo con username | Login exitoso y token JWT devuelto |
+| TC-AUTH-LOGIN-002 | [REQ-AUTH-007](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-007) | AC-AUTH-LOGIN-002 | Integration | Black Box | Usuario activo con email | Login exitoso y token JWT devuelto |
+| TC-AUTH-LOGIN-003 | [REQ-AUTH-008](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-008) | AC-AUTH-LOGIN-003 | Component | White Box | Usuario activo existente | Login rechazado por password invalido |
+| TC-AUTH-LOGIN-004 | [REQ-AUTH-009](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-009) | AC-AUTH-LOGIN-004 | Component | White Box | Usuario inactivo existente | Login rechazado por usuario inactivo |
+| TC-AUTH-TOKEN-001 | [REQ-AUTH-010](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-010) | AC-AUTH-TOKEN-001 | Component | White Box | Autenticacion exitosa | Token generado y validado |
+| TC-AUTH-TOKEN-002 | [REQ-AUTH-011](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-011) | AC-AUTH-TOKEN-002 | Component | White Box | Token expirado | Validacion falla por expiracion |
+| TC-AUTH-TOKEN-003 | [REQ-AUTH-012](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-012) | AC-AUTH-TOKEN-003 | Component | White Box | Token malformado | Validacion falla por formato |
+| TC-AUTH-PROTECT-001 | [REQ-AUTH-013](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-013) | AC-AUTH-PROTECT-001 | Integration | Black Box | Endpoint protegido disponible | Acceso denegado sin token |
+| TC-AUTH-PROTECT-002 | [REQ-AUTH-014](./REQUIREMENTS_DERIVED_FROM_STRATEGY.md#req-auth-014) | AC-AUTH-PROTECT-002 | Integration | Black Box | Token valido obtenido por login | Acceso permitido con token valido |
 
 # 8. Integracion con CI/CD
 La canalizacion de CI descrita en [CI workflow](.github/workflows/ci.yml) ejecuta pruebas unitarias, de componente e integracion, y valida seguridad y empaquetado. Esto asegura que el feature se verifique en cada cambio.

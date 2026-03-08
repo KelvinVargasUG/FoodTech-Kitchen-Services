@@ -1,124 +1,124 @@
-# Derived Requirements for Authentication Feature
+# Requisitos Derivados para Feature de Autenticacion
 
-## Feature Scope
-Derived from [docs/workshops/week2/TESTING_STRATEGY.md](../week2/TESTING_STRATEGY.md). The feature covers JWT authentication with user registration, login by username or email, token issuance and validation (including expiration and malformed tokens), and access control to protected endpoints based on token presence and validity. Role-based authorization, refresh tokens, and other security hardening are explicitly out of scope in the strategy.
+## Alcance del Feature
+Derivado de [docs/workshops/week2/TESTING_STRATEGY.md](../week2/TESTING_STRATEGY.md). El feature cubre autenticacion JWT con registro de usuarios, login por username o email, emision y validacion de tokens (incluyendo expiracion y tokens malformados), y control de acceso a endpoints protegidos segun la presencia y validez del token. La autorizacion por roles, refresh tokens y hardening adicional quedan fuera de alcance segun la estrategia.
 
-## Functional Requirements
-REQ-AUTH-001
-Users can register with valid email, username, and password.
+## Requisitos Funcionales
+### REQ-AUTH-001
+El usuario puede registrarse con email, username y password validos.
 
-REQ-AUTH-002
-Registration rejects duplicate email addresses.
+### REQ-AUTH-002
+El registro rechaza emails duplicados.
 
-REQ-AUTH-003
-Registration rejects duplicate usernames.
+### REQ-AUTH-003
+El registro rechaza usernames duplicados.
 
-REQ-AUTH-004
-Registration rejects invalid email formats.
+### REQ-AUTH-004
+El registro rechaza formatos de email invalidos.
 
-REQ-AUTH-005
-Registration rejects weak passwords (less than 6 characters, missing number, or missing letter).
+### REQ-AUTH-005
+El registro rechaza passwords debiles (menos de 6 caracteres, sin numero o sin letra).
 
-REQ-AUTH-006
-Users can log in using a username with valid credentials.
+### REQ-AUTH-006
+El usuario puede iniciar sesion con username y credenciales validas.
 
-REQ-AUTH-007
-Users can log in using an email with valid credentials.
+### REQ-AUTH-007
+El usuario puede iniciar sesion con email y credenciales validas.
 
-REQ-AUTH-008
-Login rejects invalid credentials.
+### REQ-AUTH-008
+El login rechaza credenciales invalidas.
 
-REQ-AUTH-009
-Login rejects inactive users.
+### REQ-AUTH-009
+El login rechaza usuarios inactivos.
 
-REQ-AUTH-010
-A JWT token is generated after successful authentication.
+### REQ-AUTH-010
+Se genera un token JWT despues de una autenticacion exitosa.
 
-REQ-AUTH-011
-Token validation detects expiration.
+### REQ-AUTH-011
+La validacion de token detecta expiracion.
 
-REQ-AUTH-012
-Token validation rejects malformed tokens.
+### REQ-AUTH-012
+La validacion de token rechaza tokens malformados.
 
-REQ-AUTH-013
-Protected endpoints deny access when the token is missing.
+### REQ-AUTH-013
+Los endpoints protegidos deniegan acceso cuando falta el token.
 
-REQ-AUTH-014
-Protected endpoints allow access when the token is valid.
+### REQ-AUTH-014
+Los endpoints protegidos permiten acceso cuando el token es valido.
 
-## Acceptance Criteria
-AC-AUTH-REG-001
-Given a new user with valid email, username, and password
-When the user submits registration data
-Then the account is created successfully.
+## Criterios de Aceptacion
+### AC-AUTH-REG-001
+Dado un usuario nuevo con email, username y password validos
+Cuando el usuario envia los datos de registro
+Entonces la cuenta se crea correctamente.
 
-AC-AUTH-REG-002
-Given a user already exists with the same email
-When a new registration is submitted
-Then the registration is rejected due to duplicate email.
+### AC-AUTH-REG-002
+Dado que existe un usuario con el mismo email
+Cuando se envia un nuevo registro
+Entonces el registro se rechaza por email duplicado.
 
-AC-AUTH-REG-003
-Given a user already exists with the same username
-When a new registration is submitted
-Then the registration is rejected due to duplicate username.
+### AC-AUTH-REG-003
+Dado que existe un usuario con el mismo username
+Cuando se envia un nuevo registro
+Entonces el registro se rechaza por username duplicado.
 
-AC-AUTH-REG-004
-Given a new user with an invalid email format
-When the user submits registration data
-Then the registration is rejected for invalid email.
+### AC-AUTH-REG-004
+Dado un usuario nuevo con un email de formato invalido
+Cuando el usuario envia los datos de registro
+Entonces el registro se rechaza por email invalido.
 
-AC-AUTH-REG-005
-Given a new user with a weak password (less than 6 characters, missing number, or missing letter)
-When the user submits registration data
-Then the registration is rejected for weak password.
+### AC-AUTH-REG-005
+Dado un usuario nuevo con un password debil (menos de 6 caracteres, sin numero o sin letra)
+Cuando el usuario envia los datos de registro
+Entonces el registro se rechaza por password debil.
 
-AC-AUTH-LOGIN-001
-Given a registered active user
-When the user logs in with a valid username and password
-Then authentication succeeds and a JWT token is returned.
+### AC-AUTH-LOGIN-001
+Dado un usuario registrado y activo
+Cuando el usuario inicia sesion con username y password validos
+Entonces la autenticacion es exitosa y se retorna un token JWT.
 
-AC-AUTH-LOGIN-002
-Given a registered active user
-When the user logs in with a valid email and password
-Then authentication succeeds and a JWT token is returned.
+### AC-AUTH-LOGIN-002
+Dado un usuario registrado y activo
+Cuando el usuario inicia sesion con email y password validos
+Entonces la autenticacion es exitosa y se retorna un token JWT.
 
-AC-AUTH-LOGIN-003
-Given a registered active user
-When the user logs in with an invalid password
-Then authentication is rejected.
+### AC-AUTH-LOGIN-003
+Dado un usuario registrado y activo
+Cuando el usuario inicia sesion con un password invalido
+Entonces la autenticacion es rechazada.
 
-AC-AUTH-LOGIN-004
-Given a registered inactive user
-When the user attempts to log in with valid credentials
-Then authentication is rejected.
+### AC-AUTH-LOGIN-004
+Dado un usuario registrado e inactivo
+Cuando el usuario intenta iniciar sesion con credenciales validas
+Entonces la autenticacion es rechazada.
 
-AC-AUTH-TOKEN-001
-Given a successful authentication
-When the system issues a token
-Then the JWT is generated and can be validated.
+### AC-AUTH-TOKEN-001
+Dado una autenticacion exitosa
+Cuando el sistema emite un token
+Entonces el JWT se genera y puede validarse.
 
-AC-AUTH-TOKEN-002
-Given an expired token
-When the token is validated
-Then validation fails due to expiration.
+### AC-AUTH-TOKEN-002
+Dado un token expirado
+Cuando el token es validado
+Entonces la validacion falla por expiracion.
 
-AC-AUTH-TOKEN-003
-Given a malformed token
-When the token is validated
-Then validation fails due to token format.
+### AC-AUTH-TOKEN-003
+Dado un token malformado
+Cuando el token es validado
+Entonces la validacion falla por formato de token.
 
-AC-AUTH-PROTECT-001
-Given a protected endpoint
-When a request is made without a token
-Then access is denied.
+### AC-AUTH-PROTECT-001
+Dado un endpoint protegido
+Cuando se realiza una solicitud sin token
+Entonces el acceso es denegado.
 
-AC-AUTH-PROTECT-002
-Given a protected endpoint
-When a request is made with a valid token
-Then access is allowed.
+### AC-AUTH-PROTECT-002
+Dado un endpoint protegido
+Cuando se realiza una solicitud con un token valido
+Entonces el acceso es permitido.
 
-## Refined Mapping to Test Levels
-| Requirement | Acceptance Criteria | Test Level (Component / Integration) | Testing Technique (White Box / Black Box) | Covered Scenario (from Testing Strategy) |
+## Mapeo Refinado a Niveles de Prueba
+| Requerimiento | Criterio de aceptacion | Nivel de prueba (Componente / Integracion) | Tecnica de prueba (White Box / Black Box) | Escenario cubierto (Testing Strategy) |
 | --- | --- | --- | --- | --- |
 | REQ-AUTH-001 | AC-AUTH-REG-001 | Component Test | White Box | Register success |
 | REQ-AUTH-001 | AC-AUTH-REG-001 | Integration Test | Black Box | Register success |
