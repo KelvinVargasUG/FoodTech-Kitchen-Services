@@ -112,7 +112,7 @@ Captura esperada: [docs/workshops/week3/evidence/pipeline-success.png](evidence/
 Descripción: Captura del pipeline en estado GREEN donde todos los jobs finalizan correctamente.
 
 ## 10.2 Ejecución de pruebas automatizadas
-Captura esperada: [docs/workshops/week3/evidence/tests-execution.png](evidence/tests-execution.png)
+Captura esperada: [docs/workshops/week3/evidence/tests](evidence/tests)
 Descripción: Captura del job donde se observa la ejecución de unit tests, component tests e integration tests.
 
 ## 10.3 Escaneo de seguridad de imagen Docker
