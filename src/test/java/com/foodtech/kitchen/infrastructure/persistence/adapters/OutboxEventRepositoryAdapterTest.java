@@ -4,6 +4,7 @@ import com.foodtech.kitchen.application.outbox.OutboxEvent;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.OutboxEventJpaRepository;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.OutboxEventEntity;
 import com.foodtech.kitchen.infrastructure.persistence.mappers.OutboxEventEntityMapper;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@Tag("component")
 @ExtendWith(MockitoExtension.class)
 class OutboxEventRepositoryAdapterTest {
 

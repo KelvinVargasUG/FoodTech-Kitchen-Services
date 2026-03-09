@@ -5,6 +5,7 @@ import com.foodtech.kitchen.application.exepcions.DuplicateUsernameException;
 import com.foodtech.kitchen.application.exepcions.OrderNotFoundException;
 import com.foodtech.kitchen.application.exepcions.TaskNotFoundException;
 import com.foodtech.kitchen.infrastructure.rest.dto.ErrorResponse;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,6 +20,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("component")
 @ExtendWith(MockitoExtension.class)
 class GlobalExceptionHandlerTest {
 

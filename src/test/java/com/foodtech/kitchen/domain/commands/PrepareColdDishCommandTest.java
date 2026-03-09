@@ -1,6 +1,7 @@
 package com.foodtech.kitchen.domain.commands;
 
 import com.foodtech.kitchen.domain.model.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
@@ -8,6 +9,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("unit")
 class PrepareColdDishCommandTest {
 
     @Test

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@Tag("component")
 @ExtendWith(MockitoExtension.class)
 class ReactorAsyncCommandDispatcherTest {
 
@@ -66,17 +68,18 @@ class ReactorAsyncCommandDispatcherTest {
         );
 
         when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        CountDownLatch latch = new CountDownLatch(1);
-        when(taskRepository.save(any(Task.class))).thenAnswer(invocation -> {
-            latch.countDown();
-            return invocation.getArgument(0);
-        });
+        when(taskRepository.save(any(Task.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        CountDownLatch completionLatch = new CountDownLatch(1);
+        doAnswer(invocation -> {
+            completionLatch.countDown();
+            return null;
+        }).when(orderCompletionService).completeOrderIfReady(orderId);
 
         // Act
         dispatcher.dispatch(command, taskId);
 
         // Assert
-        assertTrue(latch.await(2, TimeUnit.SECONDS));
+        assertTrue(completionLatch.await(2, TimeUnit.SECONDS));
         ArgumentCaptor<Task> taskCaptor = ArgumentCaptor.forClass(Task.class);
         verify(taskRepository).save(taskCaptor.capture());
         assertEquals(TaskStatus.COMPLETED, taskCaptor.getValue().getStatus());
