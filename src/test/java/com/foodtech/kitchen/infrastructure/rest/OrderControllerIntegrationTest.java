@@ -1,6 +1,7 @@
 package com.foodtech.kitchen.infrastructure.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.foodtech.kitchen.application.ports.out.TokenGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,8 +56,10 @@ class OrderControllerIntegrationTest {
         // Given
         Map<String, Object> request = Map.of(
             "tableNumber", "A1",
+            "customerName", "Cliente Test",
+            "customerEmail", "test@test.com",
             "products", List.of(
-                Map.of("name", "Coca Cola", "type", "DRINK")
+                Map.of("name", "Coca Cola", "type", "DRINK", "price", 3)
             )
         );
 
@@ -77,9 +80,11 @@ class OrderControllerIntegrationTest {
         // Given
         Map<String, Object> request = Map.of(
             "tableNumber", "B2",
+            "customerName", "Cliente Test",
+            "customerEmail", "test@test.com",
             "products", List.of(
-                Map.of("name", "Coca Cola", "type", "DRINK"),
-                Map.of("name", "Pizza", "type", "HOT_DISH")
+                Map.of("name", "Coca Cola", "type", "DRINK", "price", 3),
+                Map.of("name", "Pizza", "type", "HOT_DISH", "price", 12)
             )
         );
 
@@ -99,6 +104,8 @@ class OrderControllerIntegrationTest {
         // Given
         Map<String, Object> request = Map.of(
             "tableNumber", "C3",
+            "customerName", "Cliente Test",
+            "customerEmail", "test@test.com",
             "products", List.of()
         );
 
@@ -117,8 +124,10 @@ class OrderControllerIntegrationTest {
         // Given
         Map<String, Object> request = Map.of(
             "tableNumber", "",
+            "customerName", "Cliente Test",
+            "customerEmail", "test@test.com",
             "products", List.of(
-                Map.of("name", "Coca Cola", "type", "DRINK")
+                Map.of("name", "Coca Cola", "type", "DRINK", "price", 3)
             )
         );
 
@@ -129,5 +138,61 @@ class OrderControllerIntegrationTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
+    }
+
+    @Test
+    @DisplayName("Should delete order and return 204")
+    void shouldDeleteOrderAndReturn204() throws Exception {
+        // Given
+        Map<String, Object> request = Map.of(
+            "tableNumber", "D4",
+            "customerName", "Cliente Delete",
+            "customerEmail", "delete@test.com",
+            "products", List.of(
+                Map.of("name", "Jugo", "type", "DRINK", "price", 4)
+            )
+        );
+
+        mockMvc.perform(post("/api/orders")
+            .with(auth())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isCreated());
+
+        // Obtener id creado desde endpoint existente de tareas
+        String tasksResponse = mockMvc.perform(get("/api/tasks/station/BAR").with(auth()))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+        Long orderId = null;
+        JsonNode tasksNode = objectMapper.readTree(tasksResponse);
+        for (JsonNode taskNode : tasksNode) {
+            if ("D4".equals(taskNode.get("tableNumber").asText())) {
+                orderId = taskNode.get("orderId").asLong();
+                break;
+            }
+        }
+
+        if (orderId == null) {
+            throw new IllegalStateException("Expected order for table D4 was not created");
+        }
+
+        // When & Then
+        mockMvc.perform(delete("/api/orders/" + orderId).with(auth()))
+            .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/api/orders/" + orderId + "/status").with(auth()))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.message").value("Order not found"));
+    }
+
+    @Test
+    @DisplayName("Should return 404 when deleting non-existing order")
+    void shouldReturn404WhenDeletingNonExistingOrder() throws Exception {
+        mockMvc.perform(delete("/api/orders/999999").with(auth()))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.message").value("Order not found"));
     }
 }

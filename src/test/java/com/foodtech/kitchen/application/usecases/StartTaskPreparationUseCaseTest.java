@@ -52,7 +52,7 @@ class StartTaskPreparationUseCaseTest {
         // Given
         Long taskId = 1L;
         LocalDateTime now = LocalDateTime.of(2026, 2, 20, 12, 0);
-        Product product = new Product("Cerveza", ProductType.DRINK);
+        Product product = new Product("Cerveza", ProductType.DRINK, 5);
         Task pendingTask = Task.reconstruct(
                 taskId,
                 1L,
@@ -81,7 +81,7 @@ class StartTaskPreparationUseCaseTest {
         when(taskRepository.save(any(Task.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         when(orderRepository.findById(1L))
-                .thenReturn(Optional.of(Order.reconstruct(1L, "A1", List.of(product), OrderStatus.CREATED)));
+                .thenReturn(Optional.of(Order.reconstruct(1L, "A1", "Cliente Test", "test@test.com", List.of(product), OrderStatus.CREATED)));
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Command command = mock(Command.class);

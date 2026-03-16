@@ -17,4 +17,5 @@ public interface TaskRepository {
     long countByOrderId(Long orderId);
     long countByOrderIdAndStatus(Long orderId, TaskStatus status);
     List<Task> findAll();
+    void deleteByOrderId(Long orderId);
 }

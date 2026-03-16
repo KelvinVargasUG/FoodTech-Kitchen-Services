@@ -14,7 +14,7 @@ class TaskTest {
     @Test
     void shouldTransitionFromPendingToInPreparation() {
         // Given
-        Product product = new Product("Cerveza", ProductType.DRINK);
+        Product product = new Product("Cerveza", ProductType.DRINK, 5);
         Task task = new Task(
                 1L,
                 Station.BAR,
@@ -34,7 +34,7 @@ class TaskTest {
     @Test
     void shouldTransitionFromInPreparationToCompleted() {
         // Given
-        Product product = new Product("Cerveza", ProductType.DRINK);
+        Product product = new Product("Cerveza", ProductType.DRINK, 5);
         Task task = new Task(
                 1L,
                 Station.BAR,
@@ -55,7 +55,7 @@ class TaskTest {
     @Test
     void shouldNotCompleteTaskWhenNotInPreparation() {
         // Given
-        Product product = new Product("Cerveza", ProductType.DRINK);
+        Product product = new Product("Cerveza", ProductType.DRINK, 5);
         Task task = new Task(
                 1L,
                 Station.BAR,

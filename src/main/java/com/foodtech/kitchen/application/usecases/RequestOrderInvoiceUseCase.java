@@ -35,9 +35,7 @@ public class RequestOrderInvoiceUseCase implements RequestOrderInvoicePort {
             throw new IllegalStateException("Order must be completed to request invoice");
         }
 
-        int totalItems = order.getProducts().size();
-        int totalAmount = totalItems;
-        String payload = payloadBuilder.build(order, totalItems, totalAmount);
+        String payload = payloadBuilder.build(order);
 
         OutboxEvent event = OutboxEvent.newEvent(
                 "Order",

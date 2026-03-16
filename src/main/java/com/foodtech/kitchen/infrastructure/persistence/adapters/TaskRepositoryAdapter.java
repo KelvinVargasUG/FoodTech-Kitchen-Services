@@ -84,4 +84,9 @@ public class TaskRepositoryAdapter implements TaskRepository {
             .map(mapper::toDomain)
             .collect(Collectors.toList());
     }
+
+    @Override
+    public void deleteByOrderId(Long orderId) {
+        jpaRepository.deleteByOrderId(orderId);
+    }
 }

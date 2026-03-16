@@ -16,7 +16,7 @@ class PrepareDrinkCommandTest {
     @DisplayName("Debe crear comando de bebida con estación correcta")
     void shouldCreateDrinkCommandWithCorrectStation() {
         // Given
-        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
+        Product cocaCola = new Product("Coca Cola", ProductType.DRINK, 5);
         List<Product> products = List.of(cocaCola);
 
         // When
@@ -30,7 +30,7 @@ class PrepareDrinkCommandTest {
     @DisplayName("Debe ejecutar la preparación de bebida")
     void shouldExecuteDrinkPreparation() {
         // Given
-        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
+        Product cocaCola = new Product("Coca Cola", ProductType.DRINK, 5);
         PrepareDrinkCommand command = new PrepareDrinkCommand(List.of(cocaCola));
 
         // When & Then
@@ -41,8 +41,8 @@ class PrepareDrinkCommandTest {
     @DisplayName("Debe manejar múltiples bebidas en un solo comando")
     void shouldHandleMultipleDrinks() {
         // Given
-        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
-        Product sprite = new Product("Sprite", ProductType.DRINK);
+        Product cocaCola = new Product("Coca Cola", ProductType.DRINK, 5);
+        Product sprite = new Product("Sprite", ProductType.DRINK, 5);
         List<Product> products = List.of(cocaCola, sprite);
 
         // When

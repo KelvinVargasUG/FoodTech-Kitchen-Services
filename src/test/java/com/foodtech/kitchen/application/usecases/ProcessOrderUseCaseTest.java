@@ -38,9 +38,9 @@ class ProcessOrderUseCaseTest {
     @DisplayName("Should process order and save tasks")
     void shouldProcessOrderAndSaveTasks() {
         // Given
-        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
-        Order order = new Order("A1", List.of(cocaCola));
-        Order savedOrder = Order.reconstruct(1L, "A1", List.of(cocaCola));
+        Product cocaCola = new Product("Coca Cola", ProductType.DRINK, 5);
+        Order order = new Order("A1", "Cliente Test", "test@test.com", List.of(cocaCola));
+        Order savedOrder = Order.reconstruct(1L, "A1", "Cliente Test", "test@test.com", List.of(cocaCola));
         
         when(orderRepository.save(order)).thenReturn(savedOrder);
 
@@ -57,10 +57,10 @@ class ProcessOrderUseCaseTest {
     @DisplayName("Should process mixed order and save multiple tasks")
     void shouldProcessMixedOrderAndSaveMultipleTasks() {
         // Given
-        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
-        Product pizza = new Product("Pizza", ProductType.HOT_DISH);
-        Order order = new Order("B2", List.of(cocaCola, pizza));
-        Order savedOrder = Order.reconstruct(2L, "B2", List.of(cocaCola, pizza));
+        Product cocaCola = new Product("Coca Cola", ProductType.DRINK, 5);
+        Product pizza = new Product("Pizza", ProductType.HOT_DISH, 5);
+        Order order = new Order("B2", "Cliente Test", "test@test.com", List.of(cocaCola, pizza));
+        Order savedOrder = Order.reconstruct(2L, "B2", "Cliente Test", "test@test.com", List.of(cocaCola, pizza));
         
         when(orderRepository.save(order)).thenReturn(savedOrder);
 
@@ -78,7 +78,7 @@ class ProcessOrderUseCaseTest {
         // When & Then - la validación ya se lanza al crear el Order
         assertThrows(
             IllegalArgumentException.class,
-            () -> useCase.execute(new Order("C3", List.of()))
+            () -> useCase.execute(new Order("C3", "Cliente Test", "test@test.com", List.of()))
         );
         verify(taskRepository, never()).saveAll(anyList());
     }

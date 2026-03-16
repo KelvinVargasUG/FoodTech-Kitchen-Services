@@ -24,6 +24,12 @@ public class OrderEntity {
     @Column(name = "table_number", nullable = false)
     private String tableNumber;
 
+    @Column(name = "customer_name", nullable = false)
+    private String customerName;
+
+    @Column(name = "customer_email", nullable = false)
+    private String customerEmail;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default

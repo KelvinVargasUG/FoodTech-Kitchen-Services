@@ -42,7 +42,7 @@ class GetCompletedOrdersUseCaseTest {
     @Test
     void execute_whenCompletedOrdersExist_returnsViewsWithTiming() {
         // Arrange
-        Order order = Order.reconstruct(1L, "A1", sampleProducts(), OrderStatus.COMPLETED);
+        Order order = Order.reconstruct(1L, "A1", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.COMPLETED);
         LocalDateTime createdAt = LocalDateTime.of(2026, 1, 1, 9, 50);
         LocalDateTime startedAt1 = LocalDateTime.of(2026, 1, 1, 10, 0);
         LocalDateTime startedAt2 = LocalDateTime.of(2026, 1, 1, 10, 5);
@@ -97,7 +97,7 @@ class GetCompletedOrdersUseCaseTest {
     @Test
     void execute_whenNoCompletedTasks_returnsNullTiming() {
         // Arrange
-        Order order = Order.reconstruct(2L, "B2", sampleProducts(), OrderStatus.COMPLETED);
+        Order order = Order.reconstruct(2L, "B2", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.COMPLETED);
         LocalDateTime createdAt = LocalDateTime.of(2026, 1, 1, 9, 50);
         Task task = Task.reconstruct(
                 21L,
@@ -130,8 +130,8 @@ class GetCompletedOrdersUseCaseTest {
 
     private List<Product> sampleProducts() {
         return List.of(
-                new Product("Burger", ProductType.HOT_DISH),
-                new Product("Soda", ProductType.DRINK)
+                new Product("Burger", ProductType.HOT_DISH, 5),
+                new Product("Soda", ProductType.DRINK, 5)
         );
     }
 }

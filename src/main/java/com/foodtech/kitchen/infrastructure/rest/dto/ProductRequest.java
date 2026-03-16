@@ -4,5 +4,6 @@ package com.foodtech.kitchen.infrastructure.rest.dto;
 //Validación se maneja en OrderMapper para permitir que GlobalExceptionHandler capture errores correctamente.
 public record ProductRequest(
     String name,
-    String type
+    String type,
+    int price
 ) {}

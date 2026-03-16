@@ -27,7 +27,7 @@ class SyncCommandExecutorTest {
     @DisplayName("Should execute single command")
     void shouldExecuteSingleCommand() {
         // Given
-        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
+        Product cocaCola = new Product("Coca Cola", ProductType.DRINK, 5);
         Command command = new PrepareDrinkCommand(List.of(cocaCola));
 
         // When & Then
@@ -38,8 +38,8 @@ class SyncCommandExecutorTest {
     @DisplayName("Should execute multiple commands")
     void shouldExecuteMultipleCommands() {
         // Given
-        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
-        Product sprite = new Product("Sprite", ProductType.DRINK);
+        Product cocaCola = new Product("Coca Cola", ProductType.DRINK, 5);
+        Product sprite = new Product("Sprite", ProductType.DRINK, 5);
         
         Command command1 = new PrepareDrinkCommand(List.of(cocaCola));
         Command command2 = new PrepareDrinkCommand(List.of(sprite));

@@ -29,8 +29,8 @@ class TaskDecomposerTest {
     @DisplayName("Debe crear una tarea para un pedido con una sola bebida")
     void shouldCreateOneTaskForSingleDrink() {
         // Given
-        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
-        Order order = new Order("A1", List.of(cocaCola));
+        Product cocaCola = new Product("Coca Cola", ProductType.DRINK, 5);
+        Order order = new Order("A1", "Cliente Test", "test@test.com", List.of(cocaCola));
 
         // When
         List<Task> tasks = decomposer.decompose(order);
@@ -45,8 +45,8 @@ class TaskDecomposerTest {
     @DisplayName("Debe crear una tarea para un pedido con un solo plato caliente")
     void shouldCreateOneTaskForSingleHotDish() {
         // Given
-        Product pizza = new Product("Pizza Margarita", ProductType.HOT_DISH);
-        Order order = new Order("B2", List.of(pizza));
+        Product pizza = new Product("Pizza Margarita", ProductType.HOT_DISH, 5);
+        Order order = new Order("B2", "Cliente Test", "test@test.com", List.of(pizza));
 
         // When
         List<Task> tasks = decomposer.decompose(order);
@@ -60,8 +60,8 @@ class TaskDecomposerTest {
     @DisplayName("Debe crear una tarea para un pedido con un solo plato frío")
     void shouldCreateOneTaskForSingleColdDish() {
         // Given
-        Product salad = new Product("Caesar Salad", ProductType.COLD_DISH);
-        Order order = new Order("C3", List.of(salad));
+        Product salad = new Product("Caesar Salad", ProductType.COLD_DISH, 5);
+        Order order = new Order("C3", "Cliente Test", "test@test.com", List.of(salad));
 
         // When
         List<Task> tasks = decomposer.decompose(order);
@@ -75,9 +75,9 @@ class TaskDecomposerTest {
     @DisplayName("Debe crear tareas separadas para distintos tipos de producto")
     void shouldCreateSeparateTasksForMixedOrder() {
         // Given
-        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
-        Product pizza = new Product("Pizza", ProductType.HOT_DISH);
-        Order order = new Order("D4", List.of(cocaCola, pizza));
+        Product cocaCola = new Product("Coca Cola", ProductType.DRINK, 5);
+        Product pizza = new Product("Pizza", ProductType.HOT_DISH, 5);
+        Order order = new Order("D4", "Cliente Test", "test@test.com", List.of(cocaCola, pizza));
 
         // When
         List<Task> tasks = decomposer.decompose(order);
@@ -98,9 +98,9 @@ class TaskDecomposerTest {
     @DisplayName("Debe agrupar productos del mismo tipo en una sola tarea")
     void shouldGroupProductsOfSameTypeInSingleTask() {
         // Given
-        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
-        Product sprite = new Product("Sprite", ProductType.DRINK);
-        Order order = new Order("E5", List.of(cocaCola, sprite));
+        Product cocaCola = new Product("Coca Cola", ProductType.DRINK, 5);
+        Product sprite = new Product("Sprite", ProductType.DRINK, 5);
+        Order order = new Order("E5", "Cliente Test", "test@test.com", List.of(cocaCola, sprite));
 
         // When
         List<Task> tasks = decomposer.decompose(order);
@@ -117,7 +117,7 @@ class TaskDecomposerTest {
         // When & Then - la validación ahora ocurre en el constructor de Order
         assertThrows(
             IllegalArgumentException.class,
-            () -> new Order("F6", List.of()),
+            () -> new Order("F6", "Cliente Test", "test@test.com", List.of()),
             "Debe lanzar excepción para pedido vacío");
     }
 
@@ -135,12 +135,12 @@ class TaskDecomposerTest {
     @DisplayName("Debe rechazar un pedido con número de mesa nulo")
     void shouldRejectNullTableNumber() {
         // Given
-        Product product = new Product("Coca Cola", ProductType.DRINK);
+        Product product = new Product("Coca Cola", ProductType.DRINK, 5);
 
         // When & Then
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new Order(null, List.of(product)),
+                () -> new Order(null, "Cliente Test", "test@test.com", List.of(product)),
                 "Debe lanzar excepción para número de mesa nulo");
     }
 
@@ -148,10 +148,10 @@ class TaskDecomposerTest {
     @DisplayName("Debe crear tres tareas para un pedido con todos los tipos de producto")
     void shouldCreateThreeTasksForAllProductTypes() {
         // Given
-        Product drink = new Product("Coca Cola", ProductType.DRINK);
-        Product hotDish = new Product("Pizza", ProductType.HOT_DISH);
-        Product coldDish = new Product("Caesar Salad", ProductType.COLD_DISH);
-        Order order = new Order("G7", List.of(drink, hotDish, coldDish));
+        Product drink = new Product("Coca Cola", ProductType.DRINK, 5);
+        Product hotDish = new Product("Pizza", ProductType.HOT_DISH, 5);
+        Product coldDish = new Product("Caesar Salad", ProductType.COLD_DISH, 5);
+        Order order = new Order("G7", "Cliente Test", "test@test.com", List.of(drink, hotDish, coldDish));
 
         // When
         List<Task> tasks = decomposer.decompose(order);
@@ -178,9 +178,9 @@ class TaskDecomposerTest {
     @DisplayName("Debe crear comandos para cada tarea")
     void shouldCreateCommandsForEachTask() {
         // Given
-        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
-        Product pizza = new Product("Pizza", ProductType.HOT_DISH);
-        Order order = new Order("H8", List.of(cocaCola, pizza));
+        Product cocaCola = new Product("Coca Cola", ProductType.DRINK, 5);
+        Product pizza = new Product("Pizza", ProductType.HOT_DISH, 5);
+        Order order = new Order("H8", "Cliente Test", "test@test.com", List.of(cocaCola, pizza));
 
         CommandFactory commandFactory = new CommandFactory(List.of(
             new PrepareDrinkStrategy(),

@@ -78,7 +78,7 @@ class OrderCompletionServiceTest {
     @Test
     void completeOrderIfReady_whenAlreadyCompleted_returnsEarly() {
         // Arrange
-        Order completedOrder = Order.reconstruct(40L, "A1", sampleProducts(), OrderStatus.COMPLETED);
+        Order completedOrder = Order.reconstruct(40L, "A1", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.COMPLETED);
         when(taskRepository.countByOrderId(40L)).thenReturn(1L);
         when(taskRepository.countByOrderIdAndStatus(40L, TaskStatus.COMPLETED)).thenReturn(1L);
         when(orderRepository.findById(40L)).thenReturn(Optional.of(completedOrder));
@@ -93,7 +93,7 @@ class OrderCompletionServiceTest {
     @Test
     void completeOrderIfReady_whenReady_marksCompletedAndSaves() {
         // Arrange
-        Order order = Order.reconstruct(50L, "B2", sampleProducts(), OrderStatus.IN_PROGRESS);
+        Order order = Order.reconstruct(50L, "B2", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.IN_PROGRESS);
         when(taskRepository.countByOrderId(50L)).thenReturn(2L);
         when(taskRepository.countByOrderIdAndStatus(50L, TaskStatus.COMPLETED)).thenReturn(2L);
         when(orderRepository.findById(50L)).thenReturn(Optional.of(order));
@@ -107,6 +107,6 @@ class OrderCompletionServiceTest {
     }
 
     private List<Product> sampleProducts() {
-        return List.of(new Product("Pizza", ProductType.HOT_DISH));
+        return List.of(new Product("Pizza", ProductType.HOT_DISH, 5));
     }
 }

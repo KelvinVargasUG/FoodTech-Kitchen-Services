@@ -24,6 +24,8 @@ public class ProductEntity {
     @Column(nullable = false)
     private ProductType type;
 
+    @Column(nullable = false)
+    private int price;
 
     @Column(name = "order_id", insertable = false, updatable = false)
     private Long orderId;

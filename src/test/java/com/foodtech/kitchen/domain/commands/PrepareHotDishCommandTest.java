@@ -16,7 +16,7 @@ class PrepareHotDishCommandTest {
     @DisplayName("Debe crear comando de plato caliente con estación correcta")
     void shouldCreateHotDishCommandWithCorrectStation() {
         // Given
-        Product pizza = new Product("Pizza", ProductType.HOT_DISH);
+        Product pizza = new Product("Pizza", ProductType.HOT_DISH, 5);
         List<Product> products = List.of(pizza);
 
         // When
@@ -30,7 +30,7 @@ class PrepareHotDishCommandTest {
     @DisplayName("Debe ejecutar la preparación de plato caliente")
     void shouldExecuteHotDishPreparation() {
         // Given
-        Product pizza = new Product("Pizza", ProductType.HOT_DISH);
+        Product pizza = new Product("Pizza", ProductType.HOT_DISH, 5);
         PrepareHotDishCommand command = new PrepareHotDishCommand(List.of(pizza));
 
         // When & Then

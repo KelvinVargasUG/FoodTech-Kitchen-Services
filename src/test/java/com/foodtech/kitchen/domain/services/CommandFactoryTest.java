@@ -29,7 +29,7 @@ class CommandFactoryTest {
     @DisplayName("Debe crear PrepareDrinkCommand para productos de tipo DRINK")
     void shouldCreateDrinkCommandForDrinkProducts() {
         // Given
-        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
+        Product cocaCola = new Product("Coca Cola", ProductType.DRINK, 5);
         List<Product> products = List.of(cocaCola);
 
         // When
@@ -43,7 +43,7 @@ class CommandFactoryTest {
     @DisplayName("Debe crear PrepareHotDishCommand para productos de tipo HOT_DISH")
     void shouldCreateHotDishCommandForHotDishProducts() {
         // Given
-        Product pizza = new Product("Pizza", ProductType.HOT_DISH);
+        Product pizza = new Product("Pizza", ProductType.HOT_DISH, 5);
         List<Product> products = List.of(pizza);
 
         // When
@@ -57,7 +57,7 @@ class CommandFactoryTest {
     @DisplayName("Debe crear PrepareColdDishCommand para productos de tipo COLD_DISH")
     void shouldCreateColdDishCommandForColdDishProducts() {
         // Given
-        Product salad = new Product("Caesar Salad", ProductType.COLD_DISH);
+        Product salad = new Product("Caesar Salad", ProductType.COLD_DISH, 5);
         List<Product> products = List.of(salad);
 
         // When
@@ -71,7 +71,7 @@ class CommandFactoryTest {
     @DisplayName("Debe lanzar excepción para estación desconocida")
     void shouldThrowExceptionForUnknownStation() {
         // Given
-        Product product = new Product("Test", ProductType.DRINK);
+        Product product = new Product("Test", ProductType.DRINK, 5);
         List<Product> products = List.of(product);
 
         // When & Then

@@ -34,7 +34,7 @@ class OrderEntityMapperTest {
         // Arrange
         List<Product> products = sampleProducts();
         Product product = products.get(0);
-        Order order = Order.reconstruct(10L, "T1", products, OrderStatus.IN_PROGRESS);
+        Order order = Order.reconstruct(10L, "T1", "Cliente Test", "test@test.com", products, OrderStatus.IN_PROGRESS);
         ProductEntity productEntity = ProductEntity.builder().name("Soda").type(ProductType.DRINK).build();
         when(productEntityMapper.toProductEntity(product)).thenReturn(productEntity);
 
@@ -53,13 +53,15 @@ class OrderEntityMapperTest {
     @Test
     void toDomain_defaultsStatusWhenNull() {
         // Arrange
-        Product product = new Product("Soda", ProductType.DRINK);
+        Product product = new Product("Soda", ProductType.DRINK, 5);
         ProductEntity productEntity = ProductEntity.builder().name("Soda").type(ProductType.DRINK).build();
         when(productEntityMapper.toDomain(productEntity)).thenReturn(product);
 
         OrderEntity entity = OrderEntity.builder()
                 .id(11L)
                 .tableNumber("T2")
+                .customerName("Cliente Test")
+                .customerEmail("test@test.com")
                 .status(null)
                 .products(List.of(productEntity))
                 .build();
@@ -75,6 +77,6 @@ class OrderEntityMapperTest {
     }
 
     private List<Product> sampleProducts() {
-        return List.of(new Product("Soda", ProductType.DRINK));
+        return List.of(new Product("Soda", ProductType.DRINK, 5));
     }
 }

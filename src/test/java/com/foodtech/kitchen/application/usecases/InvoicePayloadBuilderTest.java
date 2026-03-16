@@ -33,11 +33,11 @@ class InvoicePayloadBuilderTest {
     @Test
     void build_whenValidOrder_buildsPayloadAndSerializes() {
         // Arrange
-        Order order = Order.reconstruct(200L, "C3", sampleProducts(), OrderStatus.COMPLETED);
+        Order order = Order.reconstruct(200L, "C3", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.COMPLETED);
         when(payloadSerializer.serialize(org.mockito.Mockito.anyMap())).thenReturn("json");
 
         // Act
-        String result = builder.build(order, 2, 2);
+        String result = builder.build(order);
 
         // Assert
         assertEquals("json", result);
@@ -45,25 +45,29 @@ class InvoicePayloadBuilderTest {
         ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
         verify(payloadSerializer).serialize(payloadCaptor.capture());
         Map<String, Object> payload = payloadCaptor.getValue();
-        assertEquals(200L, payload.get("orderId"));
-        assertEquals("C3", payload.get("tableNumber"));
-        assertEquals(2, payload.get("totalItems"));
-        assertEquals(2, payload.get("totalAmount"));
 
-        Object productsObj = payload.get("products");
+        assertEquals(10, payload.get("total")); // 5 (Plato fuerte) + 5 (Plato entrada)
+        assertEquals("PDF", payload.get("formato"));
+        assertEquals("test@test.com", payload.get("emailCliente"));
+        assertEquals("Cliente Test", payload.get("nombreCliente"));
+
+        Object productsObj = payload.get("listaProductos");
         assertNotNull(productsObj);
-        List<Map<String, String>> products = (List<Map<String, String>>) productsObj;
+        List<Map<String, Object>> products = (List<Map<String, Object>>) productsObj;
         assertEquals(2, products.size());
-        assertEquals("Coffee", products.get(0).get("name"));
-        assertEquals("DRINK", products.get(0).get("type"));
-        assertEquals("Soup", products.get(1).get("name"));
-        assertEquals("HOT_DISH", products.get(1).get("type"));
+        
+        // El orden de los elementos en el set depende del Hash, así que podemos verificar que existan
+        long fuerteCount = products.stream().filter(p -> p.get("nombre").equals("Plato fuerte")).count();
+        long entradaCount = products.stream().filter(p -> p.get("nombre").equals("Plato entrada")).count();
+        
+        assertEquals(1, fuerteCount);
+        assertEquals(1, entradaCount);
     }
 
     private List<Product> sampleProducts() {
         return List.of(
-                new Product("Coffee", ProductType.DRINK),
-                new Product("Soup", ProductType.HOT_DISH)
+                new Product("Plato fuerte", ProductType.HOT_DISH, 5),
+                new Product("Plato entrada", ProductType.COLD_DISH, 5)
         );
     }
 }

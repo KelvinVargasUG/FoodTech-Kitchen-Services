@@ -54,8 +54,10 @@ class TaskControllerIntegrationTest {
         // Crear pedido con bebidas para BAR
         Map<String, Object> orderBar1 = Map.of(
             "tableNumber", "A1",
+            "customerName", "Cliente Test",
+            "customerEmail", "test@test.com",
             "products", List.of(
-                Map.of("name", "Coca Cola", "type", "DRINK")
+                Map.of("name", "Coca Cola", "type", "DRINK", "price", 3)
             )
         );
         mockMvc.perform(post("/api/orders")
@@ -66,8 +68,10 @@ class TaskControllerIntegrationTest {
         // Crear otro pedido con bebida para BAR
         Map<String, Object> orderBar2 = Map.of(
             "tableNumber", "A2",
+            "customerName", "Cliente Test",
+            "customerEmail", "test@test.com",
             "products", List.of(
-                Map.of("name", "Sprite", "type", "DRINK")
+                Map.of("name", "Sprite", "type", "DRINK", "price", 3)
             )
         );
         mockMvc.perform(post("/api/orders")
@@ -78,8 +82,10 @@ class TaskControllerIntegrationTest {
         // Crear pedido con plato caliente para HOT_KITCHEN
         Map<String, Object> orderHotKitchen = Map.of(
             "tableNumber", "B1",
+            "customerName", "Cliente Test",
+            "customerEmail", "test@test.com",
             "products", List.of(
-                Map.of("name", "Pizza", "type", "HOT_DISH")
+                Map.of("name", "Pizza", "type", "HOT_DISH", "price", 12)
             )
         );
         mockMvc.perform(post("/api/orders")
@@ -205,13 +211,15 @@ class TaskControllerIntegrationTest {
     void shouldReturnOrderStatusBasedOnTaskStates() throws Exception {
         // Given - crear un pedido con múltiples productos que generen 3 tareas (diferentes estaciones)
         String orderRequest = objectMapper.writeValueAsString(Map.of(
+            "tableNumber", "A1",
+            "customerName", "Cliente Test",
+            "customerEmail", "test@test.com",
             "products", List.of(
-                Map.of("name", "Coca Cola", "type", "DRINK"),
-                Map.of("name", "Sprite", "type", "DRINK"),  // Same station as Coca Cola
-                Map.of("name", "Pizza", "type", "HOT_DISH"),
-                Map.of("name", "Ensalada", "type", "COLD_DISH")
-            ),
-            "tableNumber", "A1"
+                Map.of("name", "Coca Cola", "type", "DRINK", "price", 3),
+                Map.of("name", "Sprite", "type", "DRINK", "price", 3),
+                Map.of("name", "Pizza", "type", "HOT_DISH", "price", 12),
+                Map.of("name", "Ensalada", "type", "COLD_DISH", "price", 7)
+            )
         ));
 
         mockMvc.perform(post("/api/orders")

@@ -29,8 +29,8 @@ class GetTasksByStationUseCaseTest {
     @DisplayName("Should return only tasks for specified station")
     void shouldReturnOnlyTasksForSpecifiedStation() {
         // Given - 3 tareas pendientes: 2 BAR, 1 HOT_KITCHEN
-        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
-        Product sprite = new Product("Sprite", ProductType.DRINK);
+        Product cocaCola = new Product("Coca Cola", ProductType.DRINK, 5);
+        Product sprite = new Product("Sprite", ProductType.DRINK, 5);
         
         LocalDateTime now = LocalDateTime.now();
         Task barTask1 = new Task(1L, Station.BAR, "A1", List.of(cocaCola), now);

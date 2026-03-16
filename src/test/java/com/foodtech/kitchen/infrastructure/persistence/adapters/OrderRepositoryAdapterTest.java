@@ -37,10 +37,10 @@ class OrderRepositoryAdapterTest {
     @Test
     void save_mapsToEntityAndBack() {
         // Arrange
-        Order order = Order.reconstruct(1L, "A1", sampleProducts(), OrderStatus.CREATED);
+        Order order = Order.reconstruct(1L, "A1", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.CREATED);
         OrderEntity entity = OrderEntity.builder().id(1L).tableNumber("A1").build();
         OrderEntity savedEntity = OrderEntity.builder().id(1L).tableNumber("A1").build();
-        Order savedOrder = Order.reconstruct(1L, "A1", sampleProducts(), OrderStatus.CREATED);
+        Order savedOrder = Order.reconstruct(1L, "A1", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.CREATED);
 
         when(mapper.toEntity(order)).thenReturn(entity);
         when(jpaRepository.save(entity)).thenReturn(savedEntity);
@@ -60,7 +60,7 @@ class OrderRepositoryAdapterTest {
     void findById_mapsEntityToDomain() {
         // Arrange
         OrderEntity entity = OrderEntity.builder().id(2L).tableNumber("B2").build();
-        Order order = Order.reconstruct(2L, "B2", sampleProducts(), OrderStatus.CREATED);
+        Order order = Order.reconstruct(2L, "B2", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.CREATED);
         when(jpaRepository.findById(2L)).thenReturn(Optional.of(entity));
         when(mapper.toDomain(entity)).thenReturn(order);
 
@@ -77,7 +77,7 @@ class OrderRepositoryAdapterTest {
     void findByStatus_mapsEntityListToDomainList() {
         // Arrange
         OrderEntity entity = OrderEntity.builder().id(3L).tableNumber("C3").build();
-        Order order = Order.reconstruct(3L, "C3", sampleProducts(), OrderStatus.COMPLETED);
+        Order order = Order.reconstruct(3L, "C3", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.COMPLETED);
         when(jpaRepository.findByStatus(OrderStatus.COMPLETED)).thenReturn(List.of(entity));
         when(mapper.toDomain(entity)).thenReturn(order);
 
@@ -91,6 +91,6 @@ class OrderRepositoryAdapterTest {
     }
 
     private List<Product> sampleProducts() {
-        return List.of(new Product("Tea", ProductType.DRINK));
+        return List.of(new Product("Tea", ProductType.DRINK, 5));
     }
 }

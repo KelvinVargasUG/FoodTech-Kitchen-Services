@@ -4,6 +4,7 @@ import com.foodtech.kitchen.application.ports.in.GetCompletedOrdersPort;
 import com.foodtech.kitchen.application.ports.in.GetOrderStatusPort;
 import com.foodtech.kitchen.application.ports.in.ProcessOrderPort;
 import com.foodtech.kitchen.application.ports.in.RequestOrderInvoicePort;
+import com.foodtech.kitchen.application.ports.in.DeleteOrderPort;
 import com.foodtech.kitchen.application.usecases.dto.CompletedOrderView;
 import com.foodtech.kitchen.domain.model.Order;
 import com.foodtech.kitchen.domain.model.Task;
@@ -13,6 +14,9 @@ import com.foodtech.kitchen.infrastructure.rest.dto.CreateOrderRequest;
 import com.foodtech.kitchen.infrastructure.rest.dto.CreateOrderResponse;
 import com.foodtech.kitchen.infrastructure.rest.mapper.CompletedOrderMapper;
 import com.foodtech.kitchen.infrastructure.rest.mapper.OrderMapper;
+
+import lombok.AllArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
@@ -30,16 +35,8 @@ public class OrderController {
     private final GetOrderStatusPort getOrderStatusPort;
     private final GetCompletedOrdersPort getCompletedOrdersPort;
     private final RequestOrderInvoicePort requestOrderInvoicePort;
+    private final DeleteOrderPort deleteOrderPort;
 
-    public OrderController(ProcessOrderPort processOrderPort,
-                           GetOrderStatusPort getOrderStatusPort,
-                           GetCompletedOrdersPort getCompletedOrdersPort,
-                           RequestOrderInvoicePort requestOrderInvoicePort) {
-        this.processOrderPort = processOrderPort;
-        this.getOrderStatusPort = getOrderStatusPort;
-        this.getCompletedOrdersPort = getCompletedOrdersPort;
-        this.requestOrderInvoicePort = requestOrderInvoicePort;
-    }
 
     @PostMapping
     public ResponseEntity<CreateOrderResponse> createOrder(@RequestBody CreateOrderRequest request) {
@@ -73,5 +70,11 @@ public class OrderController {
     public ResponseEntity<Void> requestInvoice(@PathVariable Long orderId) {
         requestOrderInvoicePort.execute(orderId);
         return ResponseEntity.accepted().build();
+    }
+
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable Long orderId) {
+        deleteOrderPort.execute(orderId);
+        return ResponseEntity.noContent().build();
     }
 }

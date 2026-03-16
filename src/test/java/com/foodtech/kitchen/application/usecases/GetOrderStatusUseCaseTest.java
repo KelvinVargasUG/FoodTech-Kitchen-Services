@@ -35,7 +35,7 @@ class GetOrderStatusUseCaseTest {
     void shouldReturnCompletedWhenAllTasksCompleted() {
         // Given - un pedido con 3 tareas completadas
         Long orderId = 1L;
-        Product product = new Product("Pizza", ProductType.HOT_DISH);
+        Product product = new Product("Pizza", ProductType.HOT_DISH, 5);
         
         Task completedTask1 = Task.reconstruct(1L, orderId, Station.BAR, "A1", 
             List.of(product), LocalDateTime.now(), TaskStatus.COMPLETED, 
@@ -47,7 +47,7 @@ class GetOrderStatusUseCaseTest {
             List.of(product), LocalDateTime.now(), TaskStatus.COMPLETED, 
             LocalDateTime.now(), LocalDateTime.now());
 
-        Order order = Order.reconstruct(orderId, "A1", List.of(product), OrderStatus.COMPLETED);
+        Order order = Order.reconstruct(orderId, "A1", "Cliente Test", "test@test.com", List.of(product), OrderStatus.COMPLETED);
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         
         when(taskRepository.findByOrderId(orderId))
@@ -66,7 +66,7 @@ class GetOrderStatusUseCaseTest {
     void shouldReturnInPreparationWhenAnyTaskInPreparation() {
         // Given - un pedido con 2 tareas completadas y 1 en preparación
         Long orderId = 1L;
-        Product product = new Product("Pizza", ProductType.HOT_DISH);
+        Product product = new Product("Pizza", ProductType.HOT_DISH, 5);
         
         Task completedTask1 = Task.reconstruct(1L, orderId, Station.BAR, "A1", 
             List.of(product), LocalDateTime.now(), TaskStatus.COMPLETED, 
@@ -78,7 +78,7 @@ class GetOrderStatusUseCaseTest {
             List.of(product), LocalDateTime.now(), TaskStatus.IN_PREPARATION, 
             LocalDateTime.now(), null);
 
-        Order order = Order.reconstruct(orderId, "A1", List.of(product), OrderStatus.IN_PROGRESS);
+        Order order = Order.reconstruct(orderId, "A1", "Cliente Test", "test@test.com", List.of(product), OrderStatus.IN_PROGRESS);
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         
         when(taskRepository.findByOrderId(orderId))
@@ -97,14 +97,14 @@ class GetOrderStatusUseCaseTest {
     void shouldReturnPendingWhenAllTasksPending() {
         // Given - un pedido con todas las tareas pendientes
         Long orderId = 1L;
-        Product product = new Product("Pizza", ProductType.HOT_DISH);
+        Product product = new Product("Pizza", ProductType.HOT_DISH, 5);
         
         Task pendingTask1 = Task.reconstruct(1L, orderId, Station.BAR, "A1", 
             List.of(product), LocalDateTime.now(), TaskStatus.PENDING, null, null);
         Task pendingTask2 = Task.reconstruct(2L, orderId, Station.HOT_KITCHEN, "A1", 
             List.of(product), LocalDateTime.now(), TaskStatus.PENDING, null, null);
 
-        Order order = Order.reconstruct(orderId, "A1", List.of(product), OrderStatus.CREATED);
+        Order order = Order.reconstruct(orderId, "A1", "Cliente Test", "test@test.com", List.of(product), OrderStatus.CREATED);
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         
         when(taskRepository.findByOrderId(orderId))
@@ -123,7 +123,7 @@ class GetOrderStatusUseCaseTest {
     void shouldReturnInPreparationWhenMixedStates() {
         // Given - un pedido con tareas pendientes y en preparación
         Long orderId = 1L;
-        Product product = new Product("Pizza", ProductType.HOT_DISH);
+        Product product = new Product("Pizza", ProductType.HOT_DISH, 5);
         
         Task pendingTask = Task.reconstruct(1L, orderId, Station.BAR, "A1", 
             List.of(product), LocalDateTime.now(), TaskStatus.PENDING, null, null);
@@ -131,7 +131,7 @@ class GetOrderStatusUseCaseTest {
             List.of(product), LocalDateTime.now(), TaskStatus.IN_PREPARATION, 
             LocalDateTime.now(), null);
 
-        Order order = Order.reconstruct(orderId, "A1", List.of(product), OrderStatus.IN_PROGRESS);
+        Order order = Order.reconstruct(orderId, "A1", "Cliente Test", "test@test.com", List.of(product), OrderStatus.IN_PROGRESS);
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         
         when(taskRepository.findByOrderId(orderId))
@@ -150,7 +150,7 @@ class GetOrderStatusUseCaseTest {
     void shouldReturnInPreparationWhenSomeTasksCompleted() {
         // Given - un pedido con 1 tarea completada y 2 pendientes (caso Postman)
         Long orderId = 1L;
-        Product product = new Product("Pizza", ProductType.HOT_DISH);
+        Product product = new Product("Pizza", ProductType.HOT_DISH, 5);
         
         Task completedTask = Task.reconstruct(1L, orderId, Station.BAR, "A1", 
             List.of(product), LocalDateTime.now(), TaskStatus.COMPLETED, 
@@ -160,7 +160,7 @@ class GetOrderStatusUseCaseTest {
         Task pendingTask2 = Task.reconstruct(3L, orderId, Station.COLD_KITCHEN, "A1", 
             List.of(product), LocalDateTime.now(), TaskStatus.PENDING, null, null);
 
-        Order order = Order.reconstruct(orderId, "A1", List.of(product), OrderStatus.IN_PROGRESS);
+        Order order = Order.reconstruct(orderId, "A1", "Cliente Test", "test@test.com", List.of(product), OrderStatus.IN_PROGRESS);
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         
         when(taskRepository.findByOrderId(orderId))

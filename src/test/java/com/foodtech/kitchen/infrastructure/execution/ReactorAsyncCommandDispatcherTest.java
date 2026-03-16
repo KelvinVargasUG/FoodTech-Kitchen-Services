@@ -107,6 +107,6 @@ class ReactorAsyncCommandDispatcherTest {
     }
 
     private List<Product> sampleProducts() {
-        return List.of(new Product("Tea", ProductType.DRINK));
+        return List.of(new Product("Tea", ProductType.DRINK, 5));
     }
 }

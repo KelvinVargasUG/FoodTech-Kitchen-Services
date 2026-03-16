@@ -20,6 +20,7 @@ import com.foodtech.kitchen.infrastructure.security.JwtTokenValidator;
 import com.foodtech.kitchen.infrastructure.security.JwtTokenGenerator;
 import com.foodtech.kitchen.infrastructure.serialization.JacksonPayloadSerializer;
 import com.foodtech.kitchen.infrastructure.transactional.TransactionalOrderCompletionService;
+import com.foodtech.kitchen.infrastructure.transactional.TransactionalDeleteOrderPort;
 import com.foodtech.kitchen.infrastructure.transactional.TransactionalProcessOrderPort;
 import com.foodtech.kitchen.infrastructure.transactional.TransactionalRequestOrderInvoicePort;
 import com.foodtech.kitchen.infrastructure.transactional.TransactionalStartTaskPreparationPort;
@@ -200,6 +201,19 @@ public class ApplicationConfig {
     @Bean
     public RequestOrderInvoicePort requestOrderInvoicePort(RequestOrderInvoiceUseCase requestOrderInvoiceUseCase) {
         return new TransactionalRequestOrderInvoicePort(requestOrderInvoiceUseCase);
+    }
+
+    @Bean
+    public DeleteOrderUseCase deleteOrderUseCase(
+            OrderRepository orderRepository,
+            TaskRepository taskRepository
+    ) {
+        return new DeleteOrderUseCase(orderRepository, taskRepository);
+    }
+
+    @Bean
+    public DeleteOrderPort deleteOrderPort(DeleteOrderUseCase deleteOrderUseCase) {
+        return new TransactionalDeleteOrderPort(deleteOrderUseCase);
     }
 
     @Bean

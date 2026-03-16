@@ -10,4 +10,5 @@ public interface OrderRepository {
     Order save(Order order);
     Optional<Order> findById(Long id);
     List<Order> findByStatus(OrderStatus status);
+    void deleteById(Long id);
 }

@@ -12,6 +12,7 @@ public class ProductEntityMapper {
         return ProductEntity.builder()
                 .name(product.getName())
                 .type(product.getType())
+                .price(product.getPrice())
                 .build();
     }
 
@@ -23,10 +24,10 @@ public class ProductEntityMapper {
     }
 
     public Product toDomain(ProductEntity entity) {
-        return new Product(entity.getName(), entity.getType());
+        return new Product(entity.getName(), entity.getType(), entity.getPrice());
     }
 
     public Product toDomain(TaskProductEntity entity) {
-        return new Product(entity.getName(), entity.getType());
+        return new Product(entity.getName(), entity.getType(), 0);
     }
 }

@@ -34,7 +34,7 @@ class TaskRepositoryAdapterTest {
     @DisplayName("Should save tasks using JPA repository")
     void shouldSaveTasks() {
         // Given
-        Product product = new Product("Coca Cola", ProductType.DRINK);
+        Product product = new Product("Coca Cola", ProductType.DRINK, 5);
         Task task = new Task(1L, Station.BAR, "A1", List.of(product), LocalDateTime.now());
 
         // When

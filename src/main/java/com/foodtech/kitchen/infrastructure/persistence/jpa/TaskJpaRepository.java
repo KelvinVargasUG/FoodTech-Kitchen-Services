@@ -16,6 +16,7 @@ public interface TaskJpaRepository extends JpaRepository<TaskEntity, Long> {
     List<TaskEntity> findByStation(Station station);
     List<TaskEntity> findByStationAndStatus(Station station, TaskStatus status);
     List<TaskEntity> findByOrderId(Long orderId);
+    void deleteByOrderId(Long orderId);
     long countByOrderId(Long orderId);
     long countByOrderIdAndStatus(Long orderId, TaskStatus status);
 

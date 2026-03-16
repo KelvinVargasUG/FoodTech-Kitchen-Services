@@ -53,7 +53,7 @@ class RequestOrderInvoiceUseCaseTest {
     @Test
     void execute_whenOrderAlreadyInvoiced_returnsEarly() {
         // Arrange
-        Order order = Order.reconstruct(101L, "T1", sampleProducts(), OrderStatus.INVOICED);
+        Order order = Order.reconstruct(101L, "T1", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.INVOICED);
         when(orderRepository.findById(101L)).thenReturn(Optional.of(order));
 
         // Act
@@ -67,7 +67,7 @@ class RequestOrderInvoiceUseCaseTest {
     @Test
     void execute_whenOrderNotCompleted_throwsException() {
         // Arrange
-        Order order = Order.reconstruct(102L, "T2", sampleProducts(), OrderStatus.CREATED);
+        Order order = Order.reconstruct(102L, "T2", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.CREATED);
         when(orderRepository.findById(102L)).thenReturn(Optional.of(order));
 
         // Act + Assert
@@ -79,9 +79,9 @@ class RequestOrderInvoiceUseCaseTest {
     @Test
     void execute_whenOrderCompleted_persistsOutboxAndMarksInvoiced() {
         // Arrange
-        Order order = Order.reconstruct(103L, "T3", sampleProducts(), OrderStatus.COMPLETED);
+        Order order = Order.reconstruct(103L, "T3", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.COMPLETED);
         when(orderRepository.findById(103L)).thenReturn(Optional.of(order));
-        when(payloadBuilder.build(order, 2, 2)).thenReturn("payload");
+        when(payloadBuilder.build(order)).thenReturn("payload");
 
         // Act
         useCase.execute(103L);
@@ -97,13 +97,13 @@ class RequestOrderInvoiceUseCaseTest {
 
         assertEquals(OrderStatus.INVOICED, order.getStatus());
         verify(orderRepository).save(order);
-        verify(payloadBuilder).build(order, 2, 2);
+        verify(payloadBuilder).build(order);
     }
 
     private List<Product> sampleProducts() {
         return List.of(
-                new Product("Soda", ProductType.DRINK),
-                new Product("Salad", ProductType.COLD_DISH)
+                new Product("Soda", ProductType.DRINK, 5),
+                new Product("Salad", ProductType.COLD_DISH, 5)
         );
     }
 }

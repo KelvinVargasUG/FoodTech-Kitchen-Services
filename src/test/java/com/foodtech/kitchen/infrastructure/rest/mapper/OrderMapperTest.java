@@ -21,9 +21,11 @@ class OrderMapperTest {
         // Given
         CreateOrderRequest request = new CreateOrderRequest(
             "A1",
+            "Cliente Test",
+            "test@test.com",
             List.of(
-                new ProductRequest("Coca Cola", "DRINK"),
-                new ProductRequest("Pizza", "HOT_DISH")
+                new ProductRequest("Coca Cola", "DRINK", 3),
+                new ProductRequest("Pizza", "HOT_DISH", 10)
             )
         );
 
@@ -32,9 +34,12 @@ class OrderMapperTest {
 
         // Then
         assertEquals("A1", order.getTableNumber());
+        assertEquals("Cliente Test", order.getCustomerName());
+        assertEquals("test@test.com", order.getCustomerEmail());
         assertEquals(2, order.getProducts().size());
         assertEquals("Coca Cola", order.getProducts().get(0).getName());
         assertEquals(ProductType.DRINK, order.getProducts().get(0).getType());
+        assertEquals(3, order.getProducts().get(0).getPrice());
     }
 
     @Test
@@ -43,8 +48,10 @@ class OrderMapperTest {
         // Given
         CreateOrderRequest request = new CreateOrderRequest(
             "B2",
+            "Cliente Test",
+            "test@test.com",
             List.of(
-                new ProductRequest("Sprite", "DRINK")
+                new ProductRequest("Sprite", "DRINK", 2)
             )
         );
 
@@ -54,6 +61,7 @@ class OrderMapperTest {
         // Then
         assertEquals(1, order.getProducts().size());
         assertEquals("Sprite", order.getProducts().get(0).getName());
+        assertEquals(2, order.getProducts().get(0).getPrice());
     }
 
     @Test
@@ -62,8 +70,10 @@ class OrderMapperTest {
         // Given
         CreateOrderRequest request = new CreateOrderRequest(
             "C3",
+            "Cliente Test",
+            "test@test.com",
             List.of(
-                new ProductRequest("Invalid", "INVALID_TYPE")
+                new ProductRequest("Invalid", "INVALID_TYPE", 0)
             )
         );
 

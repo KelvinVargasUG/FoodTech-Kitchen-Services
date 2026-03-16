@@ -29,8 +29,10 @@ public class OrderEntityMapper {
         return OrderEntity.builder()
                 .id(order.getId())
                 .tableNumber(order.getTableNumber())
+                .customerName(order.getCustomerName())
+                .customerEmail(order.getCustomerEmail())
                 .products(products)
-            .status(status)
+                .status(status)
                 .build();
     }
 
@@ -41,6 +43,6 @@ public class OrderEntityMapper {
 
         OrderStatus status = entity.getStatus() != null ? entity.getStatus() : OrderStatus.CREATED;
 
-        return Order.reconstruct(entity.getId(), entity.getTableNumber(), products, status);
+        return Order.reconstruct(entity.getId(), entity.getTableNumber(), entity.getCustomerName(), entity.getCustomerEmail(), products, status);
     }
 }
