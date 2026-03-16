@@ -1,0 +1,81 @@
+---
+# FoodTech Kitchen Services — local development orchestration
+# Start with: docker compose up --build
+# Access at:  http://localhost:8080
+
+services:
+
+  # ──────────────────────────────────────────────
+  # PostgreSQL 16 — persistent database
+  # ──────────────────────────────────────────────
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: foodtech_db
+      POSTGRES_USER: foodtech_user
+      POSTGRES_PASSWORD: foodtech_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - foodtech_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U foodtech_user -d foodtech_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ──────────────────────────────────────────────
+  # Spring Boot backend — built from Dockerfile
+  # ──────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VERSION: "local"
+        VCS_REF: "dev"
+        VCS_URL: "local"
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # Datasource — connects to the postgres service by container name
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/foodtech_db
+      SPRING_DATASOURCE_USERNAME: foodtech_user
+      SPRING_DATASOURCE_PASSWORD: foodtech_pass
+      # JPA — update is safer than create for restarts (no data loss)
+      JPA_DDL_AUTO: update
+      # JWT — override with a real secret in production
+      JWT_SECRET: "docker-local-secret-must-be-at-least-32c"
+      JWT_EXPIRATION_SECONDS: "3600"
+      # JVM tuning — honour container memory limits
+      JAVA_OPTS: "-XX:MaxRAMPercentage=75.0 -XX:InitialRAMPercentage=25.0"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - foodtech_net
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 8080 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+# ──────────────────────────────────────────────
+# Shared network (bridge)
+# ──────────────────────────────────────────────
+networks:
+  foodtech_net:
+    driver: bridge
+
+# ──────────────────────────────────────────────
+# Named volume for PostgreSQL persistence
+# ──────────────────────────────────────────────
+volumes:
+  postgres_data:
+    driver: local

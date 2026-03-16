@@ -1,16 +1,16 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/foodtech_db
-    username: foodtech_user
-    password: foodtech_pass
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/foodtech_db}
+    username: ${SPRING_DATASOURCE_USERNAME:foodtech_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:foodtech_pass}
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: ${JPA_DDL_AUTO:create}
     show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
 jwt:
-  secret: "change-me-dev-secret-should-be-32-chars-min"
-  expirationSeconds: 3600
+  secret: ${JWT_SECRET:change-me-dev-secret-should-be-32-chars-min}
+  expirationSeconds: ${JWT_EXPIRATION_SECONDS:3600}
