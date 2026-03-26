@@ -52,3 +52,106 @@ La IA sugirió construir un documento de diseño basado en las siguientes seccio
 - Las decisiones de arquitectura deberán justificarse contra las restricciones y reqs. no funcionales definidos en el SRS.
 
 ---
+
+## 📅 Día 2 - 26/Mar/2026
+
+### 🔹 Feature en análisis
+CSV Upload para archivos grandes (5GB+)
+
+---
+
+### 🤖 Propuesta de la IA
+Implementar un endpoint único POST `/upload` que:
+1. Recibe el archivo CSV completo
+2. Valida tamaño (hasta 5GB)
+3. Lo almacena temporalmente sin procesamiento en memoria
+4. Delega el procesamiento a un servicio asincrónico
+5. Lee el archivo mediante streaming
+6. Lo divide en lotes
+7. Valida cada registro
+8. Inserta en BD solo datos válidos
+9. Registra errores sin detener el proceso completo
+
+---
+
+### 👤 Propuesta del usuario (mejorada)
+Implementar **carga por partes (chunked upload)** en lugar de un endpoint monolítico:
+
+1. **Cliente divide el archivo en fragmentos** (10–100 MB cada uno)
+2. **API crea una sesión de carga** (generando un session ID)
+3. **Endpoints específicos por chunk**:
+   - POST `/upload/session` → inicia sesión
+   - POST `/upload/session/{id}/chunk` → recibe cada fragmento
+   - POST `/upload/session/{id}/complete` → marca como finalizado
+4. **Almacenamiento en disco directo** sin uso extensivo de memoria
+5. **Ensamblaje del archivo final** una vez todos los chunks se recibieron
+6. **Marcado de estado UPLOADED**
+7. **Dispara proceso asincrónico** que lee el CSV en streaming
+8. **Carga masiva a BD** usando herramientas nativas (external tables, bulk insert)
+
+**Ventajas:**
+- Tolerancia a fallos de red (reintentar solo el chunk fallido)
+- Sin problemas de timeout en trasferencias largas
+- Escalable a archivos de cualquier tamaño
+- Bajo uso de memoria en servidor
+- Permite resume/retry de uploads interrumpidos
+
+---
+
+### 📚 Investigación humana (Estándares y librerías)
+- Fuente 1: [tus.io - Resumable Upload Protocol](https://tus.io/protocols/resumable-upload?utm_source=chatgpt.com)
+- Fuente 2: [tus-java-client - GitHub](https://github.com/tus/tus-java-client)
+
+**Hallazgos:**
+- **tus.io** es un protocolo estándar de la industria para uploads **reanudables** (resumable uploads).
+- Define operaciones HTTP como PATCH para enviar chunks y permite pausar/reanudar sin reiniciar la transferencia completa.
+- **tus-java-client** es una librería Java lista para usar que implementa el protocolo tus, facilitando integración sin reinventar la rueda.
+- Usado por plataformas de escala (Vimeo, Netflix, Cloudinary) para manejar uploads de video y datos masivos.
+- Compatible con Spring Boot mediante adaptadores ligeros.
+
+---
+
+### ⚖️ Análisis crítico
+| Criterio | Propuesta IA (endpoint único) | Propuesta usuario (chunked + tus) |
+|---|---|---|
+| **Simplicidad inicial** | Alta (un endpoint) | Media (requiere sesión + chunks) |
+| **Tolerancia a fallos de red** | Baja (reintentar todo) | Alta (reintentar solo chunk fallido) |
+| **Uso de memoria** | Alto (buffer todo en RAM) | Bajo (stream directo a disco) |
+| **Escalabilidad a 5GB+** | Media (riesgo OOM, timeouts) | Alta (sin límites prácticos) |
+| **Experiencia UX cliente** | Pobre (sin progreso parcial) | Excelente (progreso granular + resume) |
+| **Complejidad de implementación** | Media | Media-Alta (pero usando tus-java-client baja) |
+| **Reconocimiento industria** | No | Sí (protocolo tus estándar) |
+| **Reutilización** | Baja (específico del proyecto) | Alta (patrón aplicable a otros uploads) |
+
+**Problemas de la propuesta IA:**
+- No maneja networkTimeouts para transferencias de 5GB.
+- Requiere buffering en RAM, lo que escala mal con concurrencia.
+- No permite resume: un fallo obliga a recargar todo.
+- Asume conectividad perfecta en producción.
+
+---
+
+### ✅ Decisión recomendada
+- Adoptar la **propuesta del usuario con protocolo tus.io**.
+- **Justificación técnica:** 
+  - Protocolo estándar, documentado y probado en escala industrial.
+  - `tus-java-client` elimina trabajo de implementación.
+  - Chunking + streaming = sin riesgo de OOM ni timeouts.
+  - Resume/retry automático mejora confiabilidad.
+- **Justificación de negocio:**
+  - Mejor experiencia usuario en clientes (progreso visible, resumible).
+  - Reduce fallos operativos y carga de soporte.
+  - Deuda técnica baja (patrón reutilizable en futuras features de upload).
+
+---
+
+### 🧩 Impacto en el diseño
+- El endpoint de upload se divide en **3 operaciones HTTP** (sesión, chunks, completitud).
+- El servicio asincrónico actual se reutiliza tras recibir el archivo completo.
+- Se introduce **sesión de upload** en modelo de datos (tabla `upload_session`).
+- Integración con `OutboxEvent` para notificar progreso/errores a otros sistemas.
+- Cliente (frontend/integración) debe implementar `tus` protocol o usar `tus-js-client` (existe para JS/TS).
+
+---
+
+
