@@ -154,4 +154,53 @@ Implementar **carga por partes (chunked upload)** en lugar de un endpoint monol�
 
 ---
 
+## 📅 Día 2 - 26/Mar/2026
+
+### 🔹 Feature en análisis
+Investigación frontend para chunking de archivos grandes (File API + Blob.slice)
+
+---
+
+### 🤖 Propuesta de la IA
+No aplica.
+
+---
+
+### 📚 Investigación humana (Documentación oficial)
+- Fuente 1: [MDN - Blob.slice()](https://developer.mozilla.org/en-US/docs/Web/API/Blob/slice)
+- Fuente 2: [MDN - File API](https://developer.mozilla.org/en-US/docs/Web/API/File)
+
+**Hallazgos:**
+- La **File API** representa archivos seleccionados por el usuario como objetos manipulables en JavaScript (basados en `Blob`) sin cargarlos completos en memoria.
+- `Blob.slice()` permite dividir un archivo en fragmentos por rangos de bytes (chunks), habilitando cargas progresivas y reanudables.
+- Este enfoque reduce consumo de memoria en frontend y mejora la robustez frente a fallos de red.
+- Permite enviar solo partes del archivo al servidor en vez de transferirlo completo en una sola petición.
+
+---
+
+### ⚖️ Análisis crítico
+| Criterio | Propuesta IA | Investigación propia (MDN File API + Blob.slice) |
+|---|---|---|
+| Aplicabilidad al caso | No aplica | Alta |
+| Base técnica verificable | No aplica | Alta (documentación oficial MDN) |
+| Soporte para chunking | No aplica | Sí |
+| Soporte para reanudación | No aplica | Sí (como base para resumable uploads) |
+| Riesgo de memoria en cliente | No aplica | Bajo |
+
+---
+
+### ✅ Decisión tomada
+- Adoptar en frontend el uso de **File API** y **Blob.slice()** como base para envío por chunks.
+- **Justificación técnica:** APIs nativas del navegador, documentación oficial y compatibilidad con estrategia de upload reanudable.
+- **Justificación de negocio:** mejora experiencia de carga de archivos grandes, reduce fallos y retrabajo de usuarios.
+
+---
+
+### 🧩 Impacto en el diseño
+- El cliente debe implementar lectura por fragmentos y envío incremental al backend.
+- Se alinea con la arquitectura de carga por sesiones/chunks definida en el Día 2.
+- Habilita mostrar progreso real de subida y reintentos por fragmento sin reiniciar todo el archivo.
+
+---
+
 
