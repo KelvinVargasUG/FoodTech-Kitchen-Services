@@ -268,4 +268,237 @@ No aplica.
 
 ---
 
+## 📅 Día 2 - 26/Mar/2026
+
+### 🔹 Feature en análisis
+Diagrama Entidad-Relación: evolución del modelo de datos (v1 → v2)
+
+---
+
+### 🤖 Propuesta de la IA
+
+```mermaid
+erDiagram
+    Category {
+        UUID id PK
+        string name
+        string description
+        datetime created_at
+    }
+    Product {
+        UUID id PK
+        string name
+        string description
+        decimal price
+        boolean status
+        UUID category_id FK
+        datetime created_at
+    }
+    UploadSession {
+        UUID id PK
+        string file_name
+        string status
+        int total_records
+        int processed_records
+        int failed_records
+        datetime created_at
+    }
+    UploadChunk {
+        UUID id PK
+        UUID upload_id FK
+        int chunk_index
+        string file_path
+        datetime uploaded_at
+    }
+    ProcessingLog {
+        UUID id PK
+        UUID upload_id FK
+        string message
+        string type
+        datetime created_at
+    }
+    ErrorRecord {
+        UUID id PK
+        UUID upload_id FK
+        int row_number
+        string error_message
+        datetime created_at
+    }
+
+    Category ||--o{ Product : "categoriza"
+    UploadSession ||--o{ UploadChunk : "contiene"
+    UploadSession ||--o{ ErrorRecord : "genera"
+    UploadSession ||--o{ ProcessingLog : "registra"
+```
+
+---
+
+### 👤 Propuesta del usuario (mejorada)
+
+```mermaid
+erDiagram
+    UploadSession {
+        UUID id PK
+        string file_name
+        string upload_status
+        string processing_status
+        int total_records
+        int processed_records
+        int failed_records
+        datetime created_at
+        datetime updated_at
+        string created_by
+        string updated_by
+    }
+    UploadChunk {
+        UUID id PK
+        UUID upload_id FK
+        int chunk_index
+        long size
+        string checksum
+        string status
+        string file_path
+        datetime uploaded_at
+        datetime created_at
+        datetime updated_at
+        string created_by
+        string updated_by
+    }
+    UploadedFile {
+        UUID id PK
+        UUID upload_id FK
+        string file_path
+        long file_size
+        string checksum
+        datetime assembled_at
+        datetime created_at
+        datetime updated_at
+        string created_by
+        string updated_by
+    }
+    ProcessingLog {
+        UUID id PK
+        UUID upload_id FK
+        string step
+        string level
+        string message
+        datetime created_at
+        datetime updated_at
+        string created_by
+        string updated_by
+    }
+    ErrorRecord {
+        UUID id PK
+        UUID upload_id FK
+        int row_number
+        string raw_data
+        string error_code
+        string error_message
+        datetime created_at
+        datetime updated_at
+        string created_by
+        string updated_by
+    }
+    ProductStaging {
+        UUID id PK
+        UUID upload_id FK
+        string name
+        string description
+        decimal price
+        string status
+        string error_message
+        datetime created_at
+        datetime updated_at
+        string created_by
+        string updated_by
+    }
+    Category {
+        UUID id PK
+        string name
+        string description
+        datetime created_at
+        datetime updated_at
+        string created_by
+        string updated_by
+    }
+    Product {
+        UUID id PK
+        string name
+        string description
+        decimal price
+        boolean status
+        UUID category_id FK
+        datetime created_at
+        datetime updated_at
+        string created_by
+        string updated_by
+    }
+
+    UploadSession ||--o{ UploadChunk : "contiene"
+    UploadSession ||--|| UploadedFile : "genera"
+    UploadSession ||--o{ ProcessingLog : "registra"
+    UploadSession ||--o{ ErrorRecord : "genera"
+    UploadSession ||--o{ ProductStaging : "procesa"
+    Category ||--o{ Product : "categoriza"
+```
+
+**Mejoras introducidas:**
+- `UploadChunk` agrega `size`, `checksum` y `status` por fragmento, habilitando integridad y reanudación.
+- `UploadedFile` es una entidad nueva que representa el archivo final ensamblado, separando el concepto de "archivo subido" del de "sesión de subida".
+- `ProductStaging` es una entidad nueva que actúa como tabla de staging ETL; los datos se validan aquí antes de consolidarse en `Product`.
+- `ProcessingLog` agrega `step` y `level` para trazabilidad granular por fase del proceso.
+- `ErrorRecord` agrega `raw_data` y `error_code`, permitiendo análisis de errores por fila sin perder el dato original.
+- `UploadSession` separa `upload_status` y `processing_status` en dos campos independientes.
+- Todas las entidades tienen auditoría completa: `updated_at`, `created_by`, `updated_by`.
+
+---
+
+### 📚 Investigación humana (Documentación oficial)
+No aplica — diseño propio basado en análisis comparativo y buenas prácticas de modelado ETL.
+
+---
+
+### ⚖️ Análisis crítico
+| Criterio | Modelo v1 (IA) | Modelo v2 (mejorado) |
+|---|---|---|
+| **Entidades** | 6 | 8 (+UploadedFile, +ProductStaging) |
+| **Separación upload/procesamiento** | No (un solo `status`) | Sí (`upload_status` + `processing_status`) |
+| **Integridad por chunk** | No (sin checksum ni estado) | Sí (checksum + status por chunk) |
+| **Staging antes de persistir** | No (directo a Product) | Sí (ProductStaging como buffer ETL) |
+| **Trazabilidad de log** | Básica (message + type) | Granular (step + level + message) |
+| **Trazabilidad de errores** | Básica (message + row) | Completa (raw_data + error_code + message) |
+| **Auditoría** | Solo `created_at` | Completa (created/updated at + by) |
+| **Tolerancia a fallos** | Baja | Alta (resume por chunk + staging) |
+
+**Problemas del modelo v1:**
+- Sin `UploadedFile`, no hay punto de ensamblado explícito; el sistema no sabe cuándo el archivo está completo.
+- Sin `ProductStaging`, un fallo de validación en producción puede dejar datos corruptos en `Product`.
+- Sin `checksum` por chunk, no es posible verificar integridad al reanudar una carga.
+- Un solo campo `status` no diferencia entre "archivo subido" y "datos procesados".
+
+---
+
+### ✅ Decisión tomada
+- Adoptar el **modelo v2** como esquema canónico para implementación.
+- **Justificación técnica:**
+  - Flujo ETL explícito: `UploadChunk` → `UploadedFile` → `ProductStaging` → `Product`.
+  - Cada responsabilidad tiene su propia entidad; cambios futuros no afectan al resto.
+  - `checksum` por chunk garantiza integridad ante reinicios o fallos de red.
+  - Auditoría completa requerida para trazabilidad en entornos productivos.
+- **Justificación de negocio:**
+  - Reduce riesgo de catálogo de productos corrupto tras una carga fallida.
+  - Permite soportar auditorías y revisiones regulatorias con trazabilidad de quién cargó qué.
+  - El patrón de staging es reutilizable para futuras cargas masivas de otros dominios.
+
+---
+
+### 🧩 Impacto en el diseño
+- El modelo v2 requiere 8 tablas en total: `category`, `product`, `upload_session`, `upload_chunk`, `uploaded_file`, `product_staging`, `processing_log`, `error_record`.
+- Las migraciones deben respetar el orden de FKs: `upload_session` primero, luego sus dependientes.
+- El servicio ETL sigue el flujo: lectura desde `uploaded_file` → escritura en `product_staging` → validación → inserción en `product`.
+- `ProcessingLog` se escribe en cada transición de estado del flujo.
+- `ErrorRecord` acumula errores sin detener el proceso; se reporta al finalizar la sesión.
+
+---
+
 
