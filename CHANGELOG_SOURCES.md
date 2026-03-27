@@ -502,3 +502,117 @@ No aplica — diseño propio basado en análisis comparativo y buenas prácticas
 ---
 
 
+
+## 📅 Día 3 - 27/Mar/2026
+
+### 🔹 Feature en análisis
+Diagrama de contexto del flujo end-to-end para carga y procesamiento de CSV
+
+---
+
+### 🤖 Propuesta de la IA
+No aplica.
+
+---
+
+### 📚 Investigación humana (Diseño propio)
+
+```mermaid
+flowchart LR
+
+    User([User])
+
+    subgraph UploadSystem["Upload System"]
+        UploadChunks[Upload File Chunks]
+    end
+
+    subgraph Backend["Backend API"]
+        RegisterSession[Register Session]
+        SaveChunks[Save Chunks]
+        ValidateChunks[Validate Chunks]
+        AssembleFile[Assemble Final File]
+        RegisterFile[Register File]
+        TriggerProcessing[Trigger Processing]
+    end
+
+    subgraph Worker["Worker Processor"]
+        ReadCSV[Read CSV]
+        InsertStaging[Insert to Staging]
+        ValidateData[Validate Data]
+        RegisterErrors[Register Errors]
+        InsertFinal[Insert to Final Table]
+        ProcessLogs[Process Logs]
+    end
+
+    FileSystem[(File System)]
+    Database[(Database)]
+
+    %% Relaciones
+    User -->|Uploads chunks| UploadChunks
+
+    UploadChunks --> RegisterSession
+    RegisterSession -->|Save session| Database
+
+    UploadChunks --> SaveChunks
+    SaveChunks -->|Store chunks| FileSystem
+
+    SaveChunks --> ValidateChunks
+    ValidateChunks --> AssembleFile
+    AssembleFile -->|Create final file| FileSystem
+
+    AssembleFile --> RegisterFile
+    RegisterFile -->|Save file record| Database
+
+    RegisterFile --> TriggerProcessing
+
+    TriggerProcessing --> ReadCSV
+    ReadCSV -->|Read CSV file| FileSystem
+
+    ReadCSV --> InsertStaging
+    InsertStaging -->|Staging data| Database
+
+    InsertStaging --> ValidateData
+
+    ValidateData --> RegisterErrors
+    RegisterErrors -->|Error records| Database
+
+    ValidateData --> InsertFinal
+    InsertFinal -->|Final data| Database
+
+    InsertFinal --> ProcessLogs
+    ProcessLogs -->|Log records| Database
+```
+
+**Hallazgos:**
+- El diagrama separa claramente responsabilidades entre cliente, API backend y worker asíncrono.
+- El flujo evidencia soporte robusto para archivos grandes: chunks, ensamblado, ETL y consolidación.
+- Se identifican puntos de trazabilidad explícitos: sesión, errores y logs en BD.
+- Se desacopla almacenamiento físico (`File System`) de persistencia de negocio (`Database`).
+
+---
+
+### ⚖️ Análisis crítico
+| Criterio | Antes (sin diagrama de contexto formal) | Con diagrama de contexto |
+|---|---|---|
+| Visibilidad del flujo end-to-end | Parcial | Completa |
+| Separación de responsabilidades | Implícita en texto | Explícita en capas y nodos |
+| Trazabilidad operativa | Media | Alta |
+| Comunicación técnica con stakeholders | Media | Alta |
+| Base para implementación y monitoreo | Limitada | Sólida |
+
+---
+
+### ✅ Decisión tomada
+- Adoptar este diagrama Mermaid como artefacto de referencia del contexto de cargas.
+- **Justificación técnica:** alinea implementación backend/worker con un flujo único y verificable.
+- **Justificación de negocio:** reduce ambigüedad, acelera onboarding y facilita validación con stakeholders.
+
+---
+
+### 🧩 Impacto en el diseño
+- Guía contratos entre módulos (`Upload System`, `Backend API`, `Worker Processor`).
+- Facilita métricas por etapa (chunks, válidos, errores, tiempos).
+- Refuerza el criterio ETL de registrar errores sin detener la carga completa.
+- Puede reutilizarse como diagrama de arquitectura de contexto en el SRS IEEE 830.
+
+---
