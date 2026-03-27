@@ -203,4 +203,69 @@ No aplica.
 
 ---
 
+## 📅 Día 2 - 26/Mar/2026
+
+### 🔹 Feature en análisis
+Optimización de inserciones por batch en JPA/Hibernate para cargas masivas de CSV
+
+---
+
+### 🤖 Propuesta de la IA
+No aplica.
+
+---
+
+### 📚 Investigación humana (Documentación oficial)
+- Fuente 1: [Hibernate ORM - Batch Processing](https://docs.hibernate.org/orm/current/userguide/html_single/#caching)
+
+**Hallazgos:**
+- Hibernate permite agrupar múltiples operaciones INSERT en una sola petición SQL mediante configuración de `hibernate.jdbc.batch_size` (ej: 50 registros).
+- El patrón recomendado es usar `EntityManager.persist()` dentro de un ciclo, seguido de `flush()` y `clear()` cada N registros para evitar acumulación excesiva de objetos en memoria.
+- **GenerationType.IDENTITY debe evitarse** en operaciones batch porque rompe el batching; preferir **SEQUENCE** o **TABLE**.
+- Para volúmenes muy grandes (millones de filas), considerar JDBC batch nativo o herramientas nativas de BD (LOAD DATA INFILE en MySQL, COPY en PostgreSQL) para máximo rendimiento.
+- El batching reduce drasticamente la cantidad de round-trips a BD y mejora el throughput de inserciones.
+
+---
+
+### ⚖️ Análisis crítico
+| Criterio | Alternativa JPA batch | JDBC batch | Herramientas nativas BD |
+|---|---|---|---|
+| **Facilidad de implementación** | Alta (configuración + ciclo) | Media | Media (SQL específico) |
+| **Rendimiento** | Alto (bueno para 100K-1M) | Muy Alto | Máximo (para millones) |
+| **Control de errores** | Granular (por registro) | Granular | Limitado (falsos o todos) |
+| **Compatibilidad multiplataforma** | Total (JPA estándar) | Total (JDBC) | Específica por BD |
+| **Facilidad de monitoreo** | Media | Media | Baja |
+| **Gestión de memoria** | Requiere flush/clear manual | Requiere ciclos | Baja (stream directo) |
+
+**Recomendación por escala:**
+- **Hasta 100K registros:** JPA batch con EntityManager + flush/clear cada 50.
+- **100K - 1M registros:** JPA batch o JDBC batch (evaluar ganancia vs complejidad).
+- **Más de 1M registros:** Considerar herramientas nativas de BD para máximo rendimiento.
+
+---
+
+### ✅ Decisión recomendada
+- Para operaciones de carga masiva de CSV dentro del rango **100K - 1M de registros**, usar **JPA batch con Hibernate** (`hibernate.jdbc.batch_size`).
+- Para archivos que excedan **1M registros**, evaluar transición a **JDBC batch nativo** o **herramientas de BD nativas**.
+- **Justificación técnica:**
+  - Mantiene consistencia con ORM actual (JPA/Hibernate).
+  - Ofrece buen balance entre rendimiento y mantenibilidad.
+  - Permite feedback granular de errores de validación por registro.
+  - La configuración es sencilla y reutilizable.
+- **Justificación de negocio:**
+  - Reduce tiempos de carga significativamente.
+  - Permite escalar a millones de registros sin rediseño completo.
+  - Facilita mantenimiento y debugging vs soluciones ad-hoc.
+
+---
+
+### 🧩 Impacto en el diseño
+- El servicio asincrónico de procesamiento CSV debe implementar el patrón de flush/clear cada N registros.
+- Configuración Hibernate en `application.yaml`: `hibernate.jdbc.batch_size: 50`.
+- Debe evitarse `GenerationType.IDENTITY` en la entidad de productos/registros; usar `SEQUENCE`.
+- Se recomienda agregar métricas de progreso (registros procesados, errores, velocidad) para monitoreo.
+- Si el volumen supera 1M, se debe revisar y posiblemente reescribir usando JDBC batch o herramientas nativas.
+
+---
+
 
