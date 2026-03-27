@@ -616,3 +616,110 @@ flowchart LR
 - Puede reutilizarse como diagrama de arquitectura de contexto en el SRS IEEE 830.
 
 ---
+
+## 📅 Día 3 - 27/Mar/2026
+
+### 🔹 Feature en análisis
+Diagrama de flujo secuencial para carga masiva de CSV por chunks y procesamiento asíncrono
+
+---
+
+### 🤖 Propuesta de la IA
+No aplica.
+
+---
+
+### 📚 Investigación humana (Diseño propio)
+
+```mermaid
+sequenceDiagram
+    title Carga masiva de CSV por chunks + procesamiento asincrono
+
+    actor Administrador
+    participant UI as Frontend (Panel Admin)
+    participant Controller as Upload Controller
+    participant UploadService as Upload Service
+    participant Storage as Storage (Disco/S3)
+    participant Assembler as Assembler Service
+    participant Worker as CSV Processing Worker
+    participant DB as Base de Datos
+    participant ErrorLog as Error Log
+
+    %% Inicio de carga
+    Administrador->>UI: Selecciona archivo CSV (5GB)
+    UI->>Controller: POST /upload/init
+    Controller->>UploadService: Crear sesión de carga
+    UploadService-->>Controller: uploadId
+    Controller-->>UI: Retorna uploadId
+
+    %% Subida por chunks
+    loop Por cada chunk (10-100MB)
+        UI->>Controller: POST /upload/chunk (uploadId, chunk)
+        Controller->>Storage: Escribir chunk en disco
+        Storage-->>Controller: OK
+        Controller-->>UI: Chunk recibido
+    end
+
+    %% Finalización
+    UI->>Controller: POST /upload/complete (uploadId)
+    Controller->>Assembler: Ensamblar chunks
+    Assembler->>Storage: Unir chunks en archivo final
+    Storage-->>Assembler: Archivo completo
+    Assembler-->>Controller: Estado = UPLOADED
+    Controller-->>UI: Confirmación de carga completa
+
+    %% Procesamiento asincrono
+    Controller->>Worker: Disparar proceso CSV (uploadId)
+
+    Worker->>Storage: Leer archivo en streaming
+
+    loop Por cada lote de registros
+        Worker->>Worker: Parsear CSV
+        Worker->>Worker: Validar registros
+
+        alt Registros válidos
+            Worker->>DB: Insert batch
+            DB-->>Worker: OK
+        end
+
+        alt Registros inválidos
+            Worker->>ErrorLog: Registrar errores
+        end
+    end
+
+    Worker-->>Controller: Resultado final (éxitos / errores)
+```
+
+**Hallazgos:**
+- El diagrama secuencial muestra con claridad el orden temporal del flujo completo: inicialización, carga por chunks, ensamblado y procesamiento asíncrono.
+- Se evidencian dos fases claramente desacopladas: **upload** y **procesamiento**, conectadas por el `uploadId`.
+- La secuencia valida que el usuario recibe confirmación de carga completa antes del procesamiento intensivo del CSV.
+- El modelo permite procesar registros válidos y registrar errores de forma independiente dentro de cada lote.
+
+---
+
+### ⚖️ Análisis crítico
+| Criterio | Sin diagrama secuencial | Con diagrama secuencial |
+|---|---|---|
+| Visibilidad temporal del flujo | Baja | Alta |
+| Comprensión de interacciones entre componentes | Parcial | Completa |
+| Claridad de responsabilidades por etapa | Media | Alta |
+| Utilidad para implementación backend | Media | Alta |
+| Utilidad para onboarding y revisión técnica | Media | Alta |
+
+---
+
+### ✅ Decisión tomada
+- Adoptar este diagrama Mermaid `sequenceDiagram` como referencia del flujo operativo de carga masiva.
+- **Justificación técnica:** describe de manera precisa las interacciones entre frontend, controller, servicios de almacenamiento, ensamblado y worker asíncrono.
+- **Justificación de negocio:** facilita comunicar el comportamiento del sistema y validar que la experiencia del usuario no dependa del tiempo de procesamiento total.
+
+---
+
+### 🧩 Impacto en el diseño
+- Sirve como guía para definir endpoints (`/upload/init`, `/upload/chunk`, `/upload/complete`) y sus contratos.
+- Refuerza la separación entre confirmación de carga y procesamiento posterior.
+- Ayuda a identificar puntos de observabilidad: recepción de chunk, ensamblado, inserción batch y registro de errores.
+- Complementa el diagrama de contexto y el modelo ER como artefacto de diseño del flujo end-to-end.
+
+---
