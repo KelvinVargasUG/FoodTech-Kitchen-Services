@@ -3,17 +3,53 @@ package com.foodtech.kitchen.infrastructure.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.foodtech.kitchen.application.ports.in.*;
+import com.foodtech.kitchen.application.ports.in.BulkUploadProductsPort;
+import com.foodtech.kitchen.application.ports.in.ChangeProductStatusPort;
+import com.foodtech.kitchen.application.ports.in.CreateProductPort;
+import com.foodtech.kitchen.application.ports.in.DeleteOrderPort;
+import com.foodtech.kitchen.application.ports.in.GetActiveProductsPort;
+import com.foodtech.kitchen.application.ports.in.GetCompletedOrdersPort;
+import com.foodtech.kitchen.application.ports.in.GetOrderStatusPort;
+import com.foodtech.kitchen.application.ports.in.GetTasksByStationPort;
+import com.foodtech.kitchen.application.ports.in.ProcessOrderPort;
+import com.foodtech.kitchen.application.ports.in.RequestOrderInvoicePort;
+import com.foodtech.kitchen.application.ports.in.StartTaskPreparationPort;
+import com.foodtech.kitchen.application.ports.in.UpdateProductPort;
 import com.foodtech.kitchen.application.ports.out.CommandExecutor;
 import com.foodtech.kitchen.application.ports.out.OrderRepository;
 import com.foodtech.kitchen.application.ports.out.PasswordHasher;
 import com.foodtech.kitchen.application.ports.out.PayloadSerializer;
+import com.foodtech.kitchen.application.ports.out.ProductRepository;
 import com.foodtech.kitchen.application.ports.out.TaskRepository;
 import com.foodtech.kitchen.application.ports.out.TokenGenerator;
+import com.foodtech.kitchen.application.ports.out.UploadSessionRepository;
 import com.foodtech.kitchen.application.ports.out.UserRepository;
-import com.foodtech.kitchen.application.usecases.*;
+import com.foodtech.kitchen.application.usecases.AuthenticateUserUseCase;
+import com.foodtech.kitchen.application.usecases.BulkUploadProductsUseCase;
+import com.foodtech.kitchen.application.usecases.ChangeProductStatusUseCase;
+import com.foodtech.kitchen.application.usecases.CreateProductUseCase;
+import com.foodtech.kitchen.application.usecases.DeleteOrderUseCase;
+import com.foodtech.kitchen.application.usecases.GetActiveProductsUseCase;
+import com.foodtech.kitchen.application.usecases.GetCompletedOrdersUseCase;
+import com.foodtech.kitchen.application.usecases.GetOrderStatusUseCase;
+import com.foodtech.kitchen.application.usecases.GetTasksByStationUseCase;
+import com.foodtech.kitchen.application.usecases.ProcessOrderUseCase;
+import com.foodtech.kitchen.application.usecases.RegisterUserUseCase;
+import com.foodtech.kitchen.application.usecases.StartTaskPreparationUseCase;
+import com.foodtech.kitchen.application.usecases.InvoicePayloadBuilder;
+import com.foodtech.kitchen.application.usecases.OrderCompletionService;
+import com.foodtech.kitchen.application.usecases.RequestOrderInvoiceUseCase;
+import com.foodtech.kitchen.application.usecases.UpdateProductUseCase;
 import com.foodtech.kitchen.domain.ports.out.AsyncCommandDispatcher;
-import com.foodtech.kitchen.domain.services.*;
+import com.foodtech.kitchen.domain.services.CommandFactory;
+import com.foodtech.kitchen.domain.services.CommandStrategy;
+import com.foodtech.kitchen.domain.services.OrderStatusCalculator;
+import com.foodtech.kitchen.domain.services.OrderValidator;
+import com.foodtech.kitchen.domain.services.PrepareColdDishStrategy;
+import com.foodtech.kitchen.domain.services.PrepareDrinkStrategy;
+import com.foodtech.kitchen.domain.services.PrepareHotDishStrategy;
+import com.foodtech.kitchen.domain.services.TaskDecomposer;
+import com.foodtech.kitchen.domain.services.TaskFactory;
 import com.foodtech.kitchen.infrastructure.execution.ReactorAsyncCommandDispatcher;
 import com.foodtech.kitchen.infrastructure.security.BCryptPasswordHasher;
 import com.foodtech.kitchen.infrastructure.security.JwtTokenValidator;
@@ -258,5 +294,36 @@ public class ApplicationConfig {
             Clock clock
     ) {
         return new JwtTokenValidator(secret, clock);
+    }
+
+    @Bean
+    public CreateProductPort createProductPort(ProductRepository productRepository) {
+        return new CreateProductUseCase(productRepository);
+    }
+
+    @Bean
+    public GetActiveProductsPort getActiveProductsPort(ProductRepository productRepository) {
+        return new GetActiveProductsUseCase(productRepository);
+    }
+
+    @Bean
+    public ChangeProductStatusPort changeProductStatusPort(ProductRepository productRepository) {
+        return new ChangeProductStatusUseCase(productRepository);
+    }
+
+    @Bean
+    public UpdateProductPort updateProductPort(ProductRepository productRepository) {
+        return new UpdateProductUseCase(productRepository);
+    }
+
+    @Bean
+    public BulkUploadProductsPort bulkUploadProductsPort(
+            UploadSessionRepository uploadSessionRepository,
+            ProductRepository productRepository,
+            @Value("${upload.storage.base-path:/tmp/foodtech/uploads}") String storageBasePath,
+            @Value("${upload.max-file-size-bytes:10485760}") long maxFileSizeBytes
+    ) {
+        return new BulkUploadProductsUseCase(
+            uploadSessionRepository, productRepository, storageBasePath, maxFileSizeBytes);
     }
 }

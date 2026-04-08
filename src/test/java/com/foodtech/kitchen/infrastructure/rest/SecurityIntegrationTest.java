@@ -47,7 +47,8 @@ class SecurityIntegrationTest {
         @Test
         @DisplayName("RED: Protected endpoint with valid token returns 200")
         void protectedEndpoint_withValidToken_returns200() throws Exception {
-        String registerBody = "{\"username\":\"auth-user\",\"email\":\"auth-user@example.com\",\"password\":\"abc123\"}";
+        String registerBody = "{\"username\":\"auth-user\",\"email\":\"auth-user@example.com\",\"password\":\"abc123"
+                + "\"}";
         mockMvc.perform(post("/api/auth/register")
             .contentType(MediaType.APPLICATION_JSON)
             .content(registerBody))

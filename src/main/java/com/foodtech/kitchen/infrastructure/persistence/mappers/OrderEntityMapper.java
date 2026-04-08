@@ -4,7 +4,7 @@ import com.foodtech.kitchen.domain.model.Order;
 import com.foodtech.kitchen.domain.model.OrderStatus;
 import com.foodtech.kitchen.domain.model.Product;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.OrderEntity;
-import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity;
+import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.OrderProductEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,8 +20,8 @@ public class OrderEntityMapper {
     }
 
     public OrderEntity toEntity(Order order) {
-        List<ProductEntity> products = order.getProducts().stream()
-                .map(productEntityMapper::toProductEntity)
+        List<OrderProductEntity> products = order.getProducts().stream()
+                .map(productEntityMapper::toOrderProductEntity)
                 .collect(Collectors.toList());
 
         OrderStatus status = order.getStatus() != null ? order.getStatus() : OrderStatus.CREATED;
@@ -43,6 +43,7 @@ public class OrderEntityMapper {
 
         OrderStatus status = entity.getStatus() != null ? entity.getStatus() : OrderStatus.CREATED;
 
-        return Order.reconstruct(entity.getId(), entity.getTableNumber(), entity.getCustomerName(), entity.getCustomerEmail(), products, status);
+        return Order.reconstruct(entity.getId(), entity.getTableNumber(),
+            entity.getCustomerName(), entity.getCustomerEmail(), products, status);
     }
 }

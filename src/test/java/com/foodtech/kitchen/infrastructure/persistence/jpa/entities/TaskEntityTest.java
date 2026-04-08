@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @Tag("component")
 class TaskEntityTest {
@@ -13,14 +15,13 @@ class TaskEntityTest {
     @Test
     @DisplayName("Should create TaskEntity with all fields")
     void shouldCreateTaskEntity() {
-        // Given & When
+
         TaskEntity entity = TaskEntity.builder()
             .orderId(1L)
             .station(Station.BAR)
             .tableNumber("A1")
             .build();
 
-        // Then
         assertNotNull(entity);
         assertEquals(1L, entity.getOrderId());
         assertEquals(Station.BAR, entity.getStation());
@@ -30,10 +31,9 @@ class TaskEntityTest {
     @Test
     @DisplayName("Should generate ID when saved")
     void shouldHaveIdField() {
-        // Given
+
         TaskEntity entity = new TaskEntity();
-        
-        // Then - before persisting, id should be null
+
         assertNull(entity.getId());
     }
 }

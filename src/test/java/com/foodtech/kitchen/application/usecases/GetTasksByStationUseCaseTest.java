@@ -1,7 +1,10 @@
 package com.foodtech.kitchen.application.usecases;
 
 import com.foodtech.kitchen.application.ports.out.TaskRepository;
-import com.foodtech.kitchen.domain.model.*;
+import com.foodtech.kitchen.domain.model.Product;
+import com.foodtech.kitchen.domain.model.ProductType;
+import com.foodtech.kitchen.domain.model.Station;
+import com.foodtech.kitchen.domain.model.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -10,8 +13,13 @@ import org.junit.jupiter.api.Tag;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @Tag("unit")
 class GetTasksByStationUseCaseTest {
@@ -28,21 +36,19 @@ class GetTasksByStationUseCaseTest {
     @Test
     @DisplayName("Should return only tasks for specified station")
     void shouldReturnOnlyTasksForSpecifiedStation() {
-        // Given - 3 tareas pendientes: 2 BAR, 1 HOT_KITCHEN
+
         Product cocaCola = new Product("Coca Cola", ProductType.DRINK, 5);
         Product sprite = new Product("Sprite", ProductType.DRINK, 5);
-        
+
         LocalDateTime now = LocalDateTime.now();
         Task barTask1 = new Task(1L, Station.BAR, "A1", List.of(cocaCola), now);
         Task barTask2 = new Task(1L, Station.BAR, "A2", List.of(sprite), now);
-        
+
         when(taskRepository.findByStation(Station.BAR))
             .thenReturn(List.of(barTask1, barTask2));
 
-        // When - el encargado de barra consulta sus tareas
         List<Task> tasks = useCase.execute(Station.BAR, null);
 
-        // Then - el sistema muestra únicamente las 2 tareas de barra
         assertEquals(2, tasks.size());
         assertTrue(tasks.stream().allMatch(task -> task.getStation() == Station.BAR));
         verify(taskRepository, times(1)).findByStation(Station.BAR);
@@ -51,14 +57,12 @@ class GetTasksByStationUseCaseTest {
     @Test
     @DisplayName("Should return empty list when no tasks for station")
     void shouldReturnEmptyListWhenNoTasksForStation() {
-        // Given - no hay tareas asignadas a la estación de barra
+
         when(taskRepository.findByStation(Station.BAR))
             .thenReturn(List.of());
 
-        // When - el encargado de barra consulta sus tareas
         List<Task> tasks = useCase.execute(Station.BAR, null);
 
-        // Then - el sistema muestra que no hay tareas pendientes
         assertNotNull(tasks);
         assertTrue(tasks.isEmpty());
         verify(taskRepository, times(1)).findByStation(Station.BAR);

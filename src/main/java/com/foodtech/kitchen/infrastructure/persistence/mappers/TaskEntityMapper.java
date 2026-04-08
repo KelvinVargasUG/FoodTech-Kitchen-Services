@@ -9,8 +9,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// ✅ Cumple SRP: Solo mapea entre dominio y entidades JPA
-// ✅ Elimina complejidad: No más ObjectMapper, try-catch, JSON, DTOs
 @Component
 public class TaskEntityMapper {
 

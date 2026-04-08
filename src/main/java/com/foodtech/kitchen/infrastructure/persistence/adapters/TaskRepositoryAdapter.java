@@ -1,7 +1,9 @@
 package com.foodtech.kitchen.infrastructure.persistence.adapters;
 
 import com.foodtech.kitchen.application.ports.out.TaskRepository;
-import com.foodtech.kitchen.domain.model.*;
+import com.foodtech.kitchen.domain.model.Station;
+import com.foodtech.kitchen.domain.model.Task;
+import com.foodtech.kitchen.domain.model.TaskStatus;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.TaskJpaRepository;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.TaskEntity;
 import com.foodtech.kitchen.infrastructure.persistence.mappers.TaskEntityMapper;
@@ -11,9 +13,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-//HUMAN REVIEW: Simplifiqué adapter inyectando TaskEntityMapper dedicado.
-//Cumple SRP: este adapter solo adapta entre JPA y dominio, mapper maneja serialización.
-//Elimina duplicación: ProductDto y lógica JSON centralizados en mapper.
 @Component
 public class TaskRepositoryAdapter implements TaskRepository {
 
@@ -30,7 +29,7 @@ public class TaskRepositoryAdapter implements TaskRepository {
         List<TaskEntity> entities = tasks.stream()
             .map(mapper::toEntity)
             .collect(Collectors.toList());
-        
+
         jpaRepository.saveAll(entities);
     }
 
@@ -43,7 +42,7 @@ public class TaskRepositoryAdapter implements TaskRepository {
 
     @Override
     public Optional<Task> findById(Long id) {
-        return jpaRepository.findByIdWithProducts(id) // ✅ Usar eager fetch
+        return jpaRepository.findByIdWithProducts(id) 
                 .map(mapper::toDomain);
     }
 

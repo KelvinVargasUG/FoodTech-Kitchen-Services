@@ -21,7 +21,8 @@ public class PrepareColdDishCommand implements Command {
         int totalTime = 0;
         for (int i = 0; i < products.size(); i++) {
             Product product = products.get(i);
-            System.out.println("[COLD_KITCHEN] Preparing dish " + (i + 1) + "/" + products.size() + ": " + product.getName());
+            System.out.println("[COLD_KITCHEN] Preparing dish "
+                + (i + 1) + "/" + products.size() + ": " + product.getName());
 
             simulatePreparation(SECONDS_PER_COLD_DISH);
             totalTime += SECONDS_PER_COLD_DISH;

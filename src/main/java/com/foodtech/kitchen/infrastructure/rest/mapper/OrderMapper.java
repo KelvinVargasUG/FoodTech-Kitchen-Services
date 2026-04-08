@@ -7,7 +7,6 @@ import com.foodtech.kitchen.infrastructure.rest.dto.CreateOrderRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
-//HUMAN REVIEW: Eliminada "inappropriate intimacy" con Map. Ahora usa ProductRequest tipado.
 public class OrderMapper {
 
     private OrderMapper() {
@@ -18,7 +17,7 @@ public class OrderMapper {
         List<Product> products = request.products().stream()
             .map(ProductMapper::mapProduct)
             .collect(Collectors.toList());
-        
+
         return new Order(request.tableNumber(), request.customerName(), request.customerEmail(), products);
     }
 

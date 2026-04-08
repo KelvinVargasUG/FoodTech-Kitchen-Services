@@ -1,9 +1,15 @@
 package com.foodtech.kitchen.infrastructure.rest.exception;
 
-import com.foodtech.kitchen.application.exepcions.OrderNotFoundException;
-import com.foodtech.kitchen.application.exepcions.TaskNotFoundException;
 import com.foodtech.kitchen.application.exepcions.DuplicateEmailException;
+import com.foodtech.kitchen.application.exepcions.DuplicateProductException;
 import com.foodtech.kitchen.application.exepcions.DuplicateUsernameException;
+import com.foodtech.kitchen.application.exepcions.OrderNotFoundException;
+import com.foodtech.kitchen.application.exepcions.ProductNotFoundException;
+import com.foodtech.kitchen.application.exepcions.TaskNotFoundException;
+import com.foodtech.kitchen.application.exepcions.CsvValidationException;
+import com.foodtech.kitchen.application.exepcions.ChunkAssemblyException;
+import com.foodtech.kitchen.application.exepcions.UploadSessionNotFoundException;
+import com.foodtech.kitchen.application.exepcions.FileSizeLimitExceededException;
 import com.foodtech.kitchen.infrastructure.rest.dto.ErrorResponse;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.HttpStatus;
@@ -13,8 +19,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
-//HUMAN REVIEW: Manejo centralizado de excepciones. Cumple SRP: controller solo coordina, este handler maneja errores.
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -38,6 +44,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleProductNotFoundException(ProductNotFoundException ex) {
+        ErrorResponse error = new ErrorResponse(
+            ex.getMessage(),
+            "Product not found",
+            HttpStatus.NOT_FOUND.value()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
     @ExceptionHandler(DuplicateEmailException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateEmailException(DuplicateEmailException ex) {
         ErrorResponse error = new ErrorResponse(
@@ -53,6 +69,16 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(
             ex.getMessage(),
             "Duplicate username",
+            HttpStatus.CONFLICT.value()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(DuplicateProductException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateProductException(DuplicateProductException ex) {
+        ErrorResponse error = new ErrorResponse(
+            ex.getMessage(),
+            "Duplicate product",
             HttpStatus.CONFLICT.value()
         );
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
@@ -80,7 +106,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleTypeMismatchException(MethodArgumentTypeMismatchException ex) {
-        String message = String.format("Invalid value '%s' for parameter '%s'. Expected one of: BAR, HOT_KITCHEN, COLD_KITCHEN", 
+        String message = String.format(
+            "Invalid value '%s' for parameter '%s'. Expected one of: BAR, HOT_KITCHEN, COLD_KITCHEN",
             ex.getValue(), ex.getName());
         ErrorResponse error = new ErrorResponse(
             message,
@@ -112,6 +139,56 @@ public class GlobalExceptionHandler {
             HttpStatus.BAD_REQUEST.value()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(CsvValidationException.class)
+    public ResponseEntity<ErrorResponse> handleCsvValidationException(CsvValidationException ex) {
+        ErrorResponse error = new ErrorResponse(
+            ex.getMessage(),
+            "CSV validation failed",
+            HttpStatus.BAD_REQUEST.value()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(ChunkAssemblyException.class)
+    public ResponseEntity<ErrorResponse> handleChunkAssemblyException(ChunkAssemblyException ex) {
+        ErrorResponse error = new ErrorResponse(
+            ex.getMessage(),
+            "Chunk assembly failed",
+            HttpStatus.BAD_REQUEST.value()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(UploadSessionNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUploadSessionNotFoundException(UploadSessionNotFoundException ex) {
+        ErrorResponse error = new ErrorResponse(
+            ex.getMessage(),
+            "Upload session not found",
+            HttpStatus.NOT_FOUND.value()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(FileSizeLimitExceededException.class)
+    public ResponseEntity<ErrorResponse> handleFileSizeLimitExceededException(FileSizeLimitExceededException ex) {
+        ErrorResponse error = new ErrorResponse(
+            ex.getMessage(),
+            "El archivo supera el tamaño máximo permitido (10 MB)",
+            HttpStatus.PAYLOAD_TOO_LARGE.value()
+        );
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(error);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
+        ErrorResponse error = new ErrorResponse(
+            ex.getMessage(),
+            "El archivo supera el tamaño máximo permitido (10 MB)",
+            HttpStatus.PAYLOAD_TOO_LARGE.value()
+        );
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(error);
     }
 
     @ExceptionHandler(Exception.class)

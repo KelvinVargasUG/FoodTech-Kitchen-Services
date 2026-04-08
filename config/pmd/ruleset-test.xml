@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+<ruleset name="PMD Ruleset for Test Sources"
+    xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+
+    <description>
+        Lenient PMD ruleset for test sources.
+        Excludes rules that are inapplicable or counter-productive in test code.
+    </description>
+
+    <!-- Best Practices — skip JUnit-4-style assertion rules and test structure rules -->
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="UnusedImports"/>
+        <exclude name="UnusedPrivateField"/>
+        <exclude name="UnusedLocalVariable"/>
+        <exclude name="UnusedPrivateMethod"/>
+        <!-- JUnit 4 rules not applicable to JUnit 5 / AssertJ -->
+        <exclude name="JUnitAssertionsShouldIncludeMessage"/>
+        <exclude name="JUnitTestsShouldIncludeAssert"/>
+        <exclude name="JUnitTestContainsTooManyAsserts"/>
+        <exclude name="JUnit5TestShouldBePackagePrivate"/>
+        <exclude name="JUnit4TestShouldUseBeforeAnnotation"/>
+        <exclude name="JUnit4TestShouldUseAfterAnnotation"/>
+        <exclude name="JUnit4TestShouldUseTestAnnotation"/>
+        <!-- Config/helper test classes may not have test methods -->
+        <!-- Note: in PMD 6 this rule lives in errorprone, not bestpractices -->
+        <!-- <exclude name="TestClassWithoutTestCases"/> -->
+        <!-- AssertJ fluent methods cover this better than PMD can detect -->
+        <exclude name="LiteralsFirstInComparisons"/>
+        <exclude name="SimplifiableTestAssertion"/>
+    </rule>
+
+    <!-- Code Style — relax naming and structural rules for tests -->
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="MethodArgumentCouldBeFinal"/>
+        <exclude name="LocalVariableCouldBeFinal"/>
+        <exclude name="FieldDeclarationsShouldBeAtStartOfClass"/>
+        <!-- Test classes don't need a constructor -->
+        <exclude name="AtLeastOneConstructor"/>
+        <!-- BDD-style method names use underscores -->
+        <exclude name="MethodNamingConventions"/>
+        <!-- Short variable names common in tests (e, id, db, etc.) -->
+        <exclude name="ShortVariable"/>
+        <!-- Long descriptive variable names in tests are fine -->
+        <exclude name="LongVariable"/>
+        <!-- Test DSLs use many static imports -->
+        <exclude name="TooManyStaticImports"/>
+        <!-- LinguisticNaming is too strict for test helpers -->
+        <exclude name="LinguisticNaming"/>
+        <!-- Duplicate string literals in tests are acceptable -->
+        <exclude name="AvoidDuplicateLiterals"/>
+        <!-- CommentDefaultAccessModifier: test inner classes often package-private -->
+        <exclude name="CommentDefaultAccessModifier"/>
+    </rule>
+
+    <!-- Design — relax complexity rules for test classes -->
+    <rule ref="category/java/design.xml">
+        <exclude name="ExcessiveMethodLength"/>
+        <exclude name="ExcessiveClassLength"/>
+        <exclude name="TooManyFields"/>
+        <exclude name="TooManyMethods"/>
+        <exclude name="LoosePackageCoupling"/>
+        <!-- AssertJ fluent chains trigger LawOfDemeter heavily -->
+        <exclude name="LawOfDemeter"/>
+        <!-- Tests often declare throws Exception for simplicity -->
+        <exclude name="SignatureDeclareThrowsException"/>
+        <!-- Test classes with many imports are expected -->
+        <exclude name="ExcessiveImports"/>
+        <!-- Test fixture fields classified as singular fields -->
+        <exclude name="SingularField"/>
+        <!-- Test helpers may throw/catch generic exceptions -->
+        <exclude name="AvoidThrowingRawExceptionTypes"/>
+        <exclude name="AvoidCatchingGenericException"/>
+    </rule>
+
+    <!-- Error Prone — relax for tests -->
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="EmptyCatchBlock"/>
+        <exclude name="EmptyFinallyBlock"/>
+        <exclude name="EmptyIfStmt"/>
+        <exclude name="EmptyWhileStmt"/>
+        <exclude name="EmptyTryBlock"/>
+        <exclude name="EmptySwitchStatements"/>
+        <!-- Tests may use reflection to access internals -->
+        <exclude name="AvoidAccessibilityAlteration"/>
+        <!-- Duplicate literals in tests (e.g. repeated expected values) are intentional -->
+        <exclude name="AvoidDuplicateLiterals"/>
+        <!-- Literal conditions common in parameterised test helpers -->
+        <exclude name="AvoidLiteralsInIfCondition"/>
+        <!-- Helper/config classes in test dir that have no @Test methods -->
+        <exclude name="TestClassWithoutTestCases"/>
+    </rule>
+
+    <!-- Multithreading — excluded: test code is single-threaded -->
+    <!-- <rule ref="category/java/multithreading.xml/UseConcurrentHashMap"/> -->
+
+    <!-- Performance -->
+    <rule ref="category/java/performance.xml">
+        <exclude name="InefficientEmptyStringCheck"/>
+        <exclude name="InefficientStringBuffering"/>
+        <exclude name="StringInstantiation"/>
+    </rule>
+
+    <!-- Security -->
+    <rule ref="category/java/security.xml"/>
+
+    <!-- Custom thresholds — more relaxed for test classes -->
+    <rule ref="category/java/design.xml/CyclomaticComplexity">
+        <properties>
+            <property name="classReportLevel" value="80"/>
+            <property name="methodReportLevel" value="15"/>
+        </properties>
+    </rule>
+
+    <rule ref="category/java/design.xml/NcssMethodCount">
+        <properties>
+            <property name="minimum" value="100"/>
+        </properties>
+    </rule>
+
+    <rule ref="category/java/design.xml/NcssTypeCount">
+        <properties>
+            <property name="minimum" value="500"/>
+        </properties>
+    </rule>
+
+</ruleset>

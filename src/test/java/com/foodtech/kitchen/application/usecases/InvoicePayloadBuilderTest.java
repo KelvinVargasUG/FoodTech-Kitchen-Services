@@ -32,21 +32,20 @@ class InvoicePayloadBuilderTest {
 
     @Test
     void build_whenValidOrder_buildsPayloadAndSerializes() {
-        // Arrange
-        Order order = Order.reconstruct(200L, "C3", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.COMPLETED);
+
+        Order order = Order.reconstruct(200L,
+                "C3", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.COMPLETED);
         when(payloadSerializer.serialize(org.mockito.Mockito.anyMap())).thenReturn("json");
 
-        // Act
         String result = builder.build(order);
 
-        // Assert
         assertEquals("json", result);
 
         ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
         verify(payloadSerializer).serialize(payloadCaptor.capture());
         Map<String, Object> payload = payloadCaptor.getValue();
 
-        assertEquals(10, payload.get("total")); // 5 (Plato fuerte) + 5 (Plato entrada)
+        assertEquals(10, payload.get("total")); 
         assertEquals("PDF", payload.get("formato"));
         assertEquals("test@test.com", payload.get("emailCliente"));
         assertEquals("Cliente Test", payload.get("nombreCliente"));
@@ -55,11 +54,10 @@ class InvoicePayloadBuilderTest {
         assertNotNull(productsObj);
         List<Map<String, Object>> products = (List<Map<String, Object>>) productsObj;
         assertEquals(2, products.size());
-        
-        // El orden de los elementos en el set depende del Hash, así que podemos verificar que existan
+
         long fuerteCount = products.stream().filter(p -> p.get("nombre").equals("Plato fuerte")).count();
         long entradaCount = products.stream().filter(p -> p.get("nombre").equals("Plato entrada")).count();
-        
+
         assertEquals(1, fuerteCount);
         assertEquals(1, entradaCount);
     }

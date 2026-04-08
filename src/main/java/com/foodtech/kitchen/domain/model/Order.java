@@ -3,7 +3,6 @@ package com.foodtech.kitchen.domain.model;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class Order {
 
     private final Long id;
@@ -23,7 +22,8 @@ public class Order {
         this.status = OrderStatus.CREATED;
     }
 
-    private Order(Long id, String tableNumber, String customerName, String customerEmail, List<Product> products, OrderStatus status) {
+    private Order(Long id, String tableNumber, String customerName,
+            String customerEmail, List<Product> products, OrderStatus status) {
         validate(tableNumber, customerName, customerEmail, products);
         validateStatus(status);
         this.id = id;
@@ -34,12 +34,15 @@ public class Order {
         this.status = status;
     }
 
-    public static Order reconstruct(Long id, String tableNumber, String customerName, String customerEmail, List<Product> products) {
+    public static Order reconstruct(Long id, String tableNumber,
+            String customerName, String customerEmail, List<Product> products) {
         validateId(id);
         return new Order(id, tableNumber, customerName, customerEmail, products, OrderStatus.CREATED);
     }
 
-    public static Order reconstruct(Long id, String tableNumber, String customerName, String customerEmail, List<Product> products, OrderStatus status) {
+    public static Order reconstruct(Long id, String tableNumber,
+            String customerName, String customerEmail,
+            List<Product> products, OrderStatus status) {
         validateId(id);
         return new Order(id, tableNumber, customerName, customerEmail, products, defaultStatus(status));
     }

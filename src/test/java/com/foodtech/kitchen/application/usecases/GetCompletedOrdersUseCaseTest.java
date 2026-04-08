@@ -12,7 +12,6 @@ import com.foodtech.kitchen.domain.model.Task;
 import com.foodtech.kitchen.domain.model.TaskStatus;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,8 +40,9 @@ class GetCompletedOrdersUseCaseTest {
 
     @Test
     void execute_whenCompletedOrdersExist_returnsViewsWithTiming() {
-        // Arrange
-        Order order = Order.reconstruct(1L, "A1", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.COMPLETED);
+
+        Order order = Order.reconstruct(1L,
+                "A1", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.COMPLETED);
         LocalDateTime createdAt = LocalDateTime.of(2026, 1, 1, 9, 50);
         LocalDateTime startedAt1 = LocalDateTime.of(2026, 1, 1, 10, 0);
         LocalDateTime startedAt2 = LocalDateTime.of(2026, 1, 1, 10, 5);
@@ -77,10 +77,8 @@ class GetCompletedOrdersUseCaseTest {
         when(taskRepository.findByOrderId(1L))
                 .thenReturn(List.of(task1, task2));
 
-        // Act
         List<CompletedOrderView> result = useCase.execute();
 
-        // Assert
         assertEquals(1, result.size());
         CompletedOrderView view = result.get(0);
         assertEquals(1L, view.orderId());
@@ -96,8 +94,9 @@ class GetCompletedOrdersUseCaseTest {
 
     @Test
     void execute_whenNoCompletedTasks_returnsNullTiming() {
-        // Arrange
-        Order order = Order.reconstruct(2L, "B2", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.COMPLETED);
+
+        Order order = Order.reconstruct(2L,
+                "B2", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.COMPLETED);
         LocalDateTime createdAt = LocalDateTime.of(2026, 1, 1, 9, 50);
         Task task = Task.reconstruct(
                 21L,
@@ -116,10 +115,8 @@ class GetCompletedOrdersUseCaseTest {
         when(taskRepository.findByOrderId(2L))
                 .thenReturn(List.of(task));
 
-        // Act
         List<CompletedOrderView> result = useCase.execute();
 
-        // Assert
         CompletedOrderView view = result.get(0);
         assertNull(view.completedAt());
         assertNull(view.totalPreparationTime());

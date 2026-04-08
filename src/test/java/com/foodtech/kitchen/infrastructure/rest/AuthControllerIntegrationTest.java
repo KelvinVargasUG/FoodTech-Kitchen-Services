@@ -62,7 +62,8 @@ class AuthControllerIntegrationTest {
     @Test
     @DisplayName("RED: register with weak password returns 400")
     void register_withWeakPassword_returns400() throws Exception {
-        String requestBody = "{\"username\":\"user-weak-pass\",\"email\":\"weak-pass@example.com\",\"password\":\"abc\"}";
+        String requestBody = "{\"username\":\"user-weak-pass\",\"email\":\"weak-pass@example.com\","
+                + "\"password\":\"abc\"}";
 
         mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -73,8 +74,10 @@ class AuthControllerIntegrationTest {
     @Test
     @DisplayName("RED: register with duplicate email returns 409")
     void register_duplicateEmail_returns409() throws Exception {
-        String firstBody = "{\"username\":\"user-dup-email-1\",\"email\":\"dup-email@example.com\",\"password\":\"abc123\"}";
-        String secondBody = "{\"username\":\"user-dup-email-2\",\"email\":\"dup-email@example.com\",\"password\":\"abc123\"}";
+        String firstBody = "{\"username\":\"user-dup-email-1\",\"email\":\"dup-email@example.com\","
+                + "\"password\":\"abc123\"}";
+        String secondBody = "{\"username\":\"user-dup-email-2\",\"email\":\"dup-email@example.com\","
+                + "\"password\":\"abc123\"}";
 
         mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -90,8 +93,10 @@ class AuthControllerIntegrationTest {
     @Test
     @DisplayName("RED: register with duplicate username returns 409")
     void register_duplicateUsername_returns409() throws Exception {
-        String firstBody = "{\"username\":\"dup-username\",\"email\":\"dup-username-1@example.com\",\"password\":\"abc123\"}";
-        String secondBody = "{\"username\":\"dup-username\",\"email\":\"dup-username-2@example.com\",\"password\":\"abc123\"}";
+        String firstBody = "{\"username\":\"dup-username\",\"email\":\"dup-username-1@example.com\","
+                + "\"password\":\"abc123\"}";
+        String secondBody = "{\"username\":\"dup-username\",\"email\":\"dup-username-2@example.com\","
+                + "\"password\":\"abc123\"}";
 
         mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -107,7 +112,8 @@ class AuthControllerIntegrationTest {
         @Test
         @DisplayName("RED: register with null username returns 400")
         void register_nullUsername_returns400() throws Exception {
-                String requestBody = "{\"username\":null,\"email\":\"valid-null-user@example.com\",\"password\":\"abc123\"}";
+                String requestBody = "{\"username\":null,\"email\":\"valid-null-user@example.com\","
+                        + "\"password\":\"abc123\"}";
 
                 mockMvc.perform(post("/api/auth/register")
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -129,7 +135,8 @@ class AuthControllerIntegrationTest {
         @Test
         @DisplayName("RED: register with null password returns 400")
         void register_nullPassword_returns400() throws Exception {
-                String requestBody = "{\"username\":\"valid-null-pass\",\"email\":\"valid-null-pass@example.com\",\"password\":null}";
+                String requestBody = "{\"username\":\"valid-null-pass\",\"email\":\"valid-null-pass@example.com\","
+                        + "\"password\":null}";
 
                 mockMvc.perform(post("/api/auth/register")
                                 .contentType(MediaType.APPLICATION_JSON)

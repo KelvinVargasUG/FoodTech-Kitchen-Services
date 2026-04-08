@@ -12,9 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-//HUMAN REVIEW: Simplifiqué adapter inyectando OrderEntityMapper dedicado.
-//Cumple SRP: este adapter solo adapta entre JPA y dominio, no serializa.
-//Mapper maneja serialización JSON, cumpliendo separación de responsabilidades.
 @Component
 public class OrderRepositoryAdapter implements OrderRepository {
 

@@ -36,20 +36,20 @@ class OrderRepositoryAdapterTest {
 
     @Test
     void save_mapsToEntityAndBack() {
-        // Arrange
-        Order order = Order.reconstruct(1L, "A1", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.CREATED);
+
+        Order order = Order.reconstruct(1L,
+                "A1", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.CREATED);
         OrderEntity entity = OrderEntity.builder().id(1L).tableNumber("A1").build();
         OrderEntity savedEntity = OrderEntity.builder().id(1L).tableNumber("A1").build();
-        Order savedOrder = Order.reconstruct(1L, "A1", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.CREATED);
+        Order savedOrder = Order.reconstruct(1L,
+                "A1", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.CREATED);
 
         when(mapper.toEntity(order)).thenReturn(entity);
         when(jpaRepository.save(entity)).thenReturn(savedEntity);
         when(mapper.toDomain(savedEntity)).thenReturn(savedOrder);
 
-        // Act
         Order result = adapter.save(order);
 
-        // Assert
         assertNotNull(result);
         assertEquals(1L, result.getId());
         verify(mapper).toEntity(order);
@@ -58,16 +58,15 @@ class OrderRepositoryAdapterTest {
 
     @Test
     void findById_mapsEntityToDomain() {
-        // Arrange
+
         OrderEntity entity = OrderEntity.builder().id(2L).tableNumber("B2").build();
-        Order order = Order.reconstruct(2L, "B2", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.CREATED);
+        Order order = Order.reconstruct(2L,
+                "B2", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.CREATED);
         when(jpaRepository.findById(2L)).thenReturn(Optional.of(entity));
         when(mapper.toDomain(entity)).thenReturn(order);
 
-        // Act
         Optional<Order> result = adapter.findById(2L);
 
-        // Assert
         assertEquals(true, result.isPresent());
         assertEquals(2L, result.get().getId());
         verify(mapper).toDomain(entity);
@@ -75,16 +74,15 @@ class OrderRepositoryAdapterTest {
 
     @Test
     void findByStatus_mapsEntityListToDomainList() {
-        // Arrange
+
         OrderEntity entity = OrderEntity.builder().id(3L).tableNumber("C3").build();
-        Order order = Order.reconstruct(3L, "C3", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.COMPLETED);
+        Order order = Order.reconstruct(3L,
+                "C3", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.COMPLETED);
         when(jpaRepository.findByStatus(OrderStatus.COMPLETED)).thenReturn(List.of(entity));
         when(mapper.toDomain(entity)).thenReturn(order);
 
-        // Act
         List<Order> result = adapter.findByStatus(OrderStatus.COMPLETED);
 
-        // Assert
         assertEquals(1, result.size());
         assertEquals(3L, result.get(0).getId());
         verify(mapper).toDomain(entity);

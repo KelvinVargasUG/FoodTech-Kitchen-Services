@@ -12,16 +12,14 @@ class OutboxEventTest {
 
     @Test
     void newEvent_setsDefaultFields() {
-        // Arrange
+
         String aggregateType = "Order";
         String aggregateId = "123";
         String eventType = "OrderInvoiceRequested";
         String payload = "payload";
 
-        // Act
         OutboxEvent event = OutboxEvent.newEvent(aggregateType, aggregateId, eventType, payload);
 
-        // Assert
         assertNotNull(event.getId());
         assertEquals(aggregateType, event.getAggregateType());
         assertEquals(aggregateId, event.getAggregateId());

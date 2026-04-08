@@ -18,8 +18,12 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import java.util.List;
 import java.util.Map;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Tag("integration")
 @SpringBootTest
@@ -53,7 +57,7 @@ class OrderControllerIntegrationTest {
     @Test
     @DisplayName("Should create order and return 201 with task count")
     void shouldCreateOrderAndReturn201() throws Exception {
-        // Given
+
         Map<String, Object> request = Map.of(
             "tableNumber", "A1",
             "customerName", "Cliente Test",
@@ -63,7 +67,6 @@ class OrderControllerIntegrationTest {
             )
         );
 
-        // When & Then
         mockMvc.perform(post("/api/orders")
             .with(auth())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -77,7 +80,7 @@ class OrderControllerIntegrationTest {
     @Test
     @DisplayName("Should create order with mixed products")
     void shouldCreateOrderWithMixedProducts() throws Exception {
-        // Given
+
         Map<String, Object> request = Map.of(
             "tableNumber", "B2",
             "customerName", "Cliente Test",
@@ -88,7 +91,6 @@ class OrderControllerIntegrationTest {
             )
         );
 
-        // When & Then
         mockMvc.perform(post("/api/orders")
             .with(auth())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -101,7 +103,7 @@ class OrderControllerIntegrationTest {
     @Test
     @DisplayName("Should reject order without products")
     void shouldRejectOrderWithoutProducts() throws Exception {
-        // Given
+
         Map<String, Object> request = Map.of(
             "tableNumber", "C3",
             "customerName", "Cliente Test",
@@ -109,7 +111,6 @@ class OrderControllerIntegrationTest {
             "products", List.of()
         );
 
-        // When & Then
         mockMvc.perform(post("/api/orders")
             .with(auth())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -121,7 +122,7 @@ class OrderControllerIntegrationTest {
     @Test
     @DisplayName("Should reject order without table number")
     void shouldRejectOrderWithoutTableNumber() throws Exception {
-        // Given
+
         Map<String, Object> request = Map.of(
             "tableNumber", "",
             "customerName", "Cliente Test",
@@ -131,7 +132,6 @@ class OrderControllerIntegrationTest {
             )
         );
 
-        // When & Then
         mockMvc.perform(post("/api/orders")
             .with(auth())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -143,7 +143,7 @@ class OrderControllerIntegrationTest {
     @Test
     @DisplayName("Should delete order and return 204")
     void shouldDeleteOrderAndReturn204() throws Exception {
-        // Given
+
         Map<String, Object> request = Map.of(
             "tableNumber", "D4",
             "customerName", "Cliente Delete",
@@ -159,7 +159,6 @@ class OrderControllerIntegrationTest {
             .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isCreated());
 
-        // Obtener id creado desde endpoint existente de tareas
         String tasksResponse = mockMvc.perform(get("/api/tasks/station/BAR").with(auth()))
             .andExpect(status().isOk())
             .andReturn()
@@ -179,7 +178,6 @@ class OrderControllerIntegrationTest {
             throw new IllegalStateException("Expected order for table D4 was not created");
         }
 
-        // When & Then
         mockMvc.perform(delete("/api/orders/" + orderId).with(auth()))
             .andExpect(status().isNoContent());
 

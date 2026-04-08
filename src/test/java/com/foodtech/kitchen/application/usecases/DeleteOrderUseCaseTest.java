@@ -35,26 +35,23 @@ class DeleteOrderUseCaseTest {
 
     @Test
     void execute_whenOrderExists_deletesTasksAndOrder() {
-        // Arrange
+
         Long orderId = 1L;
         Order order = Order.reconstruct(orderId, "A1", "Cliente Test", "test@test.com", sampleProducts());
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
 
-        // Act
         useCase.execute(orderId);
 
-        // Assert
         verify(taskRepository).deleteByOrderId(orderId);
         verify(orderRepository).deleteById(orderId);
     }
 
     @Test
     void execute_whenOrderDoesNotExist_throwsNotFound() {
-        // Arrange
+
         Long orderId = 999L;
         when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
 
-        // Act + Assert
         assertThrows(OrderNotFoundException.class, () -> useCase.execute(orderId));
         verify(taskRepository, never()).deleteByOrderId(orderId);
         verify(orderRepository, never()).deleteById(orderId);

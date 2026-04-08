@@ -8,7 +8,7 @@ public class ProductMapper {
 
     private ProductMapper() {
     }
-    
+
     public static Product mapProduct(ProductRequest productRequest) {
         ProductType type = ProductType.valueOf(productRequest.type());
         return new Product(productRequest.name(), type, productRequest.price());

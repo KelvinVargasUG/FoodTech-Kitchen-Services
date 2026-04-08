@@ -29,13 +29,11 @@ class TransactionalOrderCompletionServiceTest {
 
     @Test
     void completeOrderIfReady_whenNoTasks_returnsEarly() {
-        // Arrange
+
         when(taskRepository.countByOrderId(99L)).thenReturn(0L);
 
-        // Act
         service.completeOrderIfReady(99L);
 
-        // Assert
         verify(taskRepository).countByOrderId(99L);
         verify(taskRepository, never()).countByOrderIdAndStatus(99L, TaskStatus.COMPLETED);
         verify(orderRepository, never()).findById(99L);

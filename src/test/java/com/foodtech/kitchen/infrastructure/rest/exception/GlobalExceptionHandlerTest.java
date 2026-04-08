@@ -16,6 +16,8 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import com.foodtech.kitchen.application.exepcions.FileSizeLimitExceededException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -28,13 +30,11 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleOrderNotFoundException_returnsNotFound() {
-        // Arrange
+
         OrderNotFoundException ex = new OrderNotFoundException(10L);
 
-        // Act
         ResponseEntity<ErrorResponse> response = handler.handleOrderNotFoundException(ex);
 
-        // Assert
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("Order not found", response.getBody().message());
@@ -43,13 +43,11 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleTaskNotFoundException_returnsNotFound() {
-        // Arrange
+
         TaskNotFoundException ex = new TaskNotFoundException(99L);
 
-        // Act
         ResponseEntity<ErrorResponse> response = handler.handleTaskNotFoundException(ex);
 
-        // Assert
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("Task not found", response.getBody().message());
@@ -58,13 +56,11 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleDuplicateEmailException_returnsConflict() {
-        // Arrange
+
         DuplicateEmailException ex = new DuplicateEmailException("dup");
 
-        // Act
         ResponseEntity<ErrorResponse> response = handler.handleDuplicateEmailException(ex);
 
-        // Assert
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("Duplicate email", response.getBody().message());
@@ -73,13 +69,11 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleDuplicateUsernameException_returnsConflict() {
-        // Arrange
+
         DuplicateUsernameException ex = new DuplicateUsernameException("dup");
 
-        // Act
         ResponseEntity<ErrorResponse> response = handler.handleDuplicateUsernameException(ex);
 
-        // Assert
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("Duplicate username", response.getBody().message());
@@ -88,13 +82,11 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleValidationException_returnsBadRequest() {
-        // Arrange
+
         IllegalArgumentException ex = new IllegalArgumentException("bad input");
 
-        // Act
         ResponseEntity<ErrorResponse> response = handler.handleValidationException(ex);
 
-        // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("Validation failed", response.getBody().message());
@@ -103,13 +95,11 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleIllegalStateException_returnsBadRequest() {
-        // Arrange
+
         IllegalStateException ex = new IllegalStateException("bad state");
 
-        // Act
         ResponseEntity<ErrorResponse> response = handler.handleIllegalStateException(ex);
 
-        // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("Invalid state transition", response.getBody().message());
@@ -118,7 +108,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleTypeMismatchException_formatsMessage() {
-        // Arrange
+
         MethodArgumentTypeMismatchException ex = new MethodArgumentTypeMismatchException(
                 "BAD",
                 String.class,
@@ -127,10 +117,8 @@ class GlobalExceptionHandlerTest {
                 new IllegalArgumentException("bad")
         );
 
-        // Act
         ResponseEntity<ErrorResponse> response = handler.handleTypeMismatchException(ex);
 
-        // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("Invalid parameter type", response.getBody().message());
@@ -140,15 +128,13 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleMethodArgumentNotValidException_usesFirstFieldErrorMessage() {
-        // Arrange
+
         BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(new Object(), "request");
         bindingResult.addError(new FieldError("request", "email", "Email is required"));
         MethodArgumentNotValidException ex = new MethodArgumentNotValidException(null, bindingResult);
 
-        // Act
         ResponseEntity<ErrorResponse> response = handler.handleMethodArgumentNotValidException(ex);
 
-        // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("Validation failed", response.getBody().message());
@@ -158,13 +144,11 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleHttpMessageNotReadableException_returnsBadRequest() {
-        // Arrange
+
         HttpMessageNotReadableException ex = new HttpMessageNotReadableException("bad json", (Throwable) null);
 
-        // Act
         ResponseEntity<ErrorResponse> response = handler.handleHttpMessageNotReadableException(ex);
 
-        // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("Validation failed", response.getBody().message());
@@ -172,14 +156,45 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void handleFileSizeLimitExceededException_returnsPayloadTooLarge() {
+
+        long actualBytes = 12L * 1024 * 1024;  
+        long maxBytes    = 10L * 1024 * 1024;  
+        FileSizeLimitExceededException ex = new FileSizeLimitExceededException(actualBytes, maxBytes);
+
+        ResponseEntity<ErrorResponse> response =
+                handler.handleFileSizeLimitExceededException(ex);
+
+        assertEquals(HttpStatus.PAYLOAD_TOO_LARGE, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(413, response.getBody().status());
+        assertEquals("El archivo supera el tamaño máximo permitido (10 MB)",
+                response.getBody().message());
+    }
+
+    @Test
+    void handleMaxUploadSizeExceededException_returnsPayloadTooLarge() {
+
+        MaxUploadSizeExceededException ex =
+                new MaxUploadSizeExceededException(10 * 1024 * 1024L);
+
+        ResponseEntity<ErrorResponse> response =
+                handler.handleMaxUploadSizeExceededException(ex);
+
+        assertEquals(HttpStatus.PAYLOAD_TOO_LARGE, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(413, response.getBody().status());
+        assertEquals("El archivo supera el tamaño máximo permitido (10 MB)",
+                response.getBody().message());
+    }
+
+    @Test
     void handleGenericException_returnsInternalServerError() {
-        // Arrange
+
         Exception ex = new Exception("boom");
 
-        // Act
         ResponseEntity<ErrorResponse> response = handler.handleGenericException(ex);
 
-        // Assert
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("Internal server error", response.getBody().error());

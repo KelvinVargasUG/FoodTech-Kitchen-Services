@@ -42,35 +42,33 @@ class RequestOrderInvoiceUseCaseTest {
 
     @Test
     void execute_whenOrderNotFound_throwsException() {
-        // Arrange
+
         when(orderRepository.findById(100L)).thenReturn(Optional.empty());
 
-        // Act + Assert
         assertThrows(OrderNotFoundException.class, () -> useCase.execute(100L));
         verify(outboxEventRepository, never()).save(org.mockito.Mockito.any(OutboxEvent.class));
     }
 
     @Test
     void execute_whenOrderAlreadyInvoiced_returnsEarly() {
-        // Arrange
-        Order order = Order.reconstruct(101L, "T1", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.INVOICED);
+
+        Order order = Order.reconstruct(101L,
+                "T1", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.INVOICED);
         when(orderRepository.findById(101L)).thenReturn(Optional.of(order));
 
-        // Act
         useCase.execute(101L);
 
-        // Assert
         verify(outboxEventRepository, never()).save(org.mockito.Mockito.any(OutboxEvent.class));
         verify(orderRepository, never()).save(order);
     }
 
     @Test
     void execute_whenOrderNotCompleted_throwsException() {
-        // Arrange
-        Order order = Order.reconstruct(102L, "T2", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.CREATED);
+
+        Order order = Order.reconstruct(102L,
+                "T2", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.CREATED);
         when(orderRepository.findById(102L)).thenReturn(Optional.of(order));
 
-        // Act + Assert
         assertThrows(IllegalStateException.class, () -> useCase.execute(102L));
         verify(outboxEventRepository, never()).save(org.mockito.Mockito.any(OutboxEvent.class));
         verify(orderRepository, never()).save(order);
@@ -78,15 +76,14 @@ class RequestOrderInvoiceUseCaseTest {
 
     @Test
     void execute_whenOrderCompleted_persistsOutboxAndMarksInvoiced() {
-        // Arrange
-        Order order = Order.reconstruct(103L, "T3", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.COMPLETED);
+
+        Order order = Order.reconstruct(103L,
+                "T3", "Cliente Test", "test@test.com", sampleProducts(), OrderStatus.COMPLETED);
         when(orderRepository.findById(103L)).thenReturn(Optional.of(order));
         when(payloadBuilder.build(order)).thenReturn("payload");
 
-        // Act
         useCase.execute(103L);
 
-        // Assert
         ArgumentCaptor<OutboxEvent> eventCaptor = ArgumentCaptor.forClass(OutboxEvent.class);
         verify(outboxEventRepository).save(eventCaptor.capture());
         OutboxEvent event = eventCaptor.getValue();
