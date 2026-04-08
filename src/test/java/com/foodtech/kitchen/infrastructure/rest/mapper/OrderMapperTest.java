@@ -10,7 +10,8 @@ import org.junit.jupiter.api.DisplayName;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Tag("component")
 class OrderMapperTest {
@@ -18,7 +19,7 @@ class OrderMapperTest {
     @Test
     @DisplayName("Should map CreateOrderRequest to Order domain")
     void shouldMapRequestToOrder() {
-        // Given
+
         CreateOrderRequest request = new CreateOrderRequest(
             "A1",
             "Cliente Test",
@@ -29,10 +30,8 @@ class OrderMapperTest {
             )
         );
 
-        // When
         Order order = OrderMapper.toDomain(request);
 
-        // Then
         assertEquals("A1", order.getTableNumber());
         assertEquals("Cliente Test", order.getCustomerName());
         assertEquals("test@test.com", order.getCustomerEmail());
@@ -45,7 +44,7 @@ class OrderMapperTest {
     @Test
     @DisplayName("Should handle single product")
     void shouldHandleSingleProduct() {
-        // Given
+
         CreateOrderRequest request = new CreateOrderRequest(
             "B2",
             "Cliente Test",
@@ -55,10 +54,8 @@ class OrderMapperTest {
             )
         );
 
-        // When
         Order order = OrderMapper.toDomain(request);
 
-        // Then
         assertEquals(1, order.getProducts().size());
         assertEquals("Sprite", order.getProducts().get(0).getName());
         assertEquals(2, order.getProducts().get(0).getPrice());
@@ -67,7 +64,7 @@ class OrderMapperTest {
     @Test
     @DisplayName("Should throw exception for invalid product type")
     void shouldThrowExceptionForInvalidProductType() {
-        // Given
+
         CreateOrderRequest request = new CreateOrderRequest(
             "C3",
             "Cliente Test",
@@ -77,7 +74,6 @@ class OrderMapperTest {
             )
         );
 
-        // When & Then
         assertThrows(IllegalArgumentException.class, () -> OrderMapper.toDomain(request));
     }
 }

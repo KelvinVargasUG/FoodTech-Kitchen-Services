@@ -29,15 +29,13 @@ class OutboxEventRepositoryAdapterTest {
 
     @Test
     void save_mapsAndPersistsEntity() {
-        // Arrange
+
         OutboxEvent event = OutboxEvent.newEvent("Order", "10", "OrderInvoiceRequested", "payload");
         OutboxEventEntity entity = OutboxEventEntity.builder().build();
         when(mapper.toEntity(event)).thenReturn(entity);
 
-        // Act
         adapter.save(event);
 
-        // Assert
         verify(mapper).toEntity(event);
         verify(jpaRepository).save(entity);
     }

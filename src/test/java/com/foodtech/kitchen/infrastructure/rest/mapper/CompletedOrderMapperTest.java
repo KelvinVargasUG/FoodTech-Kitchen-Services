@@ -18,14 +18,12 @@ class CompletedOrderMapperTest {
 
     @Test
     void toResponse_mapsFields() {
-        // Arrange
+
         LocalDateTime completedAt = LocalDateTime.of(2026, 2, 1, 12, 30);
         CompletedOrderView view = new CompletedOrderView(1L, "A1", completedAt, 2, 120L);
 
-        // Act
         CompletedOrderResponse response = CompletedOrderMapper.toResponse(view);
 
-        // Assert
         assertNotNull(response);
         assertEquals(1L, response.orderId());
         assertEquals("A1", response.tableNumber());
@@ -36,14 +34,12 @@ class CompletedOrderMapperTest {
 
     @Test
     void toResponseList_mapsAllItems() {
-        // Arrange
+
         CompletedOrderView first = new CompletedOrderView(1L, "A1", null, 1, null);
         CompletedOrderView second = new CompletedOrderView(2L, "B2", null, 3, 300L);
 
-        // Act
         List<CompletedOrderResponse> responses = CompletedOrderMapper.toResponseList(List.of(first, second));
 
-        // Assert
         assertEquals(2, responses.size());
         assertEquals(1L, responses.get(0).orderId());
         assertEquals(2L, responses.get(1).orderId());

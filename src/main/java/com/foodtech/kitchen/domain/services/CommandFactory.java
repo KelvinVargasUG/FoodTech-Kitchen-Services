@@ -23,5 +23,4 @@ public class CommandFactory {
                 .createCommand(products);
     }
 
-    
 }

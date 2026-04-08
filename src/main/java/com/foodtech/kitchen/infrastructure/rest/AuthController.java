@@ -28,8 +28,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<Void> register(@Valid @RequestBody RegisterRequest request) {
-        // ⚕️ HUMAN CHECK: Exception mapping is delegated to GlobalExceptionHandler.
-        // Controller must not swallow domain/application exceptions.
+
         registerUserUseCase.execute(request.username(), request.email(), request.password());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

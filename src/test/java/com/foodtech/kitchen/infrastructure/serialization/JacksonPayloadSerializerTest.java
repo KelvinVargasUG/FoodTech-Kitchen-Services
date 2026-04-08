@@ -27,25 +27,22 @@ class JacksonPayloadSerializerTest {
 
     @Test
     void serialize_whenObjectMapperSucceeds_returnsJson() throws Exception {
-        // Arrange
+
         Map<String, Object> payload = Map.of("k", "v");
         when(objectMapper.writeValueAsString(payload)).thenReturn("{\"k\":\"v\"}");
 
-        // Act
         String result = serializer.serialize(payload);
 
-        // Assert
         assertEquals("{\"k\":\"v\"}", result);
     }
 
     @Test
     void serialize_whenObjectMapperFails_throwsIllegalStateException() throws Exception {
-        // Arrange
+
         Map<String, Object> payload = Map.of("k", "v");
         when(objectMapper.writeValueAsString(payload))
                 .thenThrow(new JsonProcessingException("boom") {});
 
-        // Act + Assert
         IllegalStateException ex = assertThrows(IllegalStateException.class, () -> serializer.serialize(payload));
         assertNotNull(ex.getCause());
         assertEquals("Failed to serialize payload", ex.getMessage());

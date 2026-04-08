@@ -1,11 +1,15 @@
 package com.foodtech.kitchen.domain.services;
 
-import com.foodtech.kitchen.domain.model.*;
+import com.foodtech.kitchen.domain.model.Order;
+import com.foodtech.kitchen.domain.model.Product;
+import com.foodtech.kitchen.domain.model.Station;
+import com.foodtech.kitchen.domain.model.Task;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-//HUMAN REVIEW: Eliminé ProductStationMapper porque ProductType ahora tiene getStation().
-//Cumple OCP: extensible sin modificar código. Cumple SRP: orquesta validación y creación.
 public class TaskDecomposer {
 
     private final OrderValidator orderValidator;
@@ -21,7 +25,6 @@ public class TaskDecomposer {
 
         Map<Station, List<Product>> productsByStation = groupProductsByStation(order);
 
-        // Si el order tiene ID, lo usamos; si no, usamos un ID temporal para tests
         Long orderId = order.getId() != null ? order.getId() : 0L;
         return taskFactory.createTasks(orderId, order.getTableNumber(), productsByStation);
     }

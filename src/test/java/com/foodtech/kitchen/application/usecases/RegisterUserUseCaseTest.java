@@ -106,4 +106,60 @@ class RegisterUserUseCaseTest {
         verify(passwordHasher, never()).hash(any());
         verify(userRepository, never()).save(any());
     }
+
+    @Test
+    void registerUser_withNullEmail_throwsIllegalArgument() {
+        assertThrows(IllegalArgumentException.class,
+                () -> registerUserUseCase.execute("user", null, "abc123"));
+
+        verify(passwordHasher, never()).hash(any());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void registerUser_withMultipleAtSymbols_throwsIllegalArgument() {
+        assertThrows(IllegalArgumentException.class,
+                () -> registerUserUseCase.execute("user", "a@b@c.com", "abc123"));
+
+        verify(passwordHasher, never()).hash(any());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void registerUser_withNoDotAfterAt_throwsIllegalArgument() {
+        assertThrows(IllegalArgumentException.class,
+                () -> registerUserUseCase.execute("user", "user@nodotdomain", "abc123"));
+
+        verify(passwordHasher, never()).hash(any());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void registerUser_withNullPassword_throwsIllegalArgument() {
+        assertThrows(IllegalArgumentException.class,
+                () -> registerUserUseCase.execute("user", "user@mail.com", null));
+
+        verify(passwordHasher, never()).hash(any());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void registerUser_withOnlyLetters_throwsIllegalArgument() {
+
+        assertThrows(IllegalArgumentException.class,
+                () -> registerUserUseCase.execute("user", "user@mail.com", "abcdefg"));
+
+        verify(passwordHasher, never()).hash(any());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void registerUser_withOnlyDigits_throwsIllegalArgument() {
+
+        assertThrows(IllegalArgumentException.class,
+                () -> registerUserUseCase.execute("user", "user@mail.com", "123456"));
+
+        verify(passwordHasher, never()).hash(any());
+        verify(userRepository, never()).save(any());
+    }
 }

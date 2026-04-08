@@ -21,7 +21,7 @@ class OutboxEventEntityMapperTest {
 
     @Test
     void toEntity_mapsAllFields() {
-        // Arrange
+
         UUID id = UUID.fromString("00000000-0000-0000-0000-000000000123");
         LocalDateTime createdAt = LocalDateTime.of(2026, 1, 1, 10, 0);
         LocalDateTime nextRetryAt = LocalDateTime.of(2026, 1, 1, 11, 0);
@@ -40,10 +40,8 @@ class OutboxEventEntityMapperTest {
                 "error"
         );
 
-        // Act
         OutboxEventEntity entity = mapper.toEntity(event);
 
-        // Assert
         assertNotNull(entity);
         assertEquals(id, entity.getId());
         assertEquals("Order", entity.getAggregateType());

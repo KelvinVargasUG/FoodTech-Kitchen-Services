@@ -1,6 +1,10 @@
 package com.foodtech.kitchen.infrastructure.persistence.adapters;
 
-import com.foodtech.kitchen.domain.model.*;
+import com.foodtech.kitchen.domain.model.Product;
+import com.foodtech.kitchen.domain.model.ProductType;
+import com.foodtech.kitchen.domain.model.Station;
+import com.foodtech.kitchen.domain.model.Task;
+import com.foodtech.kitchen.domain.model.TaskStatus;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.TaskJpaRepository;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.TaskEntity;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,8 +15,12 @@ import org.junit.jupiter.api.Tag;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @Tag("component")
 class TaskRepositoryAdapterTest {
@@ -33,21 +41,19 @@ class TaskRepositoryAdapterTest {
     @Test
     @DisplayName("Should save tasks using JPA repository")
     void shouldSaveTasks() {
-        // Given
+
         Product product = new Product("Coca Cola", ProductType.DRINK, 5);
         Task task = new Task(1L, Station.BAR, "A1", List.of(product), LocalDateTime.now());
 
-        // When
         adapter.saveAll(List.of(task));
 
-        // Then
         verify(jpaRepository, times(1)).saveAll(anyList());
     }
 
     @Test
     @DisplayName("Should find tasks by station")
     void shouldFindTasksByStation() {
-        // Given
+
         com.foodtech.kitchen.infrastructure.persistence.jpa.entities.TaskProductEntity p =
             com.foodtech.kitchen.infrastructure.persistence.jpa.entities.TaskProductEntity.builder()
                 .name("Coca Cola").type(ProductType.DRINK).build();
@@ -60,14 +66,12 @@ class TaskRepositoryAdapterTest {
             .products(List.of(p))
             .createdAt(LocalDateTime.now())
             .build();
-        
+
         when(jpaRepository.findByStation(Station.BAR))
             .thenReturn(List.of(entity));
 
-        // When
         List<Task> tasks = adapter.findByStation(Station.BAR);
 
-        // Then
         assertEquals(1, tasks.size());
         assertEquals(Station.BAR, tasks.get(0).getStation());
         verify(jpaRepository, times(1)).findByStation(Station.BAR);
@@ -76,7 +80,7 @@ class TaskRepositoryAdapterTest {
     @Test
     @DisplayName("Should find all tasks")
     void shouldFindAllTasks() {
-        // Given
+
         com.foodtech.kitchen.infrastructure.persistence.jpa.entities.TaskProductEntity p =
             com.foodtech.kitchen.infrastructure.persistence.jpa.entities.TaskProductEntity.builder()
                 .name("Coca Cola").type(ProductType.DRINK).build();
@@ -89,13 +93,11 @@ class TaskRepositoryAdapterTest {
             .products(List.of(p))
             .createdAt(LocalDateTime.now())
             .build();
-        
+
         when(jpaRepository.findAll()).thenReturn(List.of(entity));
 
-        // When
         List<Task> tasks = adapter.findAll();
 
-        // Then
         assertEquals(1, tasks.size());
         verify(jpaRepository, times(1)).findAll();
     }
@@ -103,7 +105,7 @@ class TaskRepositoryAdapterTest {
     @Test
     @DisplayName("Should find tasks by station and status")
     void shouldFindTasksByStationAndStatus() {
-        // Given
+
         com.foodtech.kitchen.infrastructure.persistence.jpa.entities.TaskProductEntity p =
             com.foodtech.kitchen.infrastructure.persistence.jpa.entities.TaskProductEntity.builder()
                 .name("Coca Cola").type(ProductType.DRINK).build();
@@ -119,14 +121,12 @@ class TaskRepositoryAdapterTest {
             .startedAt(LocalDateTime.now())
             .completedAt(LocalDateTime.now())
             .build();
-        
+
         when(jpaRepository.findByStationAndStatus(Station.BAR, TaskStatus.COMPLETED))
             .thenReturn(List.of(completedEntity));
 
-        // When
         List<Task> tasks = adapter.findByStationAndStatus(Station.BAR, TaskStatus.COMPLETED);
 
-        // Then
         assertEquals(1, tasks.size());
         assertEquals(Station.BAR, tasks.get(0).getStation());
         assertEquals(TaskStatus.COMPLETED, tasks.get(0).getStatus());

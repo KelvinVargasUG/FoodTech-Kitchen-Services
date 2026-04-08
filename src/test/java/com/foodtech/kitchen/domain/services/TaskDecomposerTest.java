@@ -1,7 +1,11 @@
 package com.foodtech.kitchen.domain.services;
 
 import com.foodtech.kitchen.domain.commands.Command;
-import com.foodtech.kitchen.domain.model.*;
+import com.foodtech.kitchen.domain.model.Order;
+import com.foodtech.kitchen.domain.model.Product;
+import com.foodtech.kitchen.domain.model.ProductType;
+import com.foodtech.kitchen.domain.model.Station;
+import com.foodtech.kitchen.domain.model.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -9,7 +13,11 @@ import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Tag("unit")
 class TaskDecomposerTest {
@@ -28,14 +36,12 @@ class TaskDecomposerTest {
     @Test
     @DisplayName("Debe crear una tarea para un pedido con una sola bebida")
     void shouldCreateOneTaskForSingleDrink() {
-        // Given
+
         Product cocaCola = new Product("Coca Cola", ProductType.DRINK, 5);
         Order order = new Order("A1", "Cliente Test", "test@test.com", List.of(cocaCola));
 
-        // When
         List<Task> tasks = decomposer.decompose(order);
 
-        // Then
         assertEquals(1, tasks.size(), "Debe crear exactamente una tarea");
         assertEquals(Station.BAR, tasks.get(0).getStation(), "La bebida debe ir a BARRA");
         assertEquals(1, tasks.get(0).getProducts().size(), "La tarea debe contener un producto");
@@ -44,14 +50,12 @@ class TaskDecomposerTest {
     @Test
     @DisplayName("Debe crear una tarea para un pedido con un solo plato caliente")
     void shouldCreateOneTaskForSingleHotDish() {
-        // Given
+
         Product pizza = new Product("Pizza Margarita", ProductType.HOT_DISH, 5);
         Order order = new Order("B2", "Cliente Test", "test@test.com", List.of(pizza));
 
-        // When
         List<Task> tasks = decomposer.decompose(order);
 
-        // Then
         assertEquals(1, tasks.size());
         assertEquals(Station.HOT_KITCHEN, tasks.get(0).getStation());
     }
@@ -59,14 +63,12 @@ class TaskDecomposerTest {
     @Test
     @DisplayName("Debe crear una tarea para un pedido con un solo plato frío")
     void shouldCreateOneTaskForSingleColdDish() {
-        // Given
+
         Product salad = new Product("Caesar Salad", ProductType.COLD_DISH, 5);
         Order order = new Order("C3", "Cliente Test", "test@test.com", List.of(salad));
 
-        // When
         List<Task> tasks = decomposer.decompose(order);
 
-        // Then
         assertEquals(1, tasks.size());
         assertEquals(Station.COLD_KITCHEN, tasks.get(0).getStation());
     }
@@ -74,15 +76,13 @@ class TaskDecomposerTest {
     @Test
     @DisplayName("Debe crear tareas separadas para distintos tipos de producto")
     void shouldCreateSeparateTasksForMixedOrder() {
-        // Given
+
         Product cocaCola = new Product("Coca Cola", ProductType.DRINK, 5);
         Product pizza = new Product("Pizza", ProductType.HOT_DISH, 5);
         Order order = new Order("D4", "Cliente Test", "test@test.com", List.of(cocaCola, pizza));
 
-        // When
         List<Task> tasks = decomposer.decompose(order);
 
-        // Then
         assertEquals(2, tasks.size(), "Debe crear dos tareas separadas");
 
         boolean hasDrinkTask = tasks.stream()
@@ -97,15 +97,13 @@ class TaskDecomposerTest {
     @Test
     @DisplayName("Debe agrupar productos del mismo tipo en una sola tarea")
     void shouldGroupProductsOfSameTypeInSingleTask() {
-        // Given
+
         Product cocaCola = new Product("Coca Cola", ProductType.DRINK, 5);
         Product sprite = new Product("Sprite", ProductType.DRINK, 5);
         Order order = new Order("E5", "Cliente Test", "test@test.com", List.of(cocaCola, sprite));
 
-        // When
         List<Task> tasks = decomposer.decompose(order);
 
-        // Then
         assertEquals(1, tasks.size(), "Debe crear solo UNA tarea para la misma estación");
         assertEquals(2, tasks.get(0).getProducts().size(), "La tarea debe contener ambos productos");
         assertEquals(Station.BAR, tasks.get(0).getStation());
@@ -114,7 +112,7 @@ class TaskDecomposerTest {
     @Test
     @DisplayName("Debe rechazar un pedido sin productos")
     void shouldRejectEmptyOrder() {
-        // When & Then - la validación ahora ocurre en el constructor de Order
+
         assertThrows(
             IllegalArgumentException.class,
             () -> new Order("F6", "Cliente Test", "test@test.com", List.of()),
@@ -124,7 +122,7 @@ class TaskDecomposerTest {
     @Test
     @DisplayName("Debe rechazar un pedido nulo")
     void shouldRejectNullOrder() {
-        // When & Then
+
         assertThrows(
                 IllegalArgumentException.class,
                 () -> decomposer.decompose(null),
@@ -134,10 +132,9 @@ class TaskDecomposerTest {
     @Test
     @DisplayName("Debe rechazar un pedido con número de mesa nulo")
     void shouldRejectNullTableNumber() {
-        // Given
+
         Product product = new Product("Coca Cola", ProductType.DRINK, 5);
 
-        // When & Then
         assertThrows(
                 IllegalArgumentException.class,
                 () -> new Order(null, "Cliente Test", "test@test.com", List.of(product)),
@@ -147,16 +144,14 @@ class TaskDecomposerTest {
     @Test
     @DisplayName("Debe crear tres tareas para un pedido con todos los tipos de producto")
     void shouldCreateThreeTasksForAllProductTypes() {
-        // Given
+
         Product drink = new Product("Coca Cola", ProductType.DRINK, 5);
         Product hotDish = new Product("Pizza", ProductType.HOT_DISH, 5);
         Product coldDish = new Product("Caesar Salad", ProductType.COLD_DISH, 5);
         Order order = new Order("G7", "Cliente Test", "test@test.com", List.of(drink, hotDish, coldDish));
 
-        // When
         List<Task> tasks = decomposer.decompose(order);
 
-        // Then
         assertEquals(3, tasks.size(), "Debe crear tres tareas");
 
         long barTasks = tasks.stream()
@@ -177,7 +172,7 @@ class TaskDecomposerTest {
     @Test
     @DisplayName("Debe crear comandos para cada tarea")
     void shouldCreateCommandsForEachTask() {
-        // Given
+
         Product cocaCola = new Product("Coca Cola", ProductType.DRINK, 5);
         Product pizza = new Product("Pizza", ProductType.HOT_DISH, 5);
         Order order = new Order("H8", "Cliente Test", "test@test.com", List.of(cocaCola, pizza));
@@ -188,12 +183,10 @@ class TaskDecomposerTest {
             new PrepareColdDishStrategy()
         ));
 
-        // When
         List<Task> tasks = decomposer.decompose(order);
 
-        // Then
         assertEquals(2, tasks.size());
-        // Verificar que cada tarea puede crear su comando
+
         for (Task task : tasks) {
             Command command = commandFactory.createCommand(task.getStation(), task.getProducts());
             assertNotNull(command);

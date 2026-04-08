@@ -14,13 +14,15 @@ class OrderTest {
     @Test
     void constructor_whenTableNumberNull_throwsException() {
         assertThrows(IllegalArgumentException.class,
-                () -> new Order(null, "Cliente Test", "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5))));
+                () -> new Order(null,
+                        "Cliente Test", "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5))));
     }
 
     @Test
     void constructor_whenTableNumberBlank_throwsException() {
         assertThrows(IllegalArgumentException.class,
-                () -> new Order("  ", "Cliente Test", "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5))));
+                () -> new Order("  ",
+                        "Cliente Test", "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5))));
     }
 
     @Test
@@ -38,12 +40,14 @@ class OrderTest {
     @Test
     void reconstruct_whenIdNull_throwsException() {
         assertThrows(IllegalArgumentException.class,
-                () -> Order.reconstruct(null, "A1", "Cliente Test", "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5))));
+                () -> Order.reconstruct(null,
+                        "A1", "Cliente Test", "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5))));
     }
 
     @Test
     void reconstruct_whenStatusNull_defaultsToCreated() {
-        Order order = Order.reconstruct(1L, "A1", "Cliente Test", "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5)), null);
+        Order order = Order.reconstruct(1L,
+                "A1", "Cliente Test", "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5)), null);
 
         assertNotNull(order);
         assertEquals(OrderStatus.CREATED, order.getStatus());
@@ -51,14 +55,16 @@ class OrderTest {
 
     @Test
     void reconstruct_whenStatusProvided_setsStatus() {
-        Order order = Order.reconstruct(2L, "A1", "Cliente Test", "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5)), OrderStatus.IN_PROGRESS);
+        Order order = Order.reconstruct(2L, "A1", "Cliente Test",
+                "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5)), OrderStatus.IN_PROGRESS);
 
         assertEquals(OrderStatus.IN_PROGRESS, order.getStatus());
     }
 
     @Test
     void markInProgress_whenCreated_changesStatus() {
-        Order order = new Order("A1", "Cliente Test", "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5)));
+        Order order = new Order("A1",
+                "Cliente Test", "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5)));
 
         order.markInProgress();
 
@@ -67,7 +73,8 @@ class OrderTest {
 
     @Test
     void markInProgress_whenNotCreated_keepsStatus() {
-        Order order = Order.reconstruct(3L, "A1", "Cliente Test", "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5)), OrderStatus.IN_PROGRESS);
+        Order order = Order.reconstruct(3L, "A1", "Cliente Test",
+                "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5)), OrderStatus.IN_PROGRESS);
 
         order.markInProgress();
 
@@ -76,7 +83,8 @@ class OrderTest {
 
     @Test
     void markCompleted_whenNotCompleted_setsCompleted() {
-        Order order = Order.reconstruct(4L, "A1", "Cliente Test", "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5)), OrderStatus.IN_PROGRESS);
+        Order order = Order.reconstruct(4L, "A1", "Cliente Test",
+                "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5)), OrderStatus.IN_PROGRESS);
 
         order.markCompleted();
 
@@ -85,7 +93,8 @@ class OrderTest {
 
     @Test
     void markCompleted_whenAlreadyCompleted_keepsStatus() {
-        Order order = Order.reconstruct(5L, "A1", "Cliente Test", "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5)), OrderStatus.COMPLETED);
+        Order order = Order.reconstruct(5L, "A1", "Cliente Test",
+                "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5)), OrderStatus.COMPLETED);
 
         order.markCompleted();
 
@@ -94,7 +103,8 @@ class OrderTest {
 
     @Test
     void markInvoiced_whenCompleted_setsInvoiced() {
-        Order order = Order.reconstruct(6L, "A1", "Cliente Test", "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5)), OrderStatus.COMPLETED);
+        Order order = Order.reconstruct(6L, "A1", "Cliente Test",
+                "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5)), OrderStatus.COMPLETED);
 
         order.markInvoiced();
 
@@ -103,7 +113,8 @@ class OrderTest {
 
     @Test
     void markInvoiced_whenNotCompleted_keepsStatus() {
-        Order order = Order.reconstruct(7L, "A1", "Cliente Test", "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5)), OrderStatus.IN_PROGRESS);
+        Order order = Order.reconstruct(7L, "A1", "Cliente Test",
+                "test@test.com", List.of(new Product("Tea", ProductType.DRINK, 5)), OrderStatus.IN_PROGRESS);
 
         order.markInvoiced();
 

@@ -1,0 +1,21 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: ["develop"]
+  pull_request:
+
+jobs:
+  pipeline:
+    permissions:
+      contents: read
+      security-events: write
+      pull-requests: write
+    uses: KelvinVargasUG/ci-templates/.github/workflows/pr-ms-spring_boot.yml@main
+    with:
+      java_version: "21"
+      promote_branch: "release"
+  call-merge:
+    uses: KelvinVargasUG/ci-templates/.github/workflows/merge-and-tag.yml@main
+    with:
+      branch: "develop"

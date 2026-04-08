@@ -12,3 +12,14 @@ spring:
 jwt:
   secret: "test-secret-should-be-long-enough-for-hs256-123456"
   expirationSeconds: 3600
+
+feature:
+  product-bulk-upload:
+    enabled: true
+  product-catalog:
+    enabled: true
+
+upload:
+  storage:
+    base-path: /tmp/foodtech-test
+  max-file-size-bytes: 10485760  # 10 MB

@@ -24,9 +24,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @Tag("unit")
 @ExtendWith(MockitoExtension.class)
@@ -49,7 +56,7 @@ class StartTaskPreparationUseCaseTest {
 
     @Test
     void shouldStartTaskAndDispatchCommand() {
-        // Given
+
         Long taskId = 1L;
         LocalDateTime now = LocalDateTime.of(2026, 2, 20, 12, 0);
         Product product = new Product("Cerveza", ProductType.DRINK, 5);
@@ -81,16 +88,15 @@ class StartTaskPreparationUseCaseTest {
         when(taskRepository.save(any(Task.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         when(orderRepository.findById(1L))
-                .thenReturn(Optional.of(Order.reconstruct(1L, "A1", "Cliente Test", "test@test.com", List.of(product), OrderStatus.CREATED)));
+                .thenReturn(Optional.of(Order.reconstruct(1L, "A1", "Cliente Test",
+                        "test@test.com", List.of(product), OrderStatus.CREATED)));
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Command command = mock(Command.class);
         when(commandFactory.createCommand(any(), any())).thenReturn(command);
 
-        // When
         Task result = useCase.execute(taskId);
 
-        // Then
         assertNotNull(result);
         assertEquals(TaskStatus.IN_PREPARATION, result.getStatus());
         assertNotNull(result.getStartedAt());
@@ -101,11 +107,10 @@ class StartTaskPreparationUseCaseTest {
 
     @Test
     void shouldThrowExceptionWhenTaskNotFound() {
-        // Given
+
         Long taskId = 99L;
         when(taskRepository.findById(taskId)).thenReturn(Optional.empty());
 
-        // When / Then
         assertThrows(TaskNotFoundException.class, () -> useCase.execute(taskId));
         verify(taskRepository).findById(taskId);
         verify(taskRepository, never()).save(any(Task.class));

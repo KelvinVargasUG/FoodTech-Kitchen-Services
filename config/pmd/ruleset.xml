@@ -1,0 +1,157 @@
+<?xml version="1.0"?>
+<ruleset name="Custom PMD Ruleset for Spring Boot Backend"
+    xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+
+    <description>
+        Custom PMD ruleset for Spring Boot backend projects.
+        Focuses on common code smells, best practices, and reasonable complexity thresholds.
+    </description>
+
+    <!-- Best Practices -->
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="UnusedImports"/>
+        <exclude name="UnusedPrivateField"/>
+        <exclude name="UnusedLocalVariable"/>
+        <exclude name="UnusedPrivateMethod"/>
+        <!-- Domain command classes use System.out for simulation/demo output -->
+        <exclude name="SystemPrintln"/>
+        <exclude name="AvoidPrintStackTrace"/>
+        <!-- LiteralsFirstInComparisons: standard null-safe patterns -->
+        <exclude name="LiteralsFirstInComparisons"/>
+        <!-- PreserveStackTrace: intentional wrapping in some adapters -->
+        <exclude name="PreserveStackTrace"/>
+        <!-- UnusedAssignment: false positives with complex control flow -->
+        <exclude name="UnusedAssignment"/>
+        <!-- UnusedFormalParameter: Spring callback interfaces require signature -->
+        <exclude name="UnusedFormalParameter"/>
+        <!-- UseVarargs: style preference, existing API contracts -->
+        <exclude name="UseVarargs"/>
+    </rule>
+
+    <!-- Code Style -->
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="MethodArgumentCouldBeFinal"/>
+        <exclude name="LocalVariableCouldBeFinal"/>
+        <exclude name="FieldDeclarationsShouldBeAtStartOfClass"/>
+        <!-- Short names like id, e, i are idiomatic Java -->
+        <exclude name="ShortVariable"/>
+        <!-- Long descriptive names are encouraged in clean code -->
+        <exclude name="LongVariable"/>
+        <!-- Lombok-generated constructors not detected by PMD -->
+        <exclude name="AtLeastOneConstructor"/>
+        <!-- OnlyOneReturn: early returns improve readability -->
+        <exclude name="OnlyOneReturn"/>
+        <!-- CallSuperInConstructor: Spring Security filters handled by framework -->
+        <exclude name="CallSuperInConstructor"/>
+        <!-- PrematureDeclaration: style preference -->
+        <exclude name="PrematureDeclaration"/>
+        <!-- ShortClassName: Task, User, etc. are idiomatic domain names -->
+        <exclude name="ShortClassName"/>
+        <!-- ShortMethodName: factory methods 'of', 'to' are standard patterns -->
+        <exclude name="ShortMethodName"/>
+        <!-- UnnecessaryConstructor: Lombok no-args constructor may be present -->
+        <exclude name="UnnecessaryConstructor"/>
+        <!-- UnnecessaryFullyQualifiedName: occasional FQN for clarity -->
+        <exclude name="UnnecessaryFullyQualifiedName"/>
+        <!-- ControlStatementBraces: single-statement branches in domain code -->
+        <exclude name="ControlStatementBraces"/>
+    </rule>
+
+    <!-- Design -->
+    <rule ref="category/java/design.xml">
+        <exclude name="ExcessiveMethodLength"/>
+        <exclude name="ExcessiveClassLength"/>
+        <exclude name="TooManyFields"/>
+        <exclude name="TooManyMethods"/>
+        <exclude name="LoosePackageCoupling"/>
+        <!-- Builder chains in Spring Boot/JPA unavoidably trigger LawOfDemeter -->
+        <exclude name="LawOfDemeter"/>
+        <!-- DTOs, entities, and value objects are intentionally data-holding classes -->
+        <exclude name="DataClass"/>
+        <!-- Spring beans with many constructor dependencies -->
+        <exclude name="ExcessiveParameterList"/>
+        <!-- Methods returning early for validation are fine -->
+        <exclude name="UseObjectForClearerAPI"/>
+        <!-- Checked exception signatures are acceptable in domain code -->
+        <exclude name="SignatureDeclareThrowsException"/>
+        <!-- ClassWithOnlyPrivateConstructorsShouldBeFinal: factory/value classes -->
+        <exclude name="ClassWithOnlyPrivateConstructorsShouldBeFinal"/>
+        <!-- AvoidThrowingRawExceptionTypes: domain commands throw RuntimeException -->
+        <exclude name="AvoidThrowingRawExceptionTypes"/>
+        <!-- AvoidRethrowingException: intentional re-throw in error handling -->
+        <exclude name="AvoidRethrowingException"/>
+        <!-- CognitiveComplexity: complex business logic is unavoidable -->
+        <exclude name="CognitiveComplexity"/>
+        <!-- CouplingBetweenObjects: Spring config classes wire many beans -->
+        <exclude name="CouplingBetweenObjects"/>
+        <!-- ExcessiveImports: complex use cases import many domain types -->
+        <exclude name="ExcessiveImports"/>
+        <!-- NPathComplexity: complex validation methods -->
+        <exclude name="NPathComplexity"/>
+    </rule>
+
+    <!-- Error Prone -->
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="EmptyCatchBlock"/>
+        <exclude name="EmptyFinallyBlock"/>
+        <exclude name="EmptyIfStmt"/>
+        <exclude name="EmptyWhileStmt"/>
+        <exclude name="EmptyTryBlock"/>
+        <exclude name="EmptySwitchStatements"/>
+        <!-- JPA entities are not Serializable in this project intentionally -->
+        <exclude name="MissingSerialVersionUID"/>
+        <!-- Null assignments used in Optional/conditional patterns -->
+        <exclude name="NullAssignment"/>
+        <!-- Literal conditions in guard clauses are fine -->
+        <exclude name="AvoidLiteralsInIfCondition"/>
+        <!-- Early comparison literals acceptable -->
+        <exclude name="LiteralsFirstInComparisons"/>
+        <!-- Duplicate literals acceptable in some domain-specific methods -->
+        <exclude name="AvoidDuplicateLiterals"/>
+    </rule>
+
+    <!-- Multithreading — UseConcurrentHashMap excluded: domain services are single-threaded -->
+    <!-- <rule ref="category/java/multithreading.xml/UseConcurrentHashMap"/> -->
+
+    <!-- Performance -->
+    <rule ref="category/java/performance.xml">
+        <exclude name="InefficientEmptyStringCheck"/>
+        <exclude name="InefficientStringBuffering"/>
+        <exclude name="StringInstantiation"/>
+        <!-- Append optimisations are micro-optimisations not applicable here -->
+        <exclude name="AppendCharacterWithChar"/>
+        <exclude name="ConsecutiveLiteralAppends"/>
+        <!-- AvoidFileStream: NIO alternatives require refactor outside scope -->
+        <exclude name="AvoidFileStream"/>
+        <!-- AvoidInstantiatingObjectsInLoops: domain logic requires per-iteration objects -->
+        <exclude name="AvoidInstantiatingObjectsInLoops"/>
+        <!-- InsufficientStringBufferDeclaration: micro-optimisation -->
+        <exclude name="InsufficientStringBufferDeclaration"/>
+    </rule>
+
+    <!-- Security -->
+    <rule ref="category/java/security.xml"/>
+
+    <!-- Custom thresholds for complexity -->
+    <rule ref="category/java/design.xml/CyclomaticComplexity">
+        <properties>
+            <property name="classReportLevel" value="80"/>
+            <property name="methodReportLevel" value="20"/>
+        </properties>
+    </rule>
+
+    <rule ref="category/java/design.xml/NcssMethodCount">
+        <properties>
+            <property name="minimum" value="60"/>
+        </properties>
+    </rule>
+
+    <rule ref="category/java/design.xml/NcssTypeCount">
+        <properties>
+            <property name="minimum" value="200"/>
+        </properties>
+    </rule>
+
+</ruleset>

@@ -6,8 +6,6 @@ import com.foodtech.kitchen.domain.model.Station;
 
 import java.util.List;
 
-// ARCHITECTURE_DECISION:
-// Strategy pattern used to eliminate switch-case and comply with OCP.
 public interface CommandStrategy {
     boolean supports(Station station);
 

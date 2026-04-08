@@ -52,7 +52,7 @@ class ReactorAsyncCommandDispatcherTest {
 
     @Test
     void dispatch_whenCommandSucceeds_marksTaskCompletedAndCallsOrderCompletion() throws Exception {
-        // Arrange
+
         long taskId = 501L;
         long orderId = 601L;
         Task task = Task.reconstruct(
@@ -75,10 +75,8 @@ class ReactorAsyncCommandDispatcherTest {
             return null;
         }).when(orderCompletionService).completeOrderIfReady(orderId);
 
-        // Act
         dispatcher.dispatch(command, taskId);
 
-        // Assert
         assertTrue(completionLatch.await(2, TimeUnit.SECONDS));
         ArgumentCaptor<Task> taskCaptor = ArgumentCaptor.forClass(Task.class);
         verify(taskRepository).save(taskCaptor.capture());
@@ -89,17 +87,15 @@ class ReactorAsyncCommandDispatcherTest {
 
     @Test
     void dispatch_whenCommandFails_doesNotUpdateTask() throws Exception {
-        // Arrange
+
         CountDownLatch latch = new CountDownLatch(1);
         doAnswer(invocation -> {
             latch.countDown();
             throw new RuntimeException("boom");
         }).when(commandExecutor).execute(command);
 
-        // Act
         dispatcher.dispatch(command, 777L);
 
-        // Assert
         assertTrue(latch.await(2, TimeUnit.SECONDS));
         verify(taskRepository, never()).findById(anyLong());
         verify(taskRepository, never()).save(any(Task.class));

@@ -1,224 +1,327 @@
 plugins {
-    id 'java'
-    id 'org.springframework.boot' version '3.2.1'
-    id 'io.spring.dependency-management' version '1.1.4'
-    id 'jacoco'
-    id 'org.cyclonedx.bom' version '1.8.2'
+	id 'java'
+	id 'org.springframework.boot' version '3.5.11'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'jacoco'
+	id 'checkstyle'
+	id 'pmd'
 }
 
 group = 'com.foodtech'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1-RELEASE'
 description = 'FoodTech Kitchen Service'
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
-}
-
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
 }
 
 repositories {
-    mavenCentral()
+	mavenCentral()
 }
 
 dependencies {
-    // Spring Boot Starters
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.kafka:spring-kafka'
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'com.itextpdf:itext7-core:7.2.5'
+	implementation 'io.projectreactor:reactor-core:3.6.0'
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+	implementation 'com.opencsv:opencsv:5.9'
+	implementation 'org.springframework.security:spring-security-web:6.5.9'
+	implementation 'commons-beanutils:commons-beanutils:1.11.0'
+	implementation 'org.apache.poi:poi-ooxml:5.3.0'
+	implementation 'org.apache.commons:commons-compress:1.26.0'
+	implementation "org.lz4:lz4-java:1.8.1"
+	implementation "com.fasterxml.jackson.core:jackson-core:2.18.6"
+	implementation "com.fasterxml.jackson.core:jackson-annotations:2.18.6"
 
-    // ✅ NUEVO: Project Reactor para programación reactiva
-    implementation 'io.projectreactor:reactor-core:3.6.0'
-
-    // Jackson (explícito para IDE)
-    implementation 'com.fasterxml.jackson.core:jackson-databind'
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
-    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-    
-    // Database
-    runtimeOnly 'org.postgresql:postgresql'
-    runtimeOnly 'com.h2database:h2'
-    
-    // Lombok
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-    
-    // Testing
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-    testImplementation 'io.projectreactor:reactor-test'
-    testImplementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-    testRuntimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
-    testRuntimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-
-    // Lombok for tests
-    testCompileOnly 'org.projectlombok:lombok'
-    testAnnotationProcessor 'org.projectlombok:lombok'
+	runtimeOnly 'org.postgresql:postgresql'
+	runtimeOnly 'com.h2database:h2'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'io.projectreactor:reactor-test'
+	testImplementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	testImplementation 'com.tngtech.archunit:archunit-junit5:1.2.1'
+	testRuntimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	testRuntimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 }
 
+configurations.configureEach {
+	exclude group: "at.yawk.lz4", module: "lz4-java"
+}
+
+configurations.all {
+	resolutionStrategy {
+		force "org.lz4:lz4-java:1.8.1"
+	}
+}
+
+// =============================================================
+// TEST TASKS — Separated by @Tag (unit / component / integration)
+// =============================================================
+
 tasks.named('test') {
-    useJUnitPlatform()
-    finalizedBy jacocoTestReport
+	enabled = false
 }
 
 tasks.named('bootJar') {
-    archiveFileName = 'app.jar'
+	archiveFileName = 'app.jar'
 }
 
-tasks.withType(Test).configureEach {
-    useJUnitPlatform()
-    reports {
-        junitXml.required = true
-        html.required = true
-    }
-}
-
+// --- Unit Tests: @Tag("unit") ---
 tasks.register('unitTest', Test) {
-    description = 'Runs unit tests.'
-    group = 'verification'
-    testClassesDirs = sourceSets.test.output.classesDirs
-    classpath = sourceSets.test.runtimeClasspath
-    useJUnitPlatform {
-        includeTags 'unit'
-    }
-    jacoco {
-        destinationFile = layout.buildDirectory.file('jacoco/unitTest.exec').get().asFile
-    }
+	description = 'Run unit tests (@Tag("unit"))'
+	group = 'verification'
+
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+
+	useJUnitPlatform {
+		includeTags 'unit'
+	}
+
+	reports {
+		junitXml.outputLocation.set(layout.buildDirectory.dir('test-results/unitTest'))
+		html.outputLocation.set(layout.buildDirectory.dir('reports/tests/unitTest'))
+	}
+
+	finalizedBy 'jacocoUnitTestReport'
 }
 
+// --- Component Tests: @Tag("component") ---
 tasks.register('componentTest', Test) {
-    description = 'Runs component tests.'
-    group = 'verification'
-    testClassesDirs = sourceSets.test.output.classesDirs
-    classpath = sourceSets.test.runtimeClasspath
-    useJUnitPlatform {
-        includeTags 'component'
-    }
-    jacoco {
-        destinationFile = layout.buildDirectory.file('jacoco/componentTest.exec').get().asFile
-    }
+	description = 'Run component tests (@Tag("component"))'
+	group = 'verification'
+
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+
+	useJUnitPlatform {
+		includeTags 'component'
+	}
+
+	reports {
+		junitXml.outputLocation.set(layout.buildDirectory.dir('test-results/componentTest'))
+		html.outputLocation.set(layout.buildDirectory.dir('reports/tests/componentTest'))
+	}
+
+	finalizedBy 'jacocoComponentTestReport'
 }
 
+// --- Integration Tests: @Tag("integration") ---
 tasks.register('integrationTest', Test) {
-    description = 'Runs integration tests.'
-    group = 'verification'
-    testClassesDirs = sourceSets.test.output.classesDirs
-    classpath = sourceSets.test.runtimeClasspath
-    useJUnitPlatform {
-        includeTags 'integration'
-    }
-    systemProperty 'spring.profiles.active', 'test'
-    jacoco {
-        destinationFile = layout.buildDirectory.file('jacoco/integrationTest.exec').get().asFile
-    }
+	description = 'Run integration tests (@Tag("integration"))'
+	group = 'verification'
+
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+
+	useJUnitPlatform {
+		includeTags 'integration'
+	}
+
+	systemProperty 'spring.profiles.active', 'test'
+
+	reports {
+		junitXml.outputLocation.set(layout.buildDirectory.dir('test-results/integrationTest'))
+		html.outputLocation.set(layout.buildDirectory.dir('reports/tests/integrationTest'))
+	}
+
+	finalizedBy 'jacocoIntegrationTestReport'
 }
 
-tasks.register('blackboxTest', Test) {
-    description = 'Runs blackbox tests.'
-    group = 'verification'
-    testClassesDirs = sourceSets.test.output.classesDirs
-    classpath = sourceSets.test.runtimeClasspath
-    useJUnitPlatform {
-        includeTags 'blackbox'
-    }
-    jacoco {
-        destinationFile = layout.buildDirectory.file('jacoco/blackboxTest.exec').get().asFile
-    }
+// --- Black-Box Tests: @Tag("blackbox") ---
+tasks.register('blackBoxTest', Test) {
+	description = 'Run black-box tests (@Tag("blackbox"))'
+	group = 'verification'
+
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+
+	useJUnitPlatform {
+		includeTags 'blackbox'
+	}
+
+	reports {
+		junitXml.outputLocation.set(layout.buildDirectory.dir('test-results/blackBoxTest'))
+		html.outputLocation.set(layout.buildDirectory.dir('reports/tests/blackBoxTest'))
+	}
+
+	finalizedBy 'jacocoBlackBoxTestReport'
 }
+
+// 'check' executes every test category + coverage verification
+tasks.named('check') {
+	dependsOn 'unitTest', 'componentTest', 'integrationTest', 'blackBoxTest', 'jacocoTestCoverageVerification'
+}
+
+// =============================================================
+// JACOCO — Individual + Merged reports and coverage gate
+// =============================================================
 
 jacoco {
-    toolVersion = "0.8.11"
+	toolVersion = '0.8.12'
 }
 
-def jacocoExcludedClasses = [
-    '**/KitchenServiceApplication.class',
-    '**/KitchenServiceApplication$*.class',
-    '**/infrastructure/config/**',
-    '**/*JpaRepository.class'
-]
-
-def jacocoClassDirs = sourceSets.main.output.asFileTree.matching {
-    exclude jacocoExcludedClasses
-}
+// --- Per-category JaCoCo reports ---
 
 tasks.register('jacocoUnitTestReport', JacocoReport) {
-    dependsOn tasks.named('unitTest')
-    executionData(layout.buildDirectory.file('jacoco/unitTest.exec'))
-    sourceDirectories.setFrom(sourceSets.main.allSource.srcDirs)
-    classDirectories.setFrom(jacocoClassDirs)
-    reports {
-        xml.required = true
-        html.required = true
-        csv.required = false
-    }
+	dependsOn 'unitTest'
+	sourceDirectories.from(sourceSets.main.java.srcDirs)
+	classDirectories.from(sourceSets.main.output.classesDirs)
+	executionData.from(layout.buildDirectory.file('jacoco/unitTest.exec'))
+	reports {
+		xml.required = true
+		html.required = true
+		csv.required = false
+		html.outputLocation.set(layout.buildDirectory.dir('reports/jacoco/unitTest'))
+	}
 }
 
 tasks.register('jacocoComponentTestReport', JacocoReport) {
-    dependsOn tasks.named('componentTest')
-    executionData(layout.buildDirectory.file('jacoco/componentTest.exec'))
-    sourceDirectories.setFrom(sourceSets.main.allSource.srcDirs)
-    classDirectories.setFrom(jacocoClassDirs)
-    reports {
-        xml.required = true
-        html.required = true
-        csv.required = false
-    }
+	dependsOn 'componentTest'
+	sourceDirectories.from(sourceSets.main.java.srcDirs)
+	classDirectories.from(sourceSets.main.output.classesDirs)
+	executionData.from(layout.buildDirectory.file('jacoco/componentTest.exec'))
+	reports {
+		xml.required = true
+		html.required = true
+		csv.required = false
+		html.outputLocation.set(layout.buildDirectory.dir('reports/jacoco/componentTest'))
+	}
 }
 
 tasks.register('jacocoIntegrationTestReport', JacocoReport) {
-    dependsOn tasks.named('integrationTest')
-    executionData(layout.buildDirectory.file('jacoco/integrationTest.exec'))
-    sourceDirectories.setFrom(sourceSets.main.allSource.srcDirs)
-    classDirectories.setFrom(jacocoClassDirs)
-    reports {
-        xml.required = true
-        html.required = true
-        csv.required = false
-    }
+	dependsOn 'integrationTest'
+	sourceDirectories.from(sourceSets.main.java.srcDirs)
+	classDirectories.from(sourceSets.main.output.classesDirs)
+	executionData.from(layout.buildDirectory.file('jacoco/integrationTest.exec'))
+	reports {
+		xml.required = true
+		html.required = true
+		csv.required = false
+		html.outputLocation.set(layout.buildDirectory.dir('reports/jacoco/integrationTest'))
+	}
+}
+
+tasks.register('jacocoBlackBoxTestReport', JacocoReport) {
+	dependsOn 'blackBoxTest'
+	sourceDirectories.from(sourceSets.main.java.srcDirs)
+	classDirectories.from(sourceSets.main.output.classesDirs)
+	executionData.from(layout.buildDirectory.file('jacoco/blackBoxTest.exec'))
+	reports {
+		xml.required = true
+		html.required = true
+		csv.required = false
+		html.outputLocation.set(layout.buildDirectory.dir('reports/jacoco/blackBoxTest'))
+	}
+}
+
+// --- Merged JaCoCo report (all test categories combined) ---
+tasks.named('jacocoTestReport') {
+	dependsOn 'unitTest', 'componentTest', 'integrationTest', 'blackBoxTest'
+	executionData.setFrom(
+		layout.buildDirectory.file('jacoco/unitTest.exec'),
+		layout.buildDirectory.file('jacoco/componentTest.exec'),
+		layout.buildDirectory.file('jacoco/integrationTest.exec'),
+		layout.buildDirectory.file('jacoco/blackBoxTest.exec')
+	)
+	reports {
+		xml.required = true
+		html.required = true
+		csv.required = false
+	}
 }
 
 jacocoTestReport {
-    dependsOn test
-    reports {
-        xml.required = true
-        html.required = true
-        csv.required = false
-    }
-
-    // Mueve la configuración aquí, fuera de doFirst
-    // Usamos afterEvaluate para asegurar que los directorios por defecto ya existen antes de filtrar
-    classDirectories.setFrom(jacocoClassDirs)
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: ['**/*Application.class'])
+		}))
+	}
 }
 
-jacocoTestCoverageVerification {
-    dependsOn jacocoTestReport
-    
-    violationRules {
-        rule {
-            limit {
-                minimum = 0.75
-            }
-        }
-    }
-    
-    // Mismo cambio aquí: Eliminar doFirst y usar afterEvaluate
-    classDirectories.setFrom(jacocoClassDirs)
+// --- Coverage gate — requires 90% across all test types ---
+tasks.named('jacocoTestCoverageVerification') {
+	dependsOn 'unitTest', 'componentTest', 'integrationTest', 'blackBoxTest'
+	executionData.setFrom(
+		layout.buildDirectory.file('jacoco/unitTest.exec'),
+		layout.buildDirectory.file('jacoco/componentTest.exec'),
+		layout.buildDirectory.file('jacoco/integrationTest.exec'),
+		layout.buildDirectory.file('jacoco/blackBoxTest.exec')
+	)
+	violationRules {
+		rule {
+			limit {
+				minimum = 0.90
+			}
+		}
+	}
 }
 
-check.dependsOn jacocoTestCoverageVerification
+// =============================================================
+// CHECKSTYLE
+// =============================================================
 
-cyclonedxBom {
-    includeConfigs = ['runtimeClasspath']
-    projectType = 'application'
-    schemaVersion = '1.5'
-    outputFormat = 'json'
-    outputName = 'bom'
+checkstyle {
+	toolVersion = '10.12.4'
+	configFile = file('config/checkstyle/checkstyle.xml')
+	ignoreFailures = false
+	reportsDir = file("$buildDir/reports/checkstyle")
+}
+
+tasks.named('checkstyleMain') {
+	source = sourceSets.main.allJava
+	exclude '**/generated/**', 'build/**', '**/*Application.java'
+}
+
+tasks.named('checkstyleTest') {
+	source = sourceSets.test.allJava
+	exclude '**/generated/**', 'build/**'
+}
+
+// =============================================================
+// PMD
+// =============================================================
+
+pmd {
+	toolVersion = '6.55.0'
+	ruleSetFiles = files('config/pmd/ruleset.xml')
+	ignoreFailures = false
+	reportsDir = file("$buildDir/reports/pmd")
+}
+
+tasks.named('pmdMain') {
+	ruleSets = []
+	ruleSetFiles = files('config/pmd/ruleset.xml')
+	exclude '**/generated/**', 'build/**', '**/*Application.java'
+}
+
+tasks.named('pmdTest') {
+	ruleSets = []
+        ruleSetFiles = files('config/pmd/ruleset-test.xml')
+        exclude '**/generated/**', 'build/**'
+}
+// =============================================================
+
+tasks.register("printVersion") {
+	doLast {
+		println(project.version.toString())
+	}
 }
